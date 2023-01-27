@@ -3,14 +3,14 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TestModule } from './test/test.module';
 
-import * as ormconfig from '../omrconfig';
+import * as ormConfig from '../ormConfig';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot(ormconfig),
+    TypeOrmModule.forRoot(ormConfig),
     TestModule,
   ],
   controllers: [],
