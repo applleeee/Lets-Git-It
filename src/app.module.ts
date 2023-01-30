@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TestModule } from './test/test.module';
+import { CommunityModule } from './community/community.module';
 
-import * as ormConfig from '../ormConfig';
+import * as ormConfig from '../config/ormConfig';
 
 @Module({
   imports: [
@@ -11,7 +11,7 @@ import * as ormConfig from '../ormConfig';
       isGlobal: true,
     }),
     TypeOrmModule.forRoot(ormConfig),
-    TestModule,
+    CommunityModule,
   ],
   controllers: [],
   providers: [],
