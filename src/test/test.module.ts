@@ -5,7 +5,7 @@ import { TestController } from './test.controller';
 import { TestService } from './test.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([users])],
+  // imports: [TypeOrmModule.forFeature([users])],
   controllers: [TestController],
   providers: [TestService],
 })
