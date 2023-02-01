@@ -23,7 +23,7 @@ export class RankerProfile {
   @Column({ nullable: true })
   homepage_url: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: true, default: 'none' })
   email: string;
 
   @Column({ nullable: true })
