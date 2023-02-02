@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { RankerProfile } from './entities/ranker_profile.entity';
-import { Ranking } from './entities/ranking.entity';
-import { Tier } from './entities/tier.entity';
+import { RankerProfile } from '../entities/RankerProfile';
+import { Ranking } from '../entities/Ranking';
+import { Tier } from '../entities/Tier';
 
 @Injectable()
 export class RankerProfileRepository {
@@ -12,22 +12,11 @@ export class RankerProfileRepository {
     private rankerProfileRepository: Repository<RankerProfile>,
   ) {}
 
-  async getRankerProfile(name: string) {
-    const { id } = await this.rankerProfileRepository.findOne({
-      where: { name },
-    });
-    const rankerProfile = await this.rankerProfileRepository
-      .createQueryBuilder()
-      .select('*')
-      .leftJoin(Ranking, `r`, 'RankerProfile.id = r.ranker_profile_id')
-      .leftJoin(Tier, `t`, `t.id=r.tier_id`)
-      .where(`RankerProfile.id=:id`, { id })
-      .getRawOne();
-
-    return rankerProfile;
+  async checkRanker(name: string): Promise<boolean> {
+    return await this.rankerProfileRepository.exist({ where: { name } });
   }
 
-  async createRankerProfile(data) {
+  async createRankerProfile(data: RankerProfile): Promise<void> {
     await this.rankerProfileRepository
       .createQueryBuilder()
       .insert()
@@ -35,14 +24,35 @@ export class RankerProfileRepository {
       .values([
         {
           name: data['login'],
-          profile_image_url: data['avatar_url'],
-          profile_text: data['bio'],
-          homepage_url: data['blog'],
+          profileImageUrl: data['avatar_url'],
+          profileText: data['bio'],
+          homepageUrl: data['blog'],
           email: data['email'],
           company: data['company'],
           region: data['location'],
         },
       ])
       .execute();
+  }
+
+  async getRankerProfile(name: string) {
+    const { id } = await this.rankerProfileRepository.findOne({
+      where: { name },
+    });
+    const rankerProfile = await this.rankerProfileRepository
+      .createQueryBuilder()
+      .select('RankerProfile')
+      .leftJoin(Ranking, `r`, 'RankerProfile.id = r.ranker_profile_id')
+      .addSelect(`r`)
+      .leftJoin(Tier, `t`, `t.id=r.tier_id`)
+      .addSelect([`t.name`, `t.image_url`])
+      .where(`RankerProfile.id=:id`, { id })
+      .getRawOne();
+
+    return rankerProfile;
+  }
+
+  async resetAllUsers() {
+    return this.rankerProfileRepository.delete({});
   }
 }

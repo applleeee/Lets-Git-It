@@ -1,6 +1,5 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import * as dotenv from 'dotenv';
-import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 dotenv.config();
 
 const config: TypeOrmModuleOptions = {

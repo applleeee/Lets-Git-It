@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SubCategory } from './entities/sub_category.entity';
+import { SubCategory } from '../entities/SubCategory';
 
 @Injectable()
 export class CommunityRepository {
