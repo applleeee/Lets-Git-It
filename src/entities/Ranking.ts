@@ -97,13 +97,6 @@ export class Ranking {
   @JoinColumn([{ name: 'ranker_profile_id', referencedColumnName: 'id' }])
   rankerProfile: RankerProfile;
 
-  @ManyToOne(() => RankerProfile, (rankerProfile) => rankerProfile.rankings2, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
-  @JoinColumn([{ name: 'ranker_profile_id', referencedColumnName: 'id' }])
-  rankerProfile_2: RankerProfile;
-
   @ManyToOne(() => Tier, (tier) => tier.rankings, {
     onDelete: 'NO ACTION',
     onUpdate: 'NO ACTION',

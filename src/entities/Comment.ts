@@ -44,20 +44,6 @@ export class Comment {
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
   user: User;
 
-  @ManyToOne(() => User, (user) => user.comments2, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
-  @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
-  user_2: User;
-
-  @ManyToOne(() => User, (user) => user.comments3, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
-  @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
-  user_3: User;
-
   @ManyToOne(() => Post, (post) => post.comments, {
     onDelete: 'NO ACTION',
     onUpdate: 'NO ACTION',
@@ -67,7 +53,4 @@ export class Comment {
 
   @OneToMany(() => CommentLike, (commentLike) => commentLike.comment)
   commentLikes: CommentLike[];
-
-  @OneToMany(() => CommentLike, (commentLike) => commentLike.comment_2)
-  commentLikes2: CommentLike[];
 }

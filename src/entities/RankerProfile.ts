@@ -61,7 +61,4 @@ export class RankerProfile {
 
   @OneToMany(() => Ranking, (ranking) => ranking.rankerProfile)
   rankings: Ranking[];
-
-  @OneToMany(() => Ranking, (ranking) => ranking.rankerProfile_2)
-  rankings2: Ranking[];
 }
