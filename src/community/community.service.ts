@@ -25,4 +25,8 @@ export class CommunityService {
     const result = await uploadToS3(content as unknown as Buffer, title);
     console.log(save, result);
   }
+
+  async getPostList(subCategoryId: number) {
+    return await this.CommunityRepository.getPostList(subCategoryId);
+  }
 }

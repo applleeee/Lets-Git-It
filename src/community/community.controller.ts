@@ -1,6 +1,15 @@
-import { Controller, Get, Post, Body, UploadedFile } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UploadedFile,
+  Param,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { CommunityService } from './community.service';
 import { CreatePostDto } from './dto/createPost.dto';
+import { ValidateSubCategoryIdPipe } from './pipe/getPostList.pipe';
 
 @Controller('/community')
 export class CommunityController {
@@ -8,8 +17,7 @@ export class CommunityController {
 
   @Get('/categories')
   async getAllCategories() {
-    const categories = await this.communityService.getAllCategories();
-    return categories;
+    return await this.communityService.getAllCategories();
   }
 
   @Post('/post')
@@ -18,5 +26,12 @@ export class CommunityController {
     @Body() postData: CreatePostDto,
   ) {
     return await this.communityService.createPost(postData, content);
+  }
+
+  @Get('/posts/list/:subCategoryId')
+  async getPostList(
+    @Param('subCategoryId', ValidateSubCategoryIdPipe) subCategoryId: number,
+  ) {
+    return await this.communityService.getPostList(subCategoryId);
   }
 }

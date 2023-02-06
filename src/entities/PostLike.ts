@@ -42,11 +42,4 @@ export class PostLike {
   })
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
   user: User;
-
-  @ManyToOne(() => User, (user) => user.postLikes2, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
-  @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
-  user_2: User;
 }

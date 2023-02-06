@@ -55,13 +55,6 @@ export class Post {
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
   user: User;
 
-  @ManyToOne(() => User, (user) => user.posts2, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
-  @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
-  user_2: User;
-
   @ManyToOne(() => SubCategory, (subCategory) => subCategory.posts, {
     onDelete: 'NO ACTION',
     onUpdate: 'NO ACTION',

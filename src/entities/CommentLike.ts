@@ -36,13 +36,6 @@ export class CommentLike {
   @JoinColumn([{ name: 'comment_id', referencedColumnName: 'id' }])
   comment: Comment;
 
-  @ManyToOne(() => Comment, (comment) => comment.commentLikes2, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
-  @JoinColumn([{ name: 'comment_id', referencedColumnName: 'id' }])
-  comment_2: Comment;
-
   @ManyToOne(() => User, (user) => user.commentLikes, {
     onDelete: 'NO ACTION',
     onUpdate: 'NO ACTION',

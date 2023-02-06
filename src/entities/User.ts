@@ -50,26 +50,14 @@ export class User {
   @OneToMany(() => Comment, (comment) => comment.user)
   comments: Comment[];
 
-  @OneToMany(() => Comment, (comment) => comment.user_2)
-  comments2: Comment[];
-
-  @OneToMany(() => Comment, (comment) => comment.user_3)
-  comments3: Comment[];
-
   @OneToMany(() => CommentLike, (commentLike) => commentLike.user)
   commentLikes: CommentLike[];
 
   @OneToMany(() => Post, (post) => post.user)
   posts: Post[];
 
-  @OneToMany(() => Post, (post) => post.user_2)
-  posts2: Post[];
-
   @OneToMany(() => PostLike, (postLike) => postLike.user)
   postLikes: PostLike[];
-
-  @OneToMany(() => PostLike, (postLike) => postLike.user_2)
-  postLikes2: PostLike[];
 
   @OneToMany(() => RankerProfile, (rankerProfile) => rankerProfile.user)
   rankerProfiles: RankerProfile[];
