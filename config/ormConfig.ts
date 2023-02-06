@@ -11,7 +11,7 @@ const config: TypeOrmModuleOptions = {
   database: process.env.DB_DATABASE,
   synchronize: false,
   autoLoadEntities: true,
-  logging: true,
+  logging: false,
 };
 
 export = config;
