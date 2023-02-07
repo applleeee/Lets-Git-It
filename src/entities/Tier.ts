@@ -1,7 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Ranking } from './Ranking';
 
-@Entity('tier', { schema: 'letsgitit' })
+@Entity('tier', { schema: 'git_rank' })
 export class Tier {
   @PrimaryGeneratedColumn({ type: 'tinyint', name: 'id', unsigned: true })
   id: number;

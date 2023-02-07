@@ -6,6 +6,8 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Comment } from './Comment';
 import { User } from './User';
@@ -13,8 +15,7 @@ import { SubCategory } from './SubCategory';
 import { PostLike } from './PostLike';
 
 @Index('user_id', ['userId'], {})
-@Index('sub_category_id', ['subCategoryId'], {})
-@Entity('post', { schema: 'letsgitit' })
+@Entity('post', { schema: 'git_rank' })
 export class Post {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id', unsigned: true })
   id: number;
@@ -38,10 +39,10 @@ export class Post {
   })
   subCategoryId: number | null;
 
-  @Column('timestamp', { name: 'created_at', default: () => "'now()'" })
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @Column('timestamp', { name: 'updated_at', nullable: true })
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date | null;
 
   @OneToMany(() => Comment, (comment) => comment.post)
@@ -53,13 +54,6 @@ export class Post {
   })
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
   user: User;
-
-  @ManyToOne(() => User, (user) => user.posts2, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
-  @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
-  user_2: User;
 
   @ManyToOne(() => SubCategory, (subCategory) => subCategory.posts, {
     onDelete: 'NO ACTION',

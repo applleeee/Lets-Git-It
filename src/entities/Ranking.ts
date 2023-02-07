@@ -10,8 +10,7 @@ import { RankerProfile } from './RankerProfile';
 import { Tier } from './Tier';
 
 @Index('ranker_profile_id', ['rankerProfileId'], {})
-@Index('tier_id', ['tierId'], {})
-@Entity('ranking', { schema: 'letsgitit' })
+@Entity('ranking', { schema: 'git_rank' })
 export class Ranking {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id', unsigned: true })
   id: number;
@@ -97,13 +96,6 @@ export class Ranking {
   })
   @JoinColumn([{ name: 'ranker_profile_id', referencedColumnName: 'id' }])
   rankerProfile: RankerProfile;
-
-  @ManyToOne(() => RankerProfile, (rankerProfile) => rankerProfile.rankings2, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
-  @JoinColumn([{ name: 'ranker_profile_id', referencedColumnName: 'id' }])
-  rankerProfile_2: RankerProfile;
 
   @ManyToOne(() => Tier, (tier) => tier.rankings, {
     onDelete: 'NO ACTION',

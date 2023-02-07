@@ -5,13 +5,14 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Post } from './Post';
 import { User } from './User';
 
 @Index('post_id', ['postId'], {})
-@Index('user_id', ['userId'], {})
-@Entity('post_like', { schema: 'letsgitit' })
+@Entity('post_like', { schema: 'git_rank' })
 export class PostLike {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id', unsigned: true })
   id: number;
@@ -22,10 +23,10 @@ export class PostLike {
   @Column('int', { name: 'user_id', nullable: true, unsigned: true })
   userId: number | null;
 
-  @Column('timestamp', { name: 'created_at', default: () => "'now()'" })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column('timestamp', { name: 'updated_at', nullable: true })
+  @UpdateDateColumn()
   updatedAt: Date | null;
 
   @ManyToOne(() => Post, (post) => post.postLikes, {
@@ -41,11 +42,4 @@ export class PostLike {
   })
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
   user: User;
-
-  @ManyToOne(() => User, (user) => user.postLikes2, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
-  @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
-  user_2: User;
 }

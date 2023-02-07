@@ -6,14 +6,15 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { User } from './User';
 import { Post } from './Post';
 import { CommentLike } from './CommentLike';
 
-@Index('user_id', ['userId'], {})
 @Index('post_id', ['postId'], {})
-@Entity('comment', { schema: 'letsgitit' })
+@Entity('comment', { schema: 'git_rank' })
 export class Comment {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id', unsigned: true })
   id: number;
@@ -30,10 +31,10 @@ export class Comment {
   @Column('int', { name: 'group_order', unsigned: true })
   groupOrder: number;
 
-  @Column('timestamp', { name: 'created_at', default: () => "'now()'" })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column('timestamp', { name: 'updated_at', nullable: true })
+  @UpdateDateColumn()
   updatedAt: Date | null;
 
   @ManyToOne(() => User, (user) => user.comments, {
@@ -42,20 +43,6 @@ export class Comment {
   })
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
   user: User;
-
-  @ManyToOne(() => User, (user) => user.comments2, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
-  @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
-  user_2: User;
-
-  @ManyToOne(() => User, (user) => user.comments3, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
-  @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
-  user_3: User;
 
   @ManyToOne(() => Post, (post) => post.comments, {
     onDelete: 'NO ACTION',
@@ -66,7 +53,4 @@ export class Comment {
 
   @OneToMany(() => CommentLike, (commentLike) => commentLike.comment)
   commentLikes: CommentLike[];
-
-  @OneToMany(() => CommentLike, (commentLike) => commentLike.comment_2)
-  commentLikes2: CommentLike[];
 }

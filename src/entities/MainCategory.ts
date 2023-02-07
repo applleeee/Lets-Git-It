@@ -1,7 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { SubCategory } from './SubCategory';
 
-@Entity('main_category', { schema: 'letsgitit' })
+@Entity('main_category', { schema: 'git_rank' })
 export class MainCategory {
   @PrimaryGeneratedColumn({ type: 'tinyint', name: 'id', unsigned: true })
   id: number;

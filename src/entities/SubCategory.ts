@@ -11,7 +11,7 @@ import { Post } from './Post';
 import { MainCategory } from './MainCategory';
 
 @Index('main_category_id', ['mainCategoryId'], {})
-@Entity('sub_category', { schema: 'letsgitit' })
+@Entity('sub_category', { schema: 'git_rank' })
 export class SubCategory {
   @PrimaryGeneratedColumn({ type: 'tinyint', name: 'id', unsigned: true })
   id: number;

@@ -6,12 +6,14 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { User } from './User';
 import { Ranking } from './Ranking';
 
 @Index('user_id', ['userId'], {})
-@Entity('ranker_profile', { schema: 'letsgitit' })
+@Entity('ranker_profile', { schema: 'git_rank' })
 export class RankerProfile {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id', unsigned: true })
   id: number;
@@ -32,8 +34,8 @@ export class RankerProfile {
   @Column('varchar', { name: 'homepage_url', nullable: true, length: 2083 })
   homepageUrl: string | null;
 
-  @Column('varchar', { name: 'email', nullable: true, length: 255 })
-  email: string | null;
+  @Column('varchar', { name: 'email', length: 255 })
+  email: string;
 
   @Column('varchar', { name: 'company', nullable: true, length: 255 })
   company: string | null;
@@ -44,10 +46,10 @@ export class RankerProfile {
   @Column('int', { name: 'user_id', nullable: true, unsigned: true })
   userId: number | null;
 
-  @Column('timestamp', { name: 'created_at', default: () => "'now()'" })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column('timestamp', { name: 'updated_at', nullable: true })
+  @UpdateDateColumn()
   updatedAt: Date | null;
 
   @ManyToOne(() => User, (user) => user.rankerProfiles, {
@@ -59,7 +61,4 @@ export class RankerProfile {
 
   @OneToMany(() => Ranking, (ranking) => ranking.rankerProfile)
   rankings: Ranking[];
-
-  @OneToMany(() => Ranking, (ranking) => ranking.rankerProfile_2)
-  rankings2: Ranking[];
 }
