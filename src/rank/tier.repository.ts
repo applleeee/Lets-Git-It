@@ -9,4 +9,8 @@ export class TierRepository {
     @InjectRepository(Tier)
     private tierRepository: Repository<Tier>,
   ) {}
+
+  async getTierData() {
+    return await this.tierRepository.find();
+  }
 }

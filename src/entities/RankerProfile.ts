@@ -46,10 +46,10 @@ export class RankerProfile {
   @Column('int', { name: 'user_id', nullable: true, unsigned: true })
   userId: number | null;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date | null;
 
   @ManyToOne(() => User, (user) => user.rankerProfiles, {

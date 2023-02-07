@@ -16,6 +16,13 @@ export class RankerProfileRepository {
     return await this.rankerProfileRepository.exist({ where: { name } });
   }
 
+  async getRankerId(name: string): Promise<number> {
+    const { id } = await this.rankerProfileRepository.findOne({
+      where: { name: name },
+    });
+    return id;
+  }
+
   async createRankerProfile(data: RankerProfile): Promise<void> {
     await this.rankerProfileRepository
       .createQueryBuilder()
