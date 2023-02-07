@@ -23,10 +23,10 @@ export class CommentLike {
   @Column('int', { name: 'user_id', nullable: true, unsigned: true })
   userId: number | null;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at', nullable: false })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at', nullable: true })
   updatedAt: Date | null;
 
   @ManyToOne(() => Comment, (comment) => comment.commentLikes, {

@@ -31,10 +31,10 @@ export class Comment {
   @Column('int', { name: 'group_order', unsigned: true })
   groupOrder: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at', nullable: false })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at', nullable: true })
   updatedAt: Date | null;
 
   @ManyToOne(() => User, (user) => user.comments, {
