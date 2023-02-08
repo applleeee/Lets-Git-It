@@ -48,7 +48,6 @@ export class RankerProfileRepository {
     });
     const rankerProfile = await this.rankerProfileRepository
       .createQueryBuilder()
-      .select('RankerProfile')
       .leftJoin(Ranking, `r`, 'RankerProfile.id = r.ranker_profile_id')
       .addSelect(`r`)
       .leftJoin(Tier, `t`, `t.id=r.tier_id`)
@@ -57,9 +56,5 @@ export class RankerProfileRepository {
       .getRawOne();
 
     return rankerProfile;
-  }
-
-  async resetAllUsers() {
-    return this.rankerProfileRepository.delete({});
   }
 }
