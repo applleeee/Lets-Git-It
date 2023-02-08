@@ -292,6 +292,10 @@ export class RankService {
     const avgValues = await this.rankingRepository.getAvgValues();
     return { rankerDetail, maxValues, avgValues };
   }
+
+  async getTop5() {
+    return await this.rankerProfileRepository.getTop5();
+  }
 }
 
 // scoreBasis.data.forEach(async (el) => {

@@ -57,4 +57,23 @@ export class RankerProfileRepository {
 
     return rankerProfile;
   }
+
+  async getTop5() {
+    const top5 = await this.rankerProfileRepository
+      .createQueryBuilder()
+      .select([
+        'RankerProfile.name as rankerName',
+        'RankerProfile.profile_image_url as profileImage',
+        'ROUND(ranking.total_score,0) as totalScore',
+      ])
+      .leftJoin(
+        Ranking,
+        'ranking',
+        'ranking.ranker_profile_id=RankerProfile.id',
+      )
+      .orderBy('totalScore', 'DESC')
+      .limit(5)
+      .getRawMany();
+    return top5;
+  }
 }
