@@ -296,6 +296,18 @@ export class RankService {
   async getTop5() {
     return await this.rankerProfileRepository.getTop5();
   }
+
+  async getTop100() {
+    const top100Lang = await this.rankingRepository.getTop100Languages();
+    const top100 = await this.rankerProfileRepository.getTop100();
+
+    const mainLanguages = new Set();
+
+    top100Lang.forEach((el) => mainLanguages.add(el.main_language));
+
+    const langCategory = Array.from(mainLanguages);
+    return { langCategory, top100 };
+  }
 }
 
 // scoreBasis.data.forEach(async (el) => {

@@ -14,4 +14,9 @@ export class RankController {
   async getTop5() {
     return await this.rankService.getTop5();
   }
+
+  @Get('/ranking/top100')
+  async getTop100() {
+    return await this.rankService.getTop100();
+  }
 }
