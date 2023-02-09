@@ -55,6 +55,7 @@ export class CommunityRepository {
         'COUNT(comment.id) AS comment',
         'tier.name AS tierName',
         'tier.id AS tierId',
+        'sub_category.name AS subCategoryName',
       ])
       .from(Post, 'post')
       .leftJoin('post.user', 'user')
@@ -63,6 +64,7 @@ export class CommunityRepository {
       .leftJoin('user.rankerProfiles', 'ranker_profile')
       .leftJoin('ranker_profile.rankings', 'ranking')
       .leftJoin('ranking.tier', 'tier')
+      .leftJoin('post.subCategory', 'sub_category')
       .where('post.subCategoryId = :subCategoryId', {
         subCategoryId: subCategoryId,
       })
