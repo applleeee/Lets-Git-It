@@ -20,12 +20,14 @@ export class CommunityController {
     return await this.communityService.getAllCategories();
   }
 
+  // 로그인 검증 추가
   @Post('/post')
   async createPost(
     @UploadedFile('content') content: any,
     @Body() postData: CreatePostDto,
   ) {
-    return await this.communityService.createPost(postData, content);
+    const userId = 1;
+    return await this.communityService.createPost(postData, content, userId);
   }
 
   @Get('/posts/list/:subCategoryId')
@@ -33,5 +35,20 @@ export class CommunityController {
     @Param('subCategoryId', ValidateSubCategoryIdPipe) subCategoryId: number,
   ) {
     return await this.communityService.getPostList(subCategoryId);
+  }
+
+  //로그인 검증 추가
+  @Post('/like')
+  async createOrDeletePostLike(@Body() data) {
+    const userId = 1;
+    const result = await this.communityService.createOrDeletePostLike(
+      data,
+      userId,
+    );
+    if (result['raw']) {
+      return { message: 'like deleted' };
+    } else {
+      return { message: 'like created' };
+    }
   }
 }

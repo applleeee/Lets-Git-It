@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SubCategory } from '../entities/SubCategory';
 import { Post } from 'src/entities/Post';
+import { PostLike } from 'src/entities/PostLike';
 
 @Injectable()
 export class CommunityRepository {
@@ -11,6 +12,8 @@ export class CommunityRepository {
     private subCategoryRepository: Repository<SubCategory>,
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
+    @InjectRepository(PostLike)
+    private postLikeRepository: Repository<PostLike>,
   ) {}
 
   async getAllCategories() {
@@ -52,6 +55,7 @@ export class CommunityRepository {
         'COUNT(comment.id) AS comment',
         'tier.name AS tierName',
         'tier.id AS tierId',
+        'sub_category.name AS subCategoryName',
       ])
       .from(Post, 'post')
       .leftJoin('post.user', 'user')
@@ -60,6 +64,7 @@ export class CommunityRepository {
       .leftJoin('user.rankerProfiles', 'ranker_profile')
       .leftJoin('ranker_profile.rankings', 'ranking')
       .leftJoin('ranking.tier', 'tier')
+      .leftJoin('post.subCategory', 'sub_category')
       .where('post.subCategoryId = :subCategoryId', {
         subCategoryId: subCategoryId,
       })
@@ -71,5 +76,26 @@ export class CommunityRepository {
       .addGroupBy('tier.name')
       .getRawMany();
     return result;
+  }
+
+  async createOrDeletePostLike(postId, userId) {
+    const ifLiked = await this.postLikeRepository.findOne({
+      where: { postId: postId, userId: userId },
+    });
+    if (!ifLiked) {
+      try {
+        const postLike = new PostLike();
+        postLike.postId = postId;
+        postLike.userId = userId;
+        return await this.postLikeRepository.save(postLike);
+      } catch (err) {
+        throw new HttpException(
+          'Error: invaild postId',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    } else if (ifLiked) {
+      return await this.postLikeRepository.delete({ id: ifLiked.id });
+    }
   }
 }
