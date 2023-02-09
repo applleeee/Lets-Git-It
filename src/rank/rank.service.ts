@@ -97,7 +97,7 @@ export class RankService {
 
     //유저가 작성한 리뷰 수
     const eventList = await axios.get(
-      `https://api.github.com/users/${userName}/events`,
+      `https://api.github.com/users/${userName}/events?per_page=100`,
       {
         headers: {
           Authorization: `Bearer ${TOKEN}`,
@@ -220,7 +220,6 @@ export class RankService {
 
     const percentile =
       ((ranking.indexOf(totalScore) + 1) / ranking.length) * 100;
-    console.log(percentile);
 
     let tierId = 0;
     for (const t of tierData) {
@@ -235,30 +234,6 @@ export class RankService {
       userName,
     );
 
-    console.log({
-      mainLanguage,
-      curiosityScore,
-      passionScore,
-      fameScore,
-      abilityScore,
-      totalScore,
-      issuesCount,
-      forkingCount,
-      starringCount,
-      followingCount,
-      commitsCount,
-      pullRequestCount,
-      reviewCount,
-      personalRepoCount,
-      followersCount,
-      forkedCount,
-      watchersCount,
-      sponsorsCount,
-      myStarsCount,
-      contributingRepoStarsCount,
-      rankerProfileId,
-      tierId,
-    });
     await this.rankingRepository.registerRanking(
       mainLanguage,
       curiosityScore,

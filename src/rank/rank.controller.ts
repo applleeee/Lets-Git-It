@@ -1,7 +1,7 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { RankService } from './rank.service';
 
-@Controller('rank')
+@Controller('ranks')
 export class RankController {
   constructor(private rankService: RankService) {}
 
