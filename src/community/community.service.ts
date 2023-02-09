@@ -12,8 +12,8 @@ export class CommunityService {
     return categories;
   }
 
-  async createPost(postData: CreatePostDto, content) {
-    const { title, userId, subCategoryId } = postData;
+  async createPost(postData: CreatePostDto, content, userId) {
+    const { title, subCategoryId } = postData;
     const contentUrl = `post/${title}`;
     const save = await this.CommunityRepository.createPost(
       title,
@@ -28,5 +28,13 @@ export class CommunityService {
 
   async getPostList(subCategoryId: number) {
     return await this.CommunityRepository.getPostList(subCategoryId);
+  }
+
+  async createOrDeletePostLike(data, userId) {
+    const { postId } = data;
+    return await this.CommunityRepository.createOrDeletePostLike(
+      postId,
+      userId,
+    );
   }
 }
