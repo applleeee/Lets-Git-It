@@ -39,10 +39,10 @@ export class Post {
   })
   subCategoryId: number | null;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: 'created_at', nullable: false })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: 'updated_at', nullable: true })
   updatedAt: Date | null;
 
   @OneToMany(() => Comment, (comment) => comment.post)

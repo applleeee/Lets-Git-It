@@ -3,6 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommunityModule } from './community/community.module';
 import { RankModule } from './rank/rank.module';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
 
 import * as ormConfig from '../config/ormConfig';
 
@@ -14,6 +16,8 @@ import * as ormConfig from '../config/ormConfig';
     TypeOrmModule.forRoot(ormConfig),
     CommunityModule,
     RankModule,
+    AuthModule,
+    UserModule,
   ],
   controllers: [],
   providers: [],

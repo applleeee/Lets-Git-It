@@ -6,6 +6,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { Comment } from './Comment';
 import { CommentLike } from './CommentLike';
@@ -16,6 +17,7 @@ import { Field } from './Field';
 import { Career } from './Career';
 
 @Index('field_id', ['fieldId'], {})
+@Unique(['githubId'])
 @Entity('user', { schema: 'git_rank' })
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id', unsigned: true })
