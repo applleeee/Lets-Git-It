@@ -78,6 +78,14 @@ export class CommunityRepository {
     return result;
   }
 
+  async getPostsOfUser(userId: number): Promise<Post[]> {
+    return this.postRepository
+      .createQueryBuilder()
+      .select(['id'])
+      .where('user_id = :userId', { userId: userId })
+      .getRawMany();
+  }
+
   async createOrDeletePostLike(postId, userId) {
     const ifLiked = await this.postLikeRepository.findOne({
       where: { postId: postId, userId: userId },
@@ -97,5 +105,13 @@ export class CommunityRepository {
     } else if (ifLiked) {
       return await this.postLikeRepository.delete({ id: ifLiked.id });
     }
+  }
+
+  async getPostLikesOfUser(userId: number): Promise<Post[]> {
+    return this.postLikeRepository
+      .createQueryBuilder()
+      .select(['post_id'])
+      .where('user_id = :userId', { userId: userId })
+      .getRawMany();
   }
 }
