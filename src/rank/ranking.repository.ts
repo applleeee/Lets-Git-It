@@ -131,4 +131,15 @@ export class RankingRepository {
 
     return avgValues;
   }
+
+  async getTop100Languages() {
+    const top100Lang = await this.rankingRepository
+      .createQueryBuilder()
+      .select('main_language')
+      .orderBy('total_score', 'DESC')
+      .limit(100)
+      .getRawMany();
+
+    return top100Lang;
+  }
 }

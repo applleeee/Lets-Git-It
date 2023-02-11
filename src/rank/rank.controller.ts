@@ -14,4 +14,14 @@ export class RankController {
   async getRankerDetail(@Param('userName') userName: string) {
     return await this.rankService.getRankerDetail(userName);
   }
+
+  @Get('/ranking/top5')
+  async getTop5() {
+    return await this.rankService.getTop5();
+  }
+
+  @Get('/ranking/top100')
+  async getTop100(@Query('langFilter') langFilter: string) {
+    return await this.rankService.getTop100(langFilter);
+  }
 }

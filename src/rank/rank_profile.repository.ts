@@ -18,7 +18,7 @@ export class RankerProfileRepository {
 
   async getRankerId(name: string): Promise<number> {
     const { id } = await this.rankerProfileRepository.findOne({
-      where: { name: name },
+      where: { name },
     });
     return id;
   }
@@ -87,6 +87,47 @@ export class RankerProfileRepository {
     return rankerProfile;
   }
 
+  async getTop5() {
+    const top5 = await this.rankerProfileRepository
+      .createQueryBuilder()
+      .select([
+        'RankerProfile.name as rankerName',
+        'RankerProfile.profile_image_url as profileImage',
+        'ROUND(ranking.total_score,0) as totalScore',
+      ])
+      .leftJoin(
+        Ranking,
+        'ranking',
+        'ranking.ranker_profile_id=RankerProfile.id',
+      )
+      .orderBy('totalScore', 'DESC')
+      .limit(5)
+      .getRawMany();
+    return top5;
+  }
+
+  async getTop100(lang: string) {
+    const top100 = await this.rankerProfileRepository
+      .createQueryBuilder()
+      .select([
+        'RankerProfile.name as userName',
+        'r.main_language as mainLang',
+        'r.fame_follower_number as followerNumber',
+        'r.ability_public_repository_star_number as myStarNumber',
+        'r.passion_commit_number as commitNumber',
+        'r.total_score as totalScore',
+        't.name as tier',
+        't.image_url as tierImage',
+      ])
+      .leftJoin(Ranking, 'r', 'r.ranker_profile_id = RankerProfile.id')
+      .leftJoin(Tier, 't', 't.id = r.tier_id')
+      .where(`r.main_language ${lang}`)
+      .orderBy('totalScore', 'DESC')
+      .limit(100)
+      .getRawMany();
+
+    return top100;
+  }
   async findRanker(userName) {
     const ranker = await this.rankerProfileRepository
       .createQueryBuilder()
