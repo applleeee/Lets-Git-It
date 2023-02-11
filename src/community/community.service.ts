@@ -45,13 +45,18 @@ export class CommunityService {
     return await this.CommunityRepository.getPostList(subCategoryId);
   }
 
-  async getPostsOfUser(userId: number): Promise<number[]> {
-    const data = await this.CommunityRepository.getPostsOfUser(userId);
+  async getIdsOfPostsCreatedByUser(userId: number): Promise<number[]> {
+    const data = await this.CommunityRepository.getIdsOfPostsCreatedByUser(
+      userId,
+    );
     return data.map((item) => Object.values(item)[0]);
   }
 
-  async getPostLikesOfUser(userId: number): Promise<number[]> {
-    const data = await this.CommunityRepository.getPostLikesOfUser(userId);
+  async getIdsOfLikesAboutPostCreatedByUser(userId: number): Promise<number[]> {
+    const data =
+      await this.CommunityRepository.getIdsOfLikesAboutPostCreatedByUser(
+        userId,
+      );
     return data.map((item) => Object.values(item)[0]);
   }
 
