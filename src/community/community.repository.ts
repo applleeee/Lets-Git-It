@@ -90,6 +90,45 @@ export class CommunityRepository {
     return result;
   }
 
+  async getPostDatail(postId) {
+    const postContent = await this.postRepository
+      .createQueryBuilder('post')
+      .select('post.content_url AS contentUrl')
+      .where('post.id = :postId', { postId: postId })
+      .getRawOne();
+    const postDetail = await this.postRepository
+      .createQueryBuilder('post')
+      .leftJoin('user', 'user', 'user.id = post.user_id')
+      .leftJoin(
+        'ranker_profile',
+        'ranker_profile',
+        'ranker_profile.user_id = user.id',
+      )
+      .leftJoin(
+        'sub_category',
+        'sub_category',
+        'post.sub_category_id = sub_category.id',
+      )
+      .leftJoin('post_like', 'post_like', 'post_like.post_id = post.id')
+      .where('post.id = :postId', { postId: postId })
+      .select([
+        'post.id AS postId',
+        'post.title',
+        'post.user_id AS userId',
+        'ranker_profile.name AS userName',
+        'post.sub_category_id AS subCategoryId',
+        'sub_category.name AS subCategoryName',
+        `DATE_FORMAT(post.created_at, '%Y-%m-%d %H:%i:%s') AS createdAt`,
+      ])
+      .addSelect(
+        `(SELECT JSON_ARRAYAGG(JSON_OBJECT("likeId", post_like.id, "userId", post_like.user_id, "createdAt", post_like.created_at))
+      from post_like where post_like.id = 1) as likes`,
+      )
+      .getRawOne();
+    postDetail.content = postContent.contentUrl;
+    return postDetail;
+  }
+
   async getPostsCreatedByUser(userId: number): Promise<Post[]> {
     return this.postRepository
       .createQueryBuilder()
