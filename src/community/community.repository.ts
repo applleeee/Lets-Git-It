@@ -78,7 +78,7 @@ export class CommunityRepository {
     return result;
   }
 
-  async getPostsOfUser(userId: number): Promise<Post[]> {
+  async getIdsOfPostsCreatedByUser(userId: number): Promise<Post[]> {
     return this.postRepository
       .createQueryBuilder()
       .select(['id'])
@@ -107,7 +107,7 @@ export class CommunityRepository {
     }
   }
 
-  async getPostLikesOfUser(userId: number): Promise<Post[]> {
+  async getIdsOfLikesAboutPostCreatedByUser(userId: number): Promise<Post[]> {
     return this.postLikeRepository
       .createQueryBuilder()
       .select(['post_id'])
