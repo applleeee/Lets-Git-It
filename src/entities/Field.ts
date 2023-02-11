@@ -1,12 +1,12 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { User } from "./User";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from './User';
 
-@Entity("field", { schema: "git_rank" })
+@Entity('field', { schema: 'git_rank' })
 export class Field {
-  @PrimaryGeneratedColumn({ type: "tinyint", name: "id", unsigned: true })
+  @PrimaryGeneratedColumn({ type: 'tinyint', name: 'id', unsigned: true })
   id: number;
 
-  @Column("varchar", { name: "name", nullable: true, length: 100 })
+  @Column('varchar', { name: 'name', nullable: true, length: 100 })
   name: string | null;
 
   @OneToMany(() => User, (user) => user.field)
