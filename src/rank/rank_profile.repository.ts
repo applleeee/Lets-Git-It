@@ -128,4 +128,21 @@ export class RankerProfileRepository {
 
     return top100;
   }
+  async findRanker(userName) {
+    const ranker = await this.rankerProfileRepository
+      .createQueryBuilder()
+      .select([
+        'RankerProfile.name as rankerName',
+        'RankerProfile.profile_image_url as profileImage',
+        't.image_url as tierImage',
+      ])
+      .leftJoin(Ranking, `r`, 'RankerProfile.id = r.ranker_profile_id')
+      .leftJoin(Tier, `t`, `t.id=r.tier_id`)
+      .where('RankerProfile.name LIKE :rankerName', {
+        rankerName: `%${userName}%`,
+      })
+      .getRawMany();
+
+    return ranker;
+  }
 }
