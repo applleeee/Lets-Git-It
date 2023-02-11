@@ -16,7 +16,7 @@ export class RankController {
   }
 
   @Get('/ranking/top100')
-  async getTop100() {
-    return await this.rankService.getTop100();
+  async getTop100(@Query('langFilter') langFilter: string) {
+    return await this.rankService.getTop100(langFilter);
   }
 }

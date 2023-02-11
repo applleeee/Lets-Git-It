@@ -18,7 +18,7 @@ export class RankerProfileRepository {
 
   async getRankerId(name: string): Promise<number> {
     const { id } = await this.rankerProfileRepository.findOne({
-      where: { name: name },
+      where: { name },
     });
     return id;
   }
@@ -106,7 +106,7 @@ export class RankerProfileRepository {
     return top5;
   }
 
-  async getTop100() {
+  async getTop100(lang: string) {
     const top100 = await this.rankerProfileRepository
       .createQueryBuilder()
       .select([
@@ -121,6 +121,7 @@ export class RankerProfileRepository {
       ])
       .leftJoin(Ranking, 'r', 'r.ranker_profile_id = RankerProfile.id')
       .leftJoin(Tier, 't', 't.id = r.tier_id')
+      .where(`r.main_language ${lang}`)
       .orderBy('totalScore', 'DESC')
       .limit(100)
       .getRawMany();

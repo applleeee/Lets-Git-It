@@ -297,15 +297,26 @@ export class RankService {
     return await this.rankerProfileRepository.getTop5();
   }
 
-  async getTop100() {
+  async getTop100(langFilter) {
     const top100Lang = await this.rankingRepository.getTop100Languages();
-    const top100 = await this.rankerProfileRepository.getTop100();
+
+    let lang = '';
+    if (langFilter === 'All') {
+      lang = `IS NOT NULL`;
+    } else if (typeof langFilter === 'string') {
+      lang = `= '${langFilter}'`;
+    } else {
+      lang = `IS NOT NULL`;
+    }
+
+    const top100 = await this.rankerProfileRepository.getTop100(lang);
 
     const mainLanguages = new Set();
 
     top100Lang.forEach((el) => mainLanguages.add(el.main_language));
 
     const langCategory = Array.from(mainLanguages);
+
     return { langCategory, top100 };
   }
 }
