@@ -2,6 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { CommunityRepository } from './community.repository';
 import { CreatePostDto } from './dto/createPost.dto';
 import { uploadToS3 } from 'src/utiles/aws';
+import {
+  CreateCommentDto,
+  CreateCommentLikesDto,
+  DeleteCommentDto,
+  UpdateCommentDto,
+} from './dto/comment.dto';
 
 @Injectable()
 export class CommunityService {
@@ -61,5 +67,39 @@ export class CommunityService {
       postId,
       userId,
     );
+  }
+
+  async createComment(commentData: CreateCommentDto) {
+    await this.CommunityRepository.createComment(commentData);
+  }
+
+  async deleteComment(creteria: DeleteCommentDto) {
+    await this.CommunityRepository.deleteComment(creteria);
+  }
+  async updateComment(creteria: DeleteCommentDto, toUpdateContent: string) {
+    await this.CommunityRepository.updateComment(creteria, toUpdateContent);
+  }
+
+  async readComments(postId: number) {
+    return await this.CommunityRepository.readComments(postId);
+  }
+
+  async createCommentLikes(creteria: CreateCommentLikesDto) {
+    await this.CommunityRepository.createCommentLikes(creteria);
+  }
+
+  async getCommentsOfUser(userId: number) {
+    const data = await this.CommunityRepository.getIdsOfCommentCreatedByUser(
+      userId,
+    );
+    return data.map((item) => Object.values(item)[0]);
+  }
+
+  async getCommentsLikesOfUser(userId: number): Promise<number[]> {
+    const data =
+      await this.CommunityRepository.getIsOfLikesAboutCommentsCreatedByUser(
+        userId,
+      );
+    return data.map((item) => Object.values(item)[0]);
   }
 }

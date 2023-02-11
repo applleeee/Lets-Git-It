@@ -4,6 +4,14 @@ import { Repository } from 'typeorm';
 import { SubCategory } from '../entities/SubCategory';
 import { Post } from 'src/entities/Post';
 import { PostLike } from 'src/entities/PostLike';
+import { Comment } from 'src/entities/Comment';
+import {
+  CreateCommentDto,
+  CreateCommentLikesDto,
+  DeleteCommentDto,
+  UpdateCommentDto,
+} from './dto/comment.dto';
+import { CommentLike } from 'src/entities/CommentLike';
 
 @Injectable()
 export class CommunityRepository {
@@ -14,6 +22,10 @@ export class CommunityRepository {
     private postRepository: Repository<Post>,
     @InjectRepository(PostLike)
     private postLikeRepository: Repository<PostLike>,
+    @InjectRepository(Comment)
+    private commentRepository: Repository<Comment>,
+    @InjectRepository(CommentLike)
+    private commentLikeRepository: Repository<CommentLike>,
   ) {}
 
   async getAllCategories() {
@@ -111,6 +123,54 @@ export class CommunityRepository {
     return this.postLikeRepository
       .createQueryBuilder()
       .select(['post_id'])
+      .where('user_id = :userId', { userId: userId })
+      .getRawMany();
+  }
+
+  async createComment(commentData: CreateCommentDto) {
+    const data = await this.commentRepository.create(commentData);
+    await this.commentRepository.save(data);
+  }
+
+  async deleteComment(creteria: DeleteCommentDto) {
+    await this.commentRepository.delete(creteria);
+  }
+
+  async updateComment(creteria: UpdateCommentDto, toUpdateContent: string) {
+    await this.commentRepository.update(creteria, { content: toUpdateContent });
+  }
+
+  async readComments(postId: number) {
+    return await this.commentRepository.find({
+      where: { postId: postId },
+      order: { groupOrder: 'asc', createdAt: 'asc' },
+    });
+  }
+
+  async createCommentLikes(creteria: CreateCommentLikesDto) {
+    const isExist = await this.commentLikeRepository.exist({
+      where: { userId: creteria.userId, commentId: creteria.commentId },
+    });
+
+    if (!isExist) await this.commentLikeRepository.save(creteria);
+
+    await this.commentLikeRepository.delete(creteria);
+  }
+
+  async getIdsOfCommentCreatedByUser(userId: number): Promise<Comment[]> {
+    return this.commentRepository
+      .createQueryBuilder()
+      .select(['id'])
+      .where('user_id = :userId', { userId: userId })
+      .getRawMany();
+  }
+
+  async getIsOfLikesAboutCommentsCreatedByUser(
+    userId: number,
+  ): Promise<CommentLike[]> {
+    return this.commentLikeRepository
+      .createQueryBuilder()
+      .select(['comment_id'])
       .where('user_id = :userId', { userId: userId })
       .getRawMany();
   }
