@@ -36,7 +36,11 @@ export const getS3Data = async (filePath: string) => {
   }
 };
 
-export const uploadToS3 = async (file: Buffer, name: string) => {
+export const uploadToS3 = async (
+  file: Buffer,
+  name: string,
+  mimetype: string,
+) => {
   try {
     const s3 = new AWS.S3(s3Option);
 
@@ -44,6 +48,7 @@ export const uploadToS3 = async (file: Buffer, name: string) => {
       Bucket: process.env.S3_BUCKET_NAME as string,
       Key: name,
       Body: file,
+      ContentType: mimetype,
     };
 
     return await s3.upload(params).promise();

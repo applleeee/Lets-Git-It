@@ -7,8 +7,8 @@ export class CreatePostDto {
   readonly title: string;
   @IsNumber()
   @IsNotEmpty()
-  readonly userId: number;
-  @IsNumber()
-  @IsNotEmpty()
   readonly subCategoryId: number;
+  @IsString()
+  @IsNotEmpty()
+  readonly content: string;
 }

@@ -23,10 +23,10 @@ export class PostLike {
   @Column('int', { name: 'user_id', nullable: true, unsigned: true })
   userId: number | null;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date | null;
 
   @ManyToOne(() => Post, (post) => post.postLikes, {
