@@ -56,10 +56,8 @@ export class CommunityService {
     return data.map((item) => Object.values(item)[0]);
   }
 
-  async getIdsOfLikesAboutPostCreatedByUser(userId: number): Promise<number[]> {
-    const data = await this.CommunityRepository.getLikesAboutPostCreatedByUser(
-      userId,
-    );
+  async getIdsOfPostLikedByUser(userId: number): Promise<number[]> {
+    const data = await this.CommunityRepository.getIdsOfPostLikedByUser(userId);
     return data.map((item) => Object.values(item)[0]);
   }
 
@@ -91,15 +89,16 @@ export class CommunityService {
   }
 
   async getIdsOfCommentCreatedByUser(userId: number) {
-    const data = await this.CommunityRepository.getCommentCreatedByUser(userId);
+    const data = await this.CommunityRepository.getCommentsCreatedByUser(
+      userId,
+    );
     return data.map((item) => Object.values(item)[0]);
   }
 
-  async getIsOfLikesAboutCommentsCreatedByUser(
-    userId: number,
-  ): Promise<number[]> {
-    const data =
-      await this.CommunityRepository.getLikesAboutCommentsCreatedByUser(userId);
+  async getIdsOfCommentLikedByUser(userId: number): Promise<number[]> {
+    const data = await this.CommunityRepository.getIdsOfCommentLikedByUser(
+      userId,
+    );
     return data.map((item) => Object.values(item)[0]);
   }
 }
