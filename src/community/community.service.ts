@@ -52,17 +52,14 @@ export class CommunityService {
   }
 
   async getIdsOfPostsCreatedByUser(userId: number): Promise<number[]> {
-    const data = await this.CommunityRepository.getIdsOfPostsCreatedByUser(
-      userId,
-    );
+    const data = await this.CommunityRepository.getPostsCreatedByUser(userId);
     return data.map((item) => Object.values(item)[0]);
   }
 
   async getIdsOfLikesAboutPostCreatedByUser(userId: number): Promise<number[]> {
-    const data =
-      await this.CommunityRepository.getIdsOfLikesAboutPostCreatedByUser(
-        userId,
-      );
+    const data = await this.CommunityRepository.getLikesAboutPostCreatedByUser(
+      userId,
+    );
     return data.map((item) => Object.values(item)[0]);
   }
 
@@ -93,18 +90,16 @@ export class CommunityService {
     await this.CommunityRepository.createCommentLikes(creteria);
   }
 
-  async getCommentsOfUser(userId: number) {
-    const data = await this.CommunityRepository.getIdsOfCommentCreatedByUser(
-      userId,
-    );
+  async getIdsOfCommentCreatedByUser(userId: number) {
+    const data = await this.CommunityRepository.getCommentCreatedByUser(userId);
     return data.map((item) => Object.values(item)[0]);
   }
 
-  async getCommentsLikesOfUser(userId: number): Promise<number[]> {
+  async getIsOfLikesAboutCommentsCreatedByUser(
+    userId: number,
+  ): Promise<number[]> {
     const data =
-      await this.CommunityRepository.getIsOfLikesAboutCommentsCreatedByUser(
-        userId,
-      );
+      await this.CommunityRepository.getLikesAboutCommentsCreatedByUser(userId);
     return data.map((item) => Object.values(item)[0]);
   }
 }

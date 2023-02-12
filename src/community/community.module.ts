@@ -49,5 +49,6 @@ import { JwtStrategy } from 'src/auth/jwt.strategy';
     JwtService,
     JwtStrategy,
   ],
+  exports: [CommunityRepository, CommunityService],
 })
 export class CommunityModule {}
