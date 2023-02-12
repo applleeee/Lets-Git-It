@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CommunityRepository } from './community.repository';
 import { CreatePostDto } from './dto/createPost.dto';
-import { uploadToS3 } from 'src/utiles/aws';
+import { uploadToS3, getS3Data } from 'src/utiles/aws';
 import {
   CreateCommentDto,
   CreateCommentLikesDto,
@@ -11,11 +11,6 @@ import {
 
 @Injectable()
 export class CommunityService {
-  now = new Date(+new Date() + 3240 * 10000)
-    .toISOString()
-    .replace('T', '_')
-    .replace(/\..*/, '')
-    .replace(/\:/g, '-');
   constructor(private CommunityRepository: CommunityRepository) {}
 
   async getAllCategories() {
@@ -23,16 +18,28 @@ export class CommunityService {
     return categories;
   }
 
-  async saveImageToS3(image, userId) {
-    const name = `post_images/${userId}_${this.now}`;
+  async saveImageToS3(image, userId: number) {
+    const now = new Date(+new Date() + 3240 * 10000)
+      .toISOString()
+      .replace('T', '_')
+      .replace(/\..*/, '')
+      .replace(/\:/g, '-');
+
+    const name = `post_images/${userId}_${now}`;
     const mimetype = image.mimetype;
     const saveToS3 = await uploadToS3(image.buffer, name, mimetype);
     return saveToS3.Location;
   }
 
-  async createPost(postData: CreatePostDto, userId) {
+  async createPost(postData: CreatePostDto, userId: number) {
+    const now = new Date(+new Date() + 3240 * 10000)
+      .toISOString()
+      .replace('T', '_')
+      .replace(/\..*/, '')
+      .replace(/\:/g, '-');
+
     const { title, subCategoryId, content } = postData;
-    const contentUrl = `post/${userId}_${title}_${this.now}`;
+    const contentUrl = `post/${userId}_${title}_${now}`;
     await this.CommunityRepository.createPost(
       title,
       userId,
@@ -49,6 +56,14 @@ export class CommunityService {
 
   async getPostList(subCategoryId: number) {
     return await this.CommunityRepository.getPostList(subCategoryId);
+  }
+
+  async getPostDetail(postId: number) {
+    const postDetail = await this.CommunityRepository.getPostDatail(postId);
+    const postContent = await getS3Data(postDetail.content);
+    postDetail.content = postContent;
+
+    return postDetail;
   }
 
   async getIdsOfPostsCreatedByUser(userId: number): Promise<number[]> {

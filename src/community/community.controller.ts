@@ -5,7 +5,6 @@ import {
   Body,
   UploadedFile,
   Param,
-  ParseIntPipe,
   UseInterceptors,
   UseGuards,
   ValidationPipe,
@@ -24,6 +23,7 @@ import {
   UpdateCommentDto,
 } from './dto/comment.dto';
 import { ValidateSubCategoryIdPipe } from './pipe/getPostList.pipe';
+import { OptionalAuthGuard } from './guard/optionalGuard';
 
 @Controller('/community')
 export class CommunityController {
@@ -34,26 +34,26 @@ export class CommunityController {
     return await this.communityService.getAllCategories();
   }
 
-  //로그인 검증 추가가
+  @UseGuards(AuthGuard('jwt'))
   @Post('/post/image')
   @UseInterceptors(FileInterceptor('image'))
-  async saveImageToS3(@UploadedFile() image) {
-    const userId = 1;
+  async saveImageToS3(@UploadedFile() image, @Req() req) {
     try {
-      await this.communityService.saveImageToS3(image, userId);
-      return 'post save success';
+      const userId: number = req.user.id;
+      return await this.communityService.saveImageToS3(image, userId);
     } catch (err) {
       console.log(err);
       return err;
     }
   }
 
-  // 로그인 검증 추가
+  @UseGuards(AuthGuard('jwt'))
   @Post('/post')
-  async createPost(@Body() postData: CreatePostDto) {
-    const userId = 1;
+  async createPost(@Body() postData: CreatePostDto, @Req() req) {
     try {
-      return await this.communityService.createPost(postData, userId);
+      const userId: number = req.user.id;
+      await this.communityService.createPost(postData, userId);
+      return { message: 'post created' };
     } catch (err) {
       console.log(err);
       return err;
@@ -67,18 +67,42 @@ export class CommunityController {
     return await this.communityService.getPostList(subCategoryId);
   }
 
-  //로그인 검증 추가
+  @UseGuards(OptionalAuthGuard)
+  @Get('/posts/:postId')
+  async getPostDetail(@Param('postId') postId: number, @Req() req) {
+    const result = await this.communityService.getPostDetail(postId);
+    if (req.user) {
+      const { idsOfLikesAboutPostCreatedByUser } = req.user;
+      result.login = true;
+      if (idsOfLikesAboutPostCreatedByUser.length === 0) {
+        result.ifLiked = false;
+      } else {
+        result.ifLiked = true;
+      }
+      return result;
+    }
+    if (!req.user) {
+      return result;
+    }
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Post('/like')
-  async createOrDeletePostLike(@Body() data) {
-    const userId = 1;
-    const result = await this.communityService.createOrDeletePostLike(
-      data,
-      userId,
-    );
-    if (result['raw']) {
-      return { message: 'like deleted' };
-    } else {
-      return { message: 'like created' };
+  async createOrDeletePostLike(@Body() data, @Req() req) {
+    try {
+      const userId = req.user.id;
+      const result = await this.communityService.createOrDeletePostLike(
+        data,
+        userId,
+      );
+      if (result['raw']) {
+        return { message: 'like deleted' };
+      } else {
+        return { message: 'like created' };
+      }
+    } catch (err) {
+      console.log(err);
+      return err;
     }
   }
 
