@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { RankerProfile } from '../entities/RankerProfile';
 import { Ranking } from '../entities/Ranking';
 import { Tier } from '../entities/Tier';
+import { RankService } from './rank.service';
 
 @Injectable()
 export class RankerProfileRepository {
@@ -144,5 +145,26 @@ export class RankerProfileRepository {
       .getRawMany();
 
     return ranker;
+  }
+
+  async getMyPage(userId: number) {
+    //todo 추후에 auth 로직에서 해당 유저의 ranker profile 정보가 없을 경우 현상님의 로직을 사용해서 회원 가입 시 애초애 정보를 등록하는 과정으로 리펙토링 하겠습니다.
+
+    let result;
+    const ranker = await this.rankerProfileRepository.findBy({
+      userId: userId,
+    })[0];
+    if (!ranker) {
+      result = {
+        userName: '랭킹 정보를 검색해주세요!',
+        profileText: '랭킹 정보를 검색해주세요!',
+        profileImageUrl: '랭킹 정보를 검색해주세요!',
+        email: '랭킹 정보를 검색해주세요!',
+      };
+    } else {
+      result = ranker;
+    }
+    console.log('ranker: ', result);
+    return result;
   }
 }

@@ -17,7 +17,7 @@ export class UserRepository {
     });
   }
 
-  async getById(id: number): Promise<User> {
+  async getByUserId(id: number): Promise<User> {
     return await this.userRepository.findOneBy({
       id,
     });
@@ -25,5 +25,15 @@ export class UserRepository {
   async createUser(signUpData: SignUpDto) {
     const user = await this.userRepository.create(signUpData);
     await this.userRepository.save(user);
+  }
+
+  async updateMyPage(userId: number, fieldId: number, careerId: number) {
+    await this.userRepository.update(
+      { id: userId },
+      {
+        fieldId: fieldId,
+        careerId: careerId,
+      },
+    );
   }
 }
