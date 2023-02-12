@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
-import { RankerProfileRepository } from './rank_profile.repository';
+import { RankerProfileRepository } from './rankerProfile.repository';
 import * as dotenv from 'dotenv';
 import { TierRepository } from './tier.repository';
 import { RankingRepository } from './ranking.repository';
+import { SearchOutput, Top100, Top5 } from './dto/rankerProfile.dto';
 dotenv.config();
 
 const TOKEN = process.env.GITHUB_ACCESS_TOKEN;
@@ -105,7 +106,7 @@ export class RankService {
       },
     );
     const reviews = eventList.data.filter(
-      (event) => event.type === 'PullRequestReviewEvent',
+      (event: object) => event['type'] === 'PullRequestReviewEvent',
     );
 
     const reviewCount = reviews.length;
@@ -168,7 +169,7 @@ export class RankService {
             },
           },
         );
-        const languages = reposLang.data;
+        const languages: object = reposLang.data;
         for (const lang in languages) {
           if (programmingLang.hasOwnProperty(lang)) {
             programmingLang[lang] += languages[lang];
@@ -268,13 +269,14 @@ export class RankService {
     return { rankerDetail, maxValues, avgValues };
   }
 
-  async getTop5() {
+  async getTop5(): Promise<Top5[]> {
     return await this.rankerProfileRepository.getTop5();
   }
 
-  async getTop100(langFilter) {
-    const top100Lang = await this.rankingRepository.getTop100Languages();
-
+  async getTop100(langFilter: string): Promise<{
+    langCategory: unknown[];
+    top100: Top100[];
+  }> {
     let lang = '';
     if (langFilter === 'All') {
       lang = `IS NOT NULL`;
@@ -286,16 +288,18 @@ export class RankService {
 
     const top100 = await this.rankerProfileRepository.getTop100(lang);
 
+    const top100Lang = await this.rankingRepository.getTop100Languages();
+
     const mainLanguages = new Set();
 
     top100Lang.forEach((el) => mainLanguages.add(el.main_language));
 
-    const langCategory = Array.from(mainLanguages);
+    const langCategory: string | unknown[] = Array.from(mainLanguages);
 
     return { langCategory, top100 };
   }
 
-  async findRanker(userName) {
+  async findRanker(userName: string): Promise<SearchOutput[]> {
     return await this.rankerProfileRepository.findRanker(userName);
   }
 }

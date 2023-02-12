@@ -19,19 +19,19 @@ export class Ranking {
   mainLanguage: string;
 
   @Column('decimal', { name: 'curiosity_score', precision: 8, scale: 4 })
-  curiosityScore: string;
+  curiosityScore: number;
 
   @Column('decimal', { name: 'passion_score', precision: 8, scale: 4 })
-  passionScore: string;
+  passionScore: number;
 
   @Column('decimal', { name: 'fame_score', precision: 8, scale: 4 })
-  fameScore: string;
+  fameScore: number;
 
   @Column('decimal', { name: 'ability_score', precision: 8, scale: 4 })
-  abilityScore: string;
+  abilityScore: number;
 
   @Column('decimal', { name: 'total_score', precision: 9, scale: 4 })
-  totalScore: string;
+  totalScore: number;
 
   @Column('int', { name: 'curiosity_raise_issue_number', unsigned: true })
   curiosityRaiseIssueNumber: number;
