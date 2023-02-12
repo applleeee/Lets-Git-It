@@ -21,23 +21,21 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const idsOfPostsCreatedByUser =
       await this.communityService.getIdsOfPostsCreatedByUser(userId);
 
-    const idsOfLikesAboutPostCreatedByUser =
-      await this.communityService.getIdsOfLikesAboutPostCreatedByUser(userId);
+    const idsOfPostLikedByUser =
+      await this.communityService.getIdsOfPostLikedByUser(userId);
 
     const idsOfCommentsCreatedByUser =
       await this.communityService.getIdsOfCommentCreatedByUser(userId);
 
-    const idsOfLikesAboutCommentCreatedByUser =
-      await this.communityService.getIsOfLikesAboutCommentsCreatedByUser(
-        userId,
-      );
+    const idsOfCommentLikedByUser =
+      await this.communityService.getIdsOfCommentLikedByUser(userId);
 
     const user = {
       id: userId,
       idsOfPostsCreatedByUser,
-      idsOfLikesAboutPostCreatedByUser,
+      idsOfPostLikedByUser,
       idsOfCommentsCreatedByUser,
-      idsOfLikesAboutCommentCreatedByUser,
+      idsOfCommentLikedByUser,
     };
     return user;
   }
