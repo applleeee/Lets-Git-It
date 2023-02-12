@@ -24,6 +24,7 @@ import { RankerProfile } from 'src/entities/RankerProfile';
 import { Ranking } from 'src/entities/Ranking';
 import { Tier } from 'src/entities/Tier';
 import { Comment } from 'src/entities/Comment';
+import { CommunityService } from 'src/community/community.service';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { Comment } from 'src/entities/Comment';
     JwtStrategy,
     AuthRepository,
     CommunityRepository,
+    CommunityService,
   ],
   exports: [AuthService, AuthRepository],
 })
