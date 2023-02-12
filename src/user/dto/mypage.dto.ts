@@ -1,6 +1,22 @@
-import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsDate,
+  IsNumber,
+  IsString,
+  IsNotEmpty,
+} from 'class-validator';
 
-class PostDto {
+export class UpdateMyPageDto {
+  @IsNotEmpty()
+  @IsNumber()
+  readonly fieldId: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  readonly careerId: number;
+}
+
+export class PostDto {
   @IsString()
   title: string;
 
@@ -14,7 +30,7 @@ class PostDto {
   createdAt: Date;
 }
 
-export class myPageDto {
+export class MyPageDto {
   @IsString()
   readonly userName: string;
 

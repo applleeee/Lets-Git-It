@@ -6,8 +6,8 @@ export class Career {
   @PrimaryGeneratedColumn({ type: 'tinyint', name: 'id', unsigned: true })
   id: number;
 
-  @Column('varchar', { name: 'period', nullable: true, length: 100 })
-  period: string | null;
+  @Column('varchar', { name: 'period', nullable: false, length: 100 })
+  period: string;
 
   @OneToMany(() => User, (user) => user.career)
   users: User[];

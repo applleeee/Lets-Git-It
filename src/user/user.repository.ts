@@ -3,6 +3,7 @@ import { Repository } from 'typeorm';
 import { User } from '../entities/User';
 import { SignUpDto } from '../auth/dto/auth.dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UpdateMyPageDto } from './dto/mypage.dto';
 
 @Injectable()
 export class UserRepository {
@@ -27,13 +28,7 @@ export class UserRepository {
     await this.userRepository.save(user);
   }
 
-  async updateMyPage(userId: number, fieldId: number, careerId: number) {
-    await this.userRepository.update(
-      { id: userId },
-      {
-        fieldId: fieldId,
-        careerId: careerId,
-      },
-    );
+  async updateMyPage(userId: number, partialEntity: UpdateMyPageDto) {
+    await this.userRepository.update({ id: userId }, partialEntity);
   }
 }

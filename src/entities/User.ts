@@ -24,14 +24,14 @@ export class User {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id', unsigned: true })
   id: number;
 
-  @Column('int', { name: 'github_id', nullable: true, unsigned: true })
-  githubId: number | null;
+  @Column('int', { name: 'github_id', nullable: false, unsigned: true })
+  githubId: number;
 
-  @Column('tinyint', { name: 'field_id', nullable: true, unsigned: true })
-  fieldId: number | null;
+  @Column('tinyint', { name: 'field_id', nullable: false, unsigned: true })
+  fieldId: number;
 
-  @Column('tinyint', { name: 'career_id', nullable: true, unsigned: true })
-  careerId: number | null;
+  @Column('tinyint', { name: 'career_id', nullable: false, unsigned: true })
+  careerId: number;
 
   @Column('tinyint', {
     name: 'is_korean',
