@@ -78,7 +78,7 @@ export class CommunityService {
   async deleteComment(creteria: DeleteCommentDto) {
     await this.CommunityRepository.deleteComment(creteria);
   }
-  async updateComment(creteria: DeleteCommentDto, toUpdateContent: string) {
+  async updateComment(creteria: UpdateCommentDto, toUpdateContent: string) {
     await this.CommunityRepository.updateComment(creteria, toUpdateContent);
   }
 
