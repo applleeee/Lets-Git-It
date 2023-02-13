@@ -53,6 +53,30 @@ export class CommunityRepository {
     return result;
   }
 
+  async getPostToUpdate(postId: number) {
+    return await this.postRepository.findOne({ where: { id: postId } });
+  }
+
+  async updatePost(
+    postId: number,
+    title: string,
+    subCategoryId: number,
+    contentUrl: string,
+  ) {
+    return await this.postRepository
+      .createQueryBuilder()
+      .update(Post)
+      .set({
+        title: title,
+        contentUrl: contentUrl,
+        subCategoryId: subCategoryId,
+      })
+      .where('id = :id', { id: postId })
+      .execute();
+  }
+
+  async deletePost(postId: number, userId: number) {}
+
   async getPostList(subCategoryId: number) {
     const result = await this.postRepository
       .createQueryBuilder()
