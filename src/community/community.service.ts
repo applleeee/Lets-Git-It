@@ -1,69 +1,134 @@
-import { Injectable } from '@nestjs/common';
+import { Comment } from './../entities/Comment';
+import { HttpException, Injectable, HttpStatus } from '@nestjs/common';
 import { CommunityRepository } from './community.repository';
 import { CreatePostDto } from './dto/createPost.dto';
-import { uploadToS3 } from 'src/utiles/aws';
+import { uploadToS3, getS3Data, deleteS3Data } from 'src/utiles/aws';
 import {
   CreateCommentDto,
   CreateCommentLikesDto,
   DeleteCommentDto,
   UpdateCommentDto,
 } from './dto/comment.dto';
+import { Post } from 'src/entities/Post';
 
 @Injectable()
 export class CommunityService {
-  now = new Date(+new Date() + 3240 * 10000)
-    .toISOString()
-    .replace('T', '_')
-    .replace(/\..*/, '')
-    .replace(/\:/g, '-');
   constructor(private CommunityRepository: CommunityRepository) {}
+
+  private getCurrentTime() {
+    return new Date(+new Date() + 3240 * 10000)
+      .toISOString()
+      .replace('T', '_')
+      .replace(/\..*/, '')
+      .replace(/\:/g, '-');
+  }
 
   async getAllCategories() {
     const categories = this.CommunityRepository.getAllCategories();
     return categories;
   }
 
-  async saveImageToS3(image, userId) {
-    const name = `post_images/${userId}_${this.now}`;
+  async saveImageToS3(image, userId: number) {
+    // const now = new Date(+new Date() + 3240 * 10000)
+    //   .toISOString()
+    //   .replace('T', '_')
+    //   .replace(/\..*/, '')
+    //   .replace(/\:/g, '-');
+    const now = this.getCurrentTime();
+
+    const name = `post_images/${userId}_${now}`;
     const mimetype = image.mimetype;
     const saveToS3 = await uploadToS3(image.buffer, name, mimetype);
     return saveToS3.Location;
   }
 
-  async createPost(postData: CreatePostDto, userId) {
+  async createPost(postData: CreatePostDto, userId: number) {
+    // const now = new Date(+new Date() + 3240 * 10000)
+    //   .toISOString()
+    //   .replace('T', '_')
+    //   .replace(/\..*/, '')
+    //   .replace(/\:/g, '-');
+    const now = this.getCurrentTime();
+
     const { title, subCategoryId, content } = postData;
-    const contentUrl = `post/${userId}_${title}_${this.now}`;
+    const contentUrl = `post/${userId}_${title}_${now}`;
+    const mimetype = 'string';
+    try {
+      await uploadToS3(content as unknown as Buffer, contentUrl, mimetype);
+    } catch (err) {
+      console.log(err);
+      throw new Error(err);
+    }
+
     await this.CommunityRepository.createPost(
       title,
       userId,
       subCategoryId,
       contentUrl,
     );
+  }
+
+  async getPostToUpdate(postId: number) {
+    const postDetail = await this.CommunityRepository.getPostToUpdate(postId);
+    const postContent = await getS3Data(postDetail.contentUrl);
+    postDetail['content'] = postContent;
+    delete postDetail.contentUrl;
+    return postDetail;
+  }
+
+  async updatePost(postId: number, updatedData: CreatePostDto, userId: number) {
+    const originPost = await this.CommunityRepository.getPostToUpdate(postId);
+    try {
+      await deleteS3Data(originPost.contentUrl);
+    } catch (err) {
+      console.log(err);
+      throw new Error(err);
+    }
+
+    const now = this.getCurrentTime();
+
+    const { title, subCategoryId, content } = updatedData;
+    const contentUrl = `post/${userId}_${title}_${now}`;
     const mimetype = 'string';
-    const result = await uploadToS3(
-      content as unknown as Buffer,
+    try {
+      await uploadToS3(content as unknown as Buffer, contentUrl, mimetype);
+    } catch (err) {
+      console.log(err);
+      throw new Error(err);
+    }
+
+    await this.CommunityRepository.updatePost(
+      postId,
+      title,
+      subCategoryId,
       contentUrl,
-      mimetype,
     );
+  }
+
+  async deletePost(postId: number, userId: number) {
+    return await this.CommunityRepository.deletePost(postId, userId);
   }
 
   async getPostList(subCategoryId: number) {
     return await this.CommunityRepository.getPostList(subCategoryId);
   }
 
-  async getIdsOfPostsCreatedByUser(userId: number): Promise<number[]> {
-    const data = await this.CommunityRepository.getIdsOfPostsCreatedByUser(
-      userId,
-    );
-    return data.map((item) => Object.values(item)[0]);
+  async getPostDetail(postId: number) {
+    const postDetail = await this.CommunityRepository.getPostDatail(postId);
+    const postContent = await getS3Data(postDetail.content);
+    postDetail.content = postContent;
+
+    return postDetail;
   }
 
-  async getIdsOfLikesAboutPostCreatedByUser(userId: number): Promise<number[]> {
-    const data =
-      await this.CommunityRepository.getIdsOfLikesAboutPostCreatedByUser(
-        userId,
-      );
-    return data.map((item) => Object.values(item)[0]);
+  async getIdsOfPostsCreatedByUser(userId: number) {
+    const data = await this.CommunityRepository.getPostsCreatedByUser(userId);
+    return data.map<Post>((item) => Object.values(item)[0]);
+  }
+
+  async getIdsOfPostLikedByUser(userId: number) {
+    const data = await this.CommunityRepository.getIdsOfPostLikedByUser(userId);
+    return data.map<Post['id']>((item) => Object.values(item)[0]);
   }
 
   async createOrDeletePostLike(data, userId) {
@@ -78,33 +143,42 @@ export class CommunityService {
     await this.CommunityRepository.createComment(commentData);
   }
 
-  async deleteComment(creteria: DeleteCommentDto) {
-    await this.CommunityRepository.deleteComment(creteria);
+  async deleteComment(criteria: DeleteCommentDto) {
+    await this.CommunityRepository.deleteComment(criteria);
   }
-  async updateComment(creteria: DeleteCommentDto, toUpdateContent: string) {
-    await this.CommunityRepository.updateComment(creteria, toUpdateContent);
+  async updateComment(criteria: UpdateCommentDto, toUpdateContent: string) {
+    console.log('criteria: ', criteria.id);
+    const isCommentExist = await this.CommunityRepository.isCommentExist(
+      criteria.id,
+    );
+
+    if (!isCommentExist)
+      throw new HttpException(
+        'THE_COMMENT_IS_NOT_EXIST',
+        HttpStatus.BAD_REQUEST,
+      );
+    await this.CommunityRepository.updateComment(criteria, toUpdateContent);
   }
 
   async readComments(postId: number) {
     return await this.CommunityRepository.readComments(postId);
   }
 
-  async createCommentLikes(creteria: CreateCommentLikesDto) {
-    await this.CommunityRepository.createCommentLikes(creteria);
+  async createCommentLikes(criteria: CreateCommentLikesDto) {
+    return await this.CommunityRepository.createCommentLikes(criteria);
   }
 
-  async getCommentsOfUser(userId: number) {
-    const data = await this.CommunityRepository.getIdsOfCommentCreatedByUser(
+  async getIdsOfCommentCreatedByUser(userId: number) {
+    const data = await this.CommunityRepository.getCommentsCreatedByUser(
       userId,
     );
-    return data.map((item) => Object.values(item)[0]);
+    return data.map<Comment>((item) => Object.values(item)[0]);
   }
 
-  async getCommentsLikesOfUser(userId: number): Promise<number[]> {
-    const data =
-      await this.CommunityRepository.getIsOfLikesAboutCommentsCreatedByUser(
-        userId,
-      );
-    return data.map((item) => Object.values(item)[0]);
+  async getIdsOfCommentLikedByUser(userId: number) {
+    const data = await this.CommunityRepository.getIdsOfCommentLikedByUser(
+      userId,
+    );
+    return data.map<Comment['id']>((item) => Object.values(item)[0]);
   }
 }

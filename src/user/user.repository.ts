@@ -3,6 +3,7 @@ import { Repository } from 'typeorm';
 import { User } from '../entities/User';
 import { SignUpDto } from '../auth/dto/auth.dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UpdateMyPageDto } from './dto/mypage.dto';
 
 @Injectable()
 export class UserRepository {
@@ -17,7 +18,7 @@ export class UserRepository {
     });
   }
 
-  async getById(id: number): Promise<User> {
+  async getByUserId(id: number): Promise<User> {
     return await this.userRepository.findOneBy({
       id,
     });
@@ -25,5 +26,9 @@ export class UserRepository {
   async createUser(signUpData: SignUpDto) {
     const user = await this.userRepository.create(signUpData);
     await this.userRepository.save(user);
+  }
+
+  async updateMyPage(userId: number, partialEntity: UpdateMyPageDto) {
+    await this.userRepository.update({ id: userId }, partialEntity);
   }
 }

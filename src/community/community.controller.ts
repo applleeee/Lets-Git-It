@@ -5,10 +5,8 @@ import {
   Body,
   UploadedFile,
   Param,
-  ParseIntPipe,
   UseInterceptors,
   UseGuards,
-  ValidationPipe,
   Req,
   Delete,
   Put,
@@ -18,12 +16,15 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CommunityService } from './community.service';
 import { CreatePostDto } from './dto/createPost.dto';
 import {
+  CreateCommentBodyDto,
   CreateCommentDto,
   CreateCommentLikesDto,
   DeleteCommentDto,
+  UpdateCommentBodyDto,
   UpdateCommentDto,
 } from './dto/comment.dto';
 import { ValidateSubCategoryIdPipe } from './pipe/getPostList.pipe';
+import { OptionalAuthGuard } from './guard/optionalGuard';
 
 @Controller('/community')
 export class CommunityController {
@@ -34,30 +35,70 @@ export class CommunityController {
     return await this.communityService.getAllCategories();
   }
 
-  //로그인 검증 추가가
+  @UseGuards(AuthGuard('jwt'))
   @Post('/post/image')
   @UseInterceptors(FileInterceptor('image'))
-  async saveImageToS3(@UploadedFile() image) {
-    const userId = 1;
+  async saveImageToS3(@UploadedFile() image, @Req() req) {
     try {
-      await this.communityService.saveImageToS3(image, userId);
-      return 'post save success';
+      const userId: number = req.user.id;
+      return await this.communityService.saveImageToS3(image, userId);
     } catch (err) {
       console.log(err);
-      return err;
+      throw new Error(err);
     }
   }
 
-  // 로그인 검증 추가
+  @UseGuards(AuthGuard('jwt'))
   @Post('/post')
-  async createPost(@Body() postData: CreatePostDto) {
-    const userId = 1;
+  async createPost(@Body() postData: CreatePostDto, @Req() req) {
     try {
-      return await this.communityService.createPost(postData, userId);
+      const userId: number = req.user.id;
+      await this.communityService.createPost(postData, userId);
+      return { message: 'post created' };
     } catch (err) {
       console.log(err);
-      return err;
+      throw new Error(err);
     }
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/posts/update/:postId')
+  async getPostToUpdate(@Param('postId') postId: number, @Req() req) {
+    const { idsOfPostsCreatedByUser } = req.user;
+    try {
+      if (idsOfPostsCreatedByUser.includes(postId)) {
+        return await this.communityService.getPostToUpdate(postId);
+      } else {
+        return { message: 'This user has never written that post.' };
+      }
+    } catch (err) {
+      console.log(err);
+      throw new Error(err);
+    }
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Put('/posts/update/:postId')
+  async updatePost(
+    @Param('postId') postId: number,
+    @Body() updatedData: CreatePostDto,
+    @Req() req,
+  ) {
+    try {
+      const userId = req.user.id;
+      await this.communityService.updatePost(postId, updatedData, userId);
+      return { message: 'post updated' };
+    } catch (err) {
+      console.log(err);
+      throw new Error(err);
+    }
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('/posts/:postId')
+  async deletePost(@Param('postId') postId: number, @Req() req) {
+    const userId = req.user.id;
+    return await this.communityService.deletePost(postId, userId);
   }
 
   @Get('/posts/list/:subCategoryId')
@@ -67,18 +108,48 @@ export class CommunityController {
     return await this.communityService.getPostList(subCategoryId);
   }
 
-  //로그인 검증 추가
+  @UseGuards(OptionalAuthGuard)
+  @Get('/posts/:postId')
+  async getPostDetail(@Param('postId') postId: number, @Req() req) {
+    try {
+      const result = await this.communityService.getPostDetail(postId);
+      if (req.user) {
+        const { idsOfPostLikedByUser } = req.user;
+        result.login = true;
+        console.log(req.user);
+        if (idsOfPostLikedByUser.length === 0) {
+          result.ifLiked = false;
+        } else {
+          result.ifLiked = true;
+        }
+        return result;
+      }
+      if (!req.user) {
+        return result;
+      }
+    } catch (err) {
+      console.log(err);
+      throw new Error(err);
+    }
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Post('/like')
-  async createOrDeletePostLike(@Body() data) {
-    const userId = 1;
-    const result = await this.communityService.createOrDeletePostLike(
-      data,
-      userId,
-    );
-    if (result['raw']) {
-      return { message: 'like deleted' };
-    } else {
-      return { message: 'like created' };
+  async createOrDeletePostLike(@Body() data, @Req() req) {
+    try {
+      const userId = req.user.id;
+      const result = await this.communityService.createOrDeletePostLike(
+        data,
+        userId,
+      );
+      if (result['raw']) {
+        return { message: 'like deleted' };
+      } else {
+        return { message: 'like created' };
+      }
+    } catch (err) {
+      console.log(err);
+      return err;
     }
   }
 
@@ -86,9 +157,9 @@ export class CommunityController {
   @UseGuards(AuthGuard('jwt'))
   @Post('/posts/:post_id/comment')
   async createComment(
-    @Body(ValidationPipe) body,
+    @Body() body: CreateCommentBodyDto,
     @Req() req,
-    @Param('post_id', ValidationPipe) postId,
+    @Param('post_id') postId: number,
   ) {
     const commentData: CreateCommentDto = {
       userId: req.user.id,
@@ -102,12 +173,9 @@ export class CommunityController {
   // 댓글삭제
   @UseGuards(AuthGuard('jwt'))
   @Delete('/comments/:comment_id')
-  async deleteComment(
-    @Req() req,
-    @Param('comment_id', ValidationPipe) commentId,
-  ) {
-    const creteria: DeleteCommentDto = { userId: req.user.id, id: commentId };
-    await this.communityService.deleteComment(creteria);
+  async deleteComment(@Req() req, @Param('comment_id') commentId: number) {
+    const criteria: DeleteCommentDto = { userId: req.user.id, id: commentId };
+    await this.communityService.deleteComment(criteria);
     return { message: 'COMMENT_DELETED' };
   }
 
@@ -116,35 +184,32 @@ export class CommunityController {
   @Put('/comments/:comment_id')
   async updateComment(
     @Req() req,
-    @Param('comment_id', ValidationPipe) commentId,
-    @Body() body,
+    @Param('comment_id') commentId: number,
+    @Body() body: UpdateCommentBodyDto,
   ) {
-    const creteria: UpdateCommentDto = {
+    const criteria: UpdateCommentDto = {
       userId: req.user.id,
       id: commentId,
     };
     const toUpdateContent: string = body.content;
-    await this.communityService.updateComment(creteria, toUpdateContent);
+    await this.communityService.updateComment(criteria, toUpdateContent);
     return { message: 'COMMENT_UPDATED' };
   }
 
   // 댓글조회
   @Get('/posts/:post_id/comments')
-  async getComments(@Param('post_id', ValidationPipe) postId) {
-    return await this.communityService.readComments(postId);
+  async getComments(@Param('post_id') postId: number) {
+    return { data: await this.communityService.readComments(postId) };
   }
   // 댓글좋아요 생성/삭제
   @UseGuards(AuthGuard('jwt'))
   @Post('/comments/:comment_id/likes')
-  async createCommentLikes(
-    @Req() req,
-    @Param('comment_id', ValidationPipe) commentId,
-  ) {
-    const creteria: CreateCommentLikesDto = {
+  async createCommentLikes(@Req() req, @Param('comment_id') commentId: number) {
+    const criteria: CreateCommentLikesDto = {
       userId: req.user.id,
       commentId,
     };
 
-    await this.communityService.createCommentLikes(creteria);
+    return await this.communityService.createCommentLikes(criteria);
   }
 }

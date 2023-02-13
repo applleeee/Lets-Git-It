@@ -53,6 +53,30 @@ export class CommunityRepository {
     return result;
   }
 
+  async getPostToUpdate(postId: number) {
+    return await this.postRepository.findOne({ where: { id: postId } });
+  }
+
+  async updatePost(
+    postId: number,
+    title: string,
+    subCategoryId: number,
+    contentUrl: string,
+  ) {
+    return await this.postRepository
+      .createQueryBuilder()
+      .update(Post)
+      .set({
+        title: title,
+        contentUrl: contentUrl,
+        subCategoryId: subCategoryId,
+      })
+      .where('id = :id', { id: postId })
+      .execute();
+  }
+
+  async deletePost(postId: number, userId: number) {}
+
   async getPostList(subCategoryId: number) {
     const result = await this.postRepository
       .createQueryBuilder()
@@ -90,11 +114,73 @@ export class CommunityRepository {
     return result;
   }
 
-  async getIdsOfPostsCreatedByUser(userId: number): Promise<Post[]> {
+  async getPostDatail(postId) {
+    const postContent = await this.postRepository
+      .createQueryBuilder('post')
+      .select('post.content_url AS contentUrl')
+      .where('post.id = :postId', { postId: postId })
+      .getRawOne();
+    const postDetail = await this.postRepository
+      .createQueryBuilder('post')
+      .leftJoin('user', 'user', 'user.id = post.user_id')
+      .leftJoin(
+        'ranker_profile',
+        'ranker_profile',
+        'ranker_profile.user_id = user.id',
+      )
+      .leftJoin(
+        'sub_category',
+        'sub_category',
+        'post.sub_category_id = sub_category.id',
+      )
+      .leftJoin('post_like', 'post_like', 'post_like.post_id = post.id')
+      .where('post.id = :postId', { postId: postId })
+      .select([
+        'post.id AS postId',
+        'post.title',
+        'post.user_id AS userId',
+        'ranker_profile.name AS userName',
+        'post.sub_category_id AS subCategoryId',
+        'sub_category.name AS subCategoryName',
+        `DATE_FORMAT(post.created_at, '%Y-%m-%d %H:%i:%s') AS createdAt`,
+      ])
+      .addSelect(
+        `(SELECT JSON_ARRAYAGG(JSON_OBJECT("likeId", post_like.id, "userId", post_like.user_id, "createdAt", post_like.created_at))
+      from post_like where post_like.id = 1) as likes`,
+      )
+      .getRawOne();
+    postDetail.content = postContent.contentUrl;
+    return postDetail;
+  }
+
+  async getPostsCreatedByUser(userId: number): Promise<Post[]> {
     return this.postRepository
       .createQueryBuilder()
-      .select(['id'])
-      .where('user_id = :userId', { userId: userId })
+      .select([
+        'post.id as id',
+        'post.title as title',
+        'sub_category.name as subCategory',
+        `DATE_FORMAT(post.created_at, '%Y-%m-%d %H:%i:%s') as createdAt`,
+      ])
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('COUNT(post_like.id)', 'likeNumber')
+          .from(PostLike, 'post_like')
+          .where('post_like.post_id = post.id');
+      }, 'likeNumber')
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('COUNT(comment.post_id)', 'commentNumber')
+          .from(Comment, 'comment')
+          .where('post.id = comment.post_id');
+      }, 'commentNumber')
+      .leftJoin(
+        'sub_category',
+        'sub_category',
+        'sub_category.id = post.sub_category_id',
+      )
+      .where('post.user_id = :userId', { userId: userId })
+      .groupBy('post.id')
       .getRawMany();
   }
 
@@ -119,7 +205,7 @@ export class CommunityRepository {
     }
   }
 
-  async getIdsOfLikesAboutPostCreatedByUser(userId: number): Promise<Post[]> {
+  async getIdsOfPostLikedByUser(userId: number): Promise<Post[]> {
     return this.postLikeRepository
       .createQueryBuilder()
       .select(['post_id'])
@@ -128,16 +214,20 @@ export class CommunityRepository {
   }
 
   async createComment(commentData: CreateCommentDto) {
-    const data = await this.commentRepository.create(commentData);
+    const data = this.commentRepository.create(commentData);
     await this.commentRepository.save(data);
   }
 
-  async deleteComment(creteria: DeleteCommentDto) {
-    await this.commentRepository.delete(creteria);
+  async deleteComment(criteria: DeleteCommentDto) {
+    await this.commentRepository.delete(criteria);
   }
 
-  async updateComment(creteria: UpdateCommentDto, toUpdateContent: string) {
-    await this.commentRepository.update(creteria, { content: toUpdateContent });
+  async updateComment(criteria: UpdateCommentDto, toUpdateContent: string) {
+    await this.commentRepository.update(criteria, { content: toUpdateContent });
+  }
+
+  async isCommentExist(commentId: number) {
+    return await this.commentRepository.exist({ where: { id: commentId } });
   }
 
   async readComments(postId: number) {
@@ -147,27 +237,25 @@ export class CommunityRepository {
     });
   }
 
-  async createCommentLikes(creteria: CreateCommentLikesDto) {
+  async createCommentLikes(criteria: CreateCommentLikesDto) {
     const isExist = await this.commentLikeRepository.exist({
-      where: { userId: creteria.userId, commentId: creteria.commentId },
+      where: { userId: criteria.userId, commentId: criteria.commentId },
     });
 
-    if (!isExist) await this.commentLikeRepository.save(creteria);
+    if (!isExist) return await this.commentLikeRepository.save(criteria);
 
-    await this.commentLikeRepository.delete(creteria);
+    return await this.commentLikeRepository.delete(criteria);
   }
 
-  async getIdsOfCommentCreatedByUser(userId: number): Promise<Comment[]> {
+  async getCommentsCreatedByUser(userId: number): Promise<Comment[]> {
     return this.commentRepository
       .createQueryBuilder()
-      .select(['id'])
+      .select(['id', 'content', 'post_id as postId', 'created_at as createdAt'])
       .where('user_id = :userId', { userId: userId })
       .getRawMany();
   }
 
-  async getIsOfLikesAboutCommentsCreatedByUser(
-    userId: number,
-  ): Promise<CommentLike[]> {
+  async getIdsOfCommentLikedByUser(userId: number): Promise<CommentLike[]> {
     return this.commentLikeRepository
       .createQueryBuilder()
       .select(['comment_id'])

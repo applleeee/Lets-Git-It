@@ -20,24 +20,24 @@ export class Post {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id', unsigned: true })
   id: number;
 
-  @Column('varchar', { name: 'title', nullable: true, length: 500 })
-  title: string | null;
+  @Column('varchar', { name: 'title', nullable: false, length: 500 })
+  title: string;
 
-  @Column('varchar', { name: 'content_url', nullable: true, length: 2083 })
-  contentUrl: string | null;
+  @Column('varchar', { name: 'content_url', nullable: false, length: 2083 })
+  contentUrl: string;
 
-  @Column('int', { name: 'view', default: () => "'0'" })
+  @Column('int', { name: 'view', nullable: false, default: () => "'0'" })
   view: number;
 
-  @Column('int', { name: 'user_id', nullable: true, unsigned: true })
-  userId: number | null;
+  @Column('int', { name: 'user_id', nullable: false, unsigned: true })
+  userId: number;
 
   @Column('tinyint', {
     name: 'sub_category_id',
-    nullable: true,
+    nullable: false,
     unsigned: true,
   })
-  subCategoryId: number | null;
+  subCategoryId: number;
 
   @CreateDateColumn({ name: 'created_at', nullable: false })
   createdAt: Date;

@@ -15,6 +15,7 @@ import { PostLike } from './PostLike';
 import { RankerProfile } from './RankerProfile';
 import { Field } from './Field';
 import { Career } from './Career';
+import { BooleanTransformer } from 'src/utiles/boolean-transformer';
 
 @Index('field_id', ['fieldId'], {})
 @Unique(['githubId'])
@@ -23,21 +24,27 @@ export class User {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id', unsigned: true })
   id: number;
 
-  @Column('int', { name: 'github_id', nullable: true, unsigned: true })
-  githubId: number | null;
+  @Column('int', { name: 'github_id', nullable: false, unsigned: true })
+  githubId: number;
 
-  @Column('tinyint', { name: 'field_id', nullable: true, unsigned: true })
-  fieldId: number | null;
+  @Column('tinyint', { name: 'field_id', nullable: false, unsigned: true })
+  fieldId: number;
 
-  @Column('tinyint', { name: 'career_id', nullable: true, unsigned: true })
-  careerId: number | null;
+  @Column('tinyint', { name: 'career_id', nullable: false, unsigned: true })
+  careerId: number;
 
-  @Column('tinyint', { name: 'is_korean', nullable: true, width: 1 })
+  @Column('tinyint', {
+    name: 'is_korean',
+    nullable: true,
+    width: 1,
+    transformer: new BooleanTransformer(),
+  })
   isKorean: boolean | null;
 
   @Column('tinyint', {
     name: 'is_admin',
     nullable: true,
+    transformer: new BooleanTransformer(),
     width: 1,
     default: () => "'0'",
   })

@@ -17,11 +17,11 @@ export class CommentLike {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id', unsigned: true })
   id: number;
 
-  @Column('int', { name: 'comment_id', nullable: true, unsigned: true })
-  commentId: number | null;
+  @Column('int', { name: 'comment_id', nullable: false, unsigned: true })
+  commentId: number;
 
-  @Column('int', { name: 'user_id', nullable: true, unsigned: true })
-  userId: number | null;
+  @Column('int', { name: 'user_id', nullable: false, unsigned: true })
+  userId: number;
 
   @CreateDateColumn({ name: 'created_at', nullable: false })
   createdAt: Date;
@@ -30,7 +30,7 @@ export class CommentLike {
   updatedAt: Date | null;
 
   @ManyToOne(() => Comment, (comment) => comment.commentLikes, {
-    onDelete: 'NO ACTION',
+    onDelete: 'CASCADE',
     onUpdate: 'NO ACTION',
   })
   @JoinColumn([{ name: 'comment_id', referencedColumnName: 'id' }])

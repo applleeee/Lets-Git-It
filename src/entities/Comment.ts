@@ -19,16 +19,16 @@ export class Comment {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id', unsigned: true })
   id: number;
 
-  @Column('varchar', { name: 'content', nullable: true, length: 2083 })
-  content: string | null;
+  @Column('varchar', { name: 'content', nullable: false, length: 2083 })
+  content: string;
 
-  @Column('int', { name: 'user_id', nullable: true, unsigned: true })
-  userId: number | null;
+  @Column('int', { name: 'user_id', nullable: false, unsigned: true })
+  userId: number;
 
-  @Column('int', { name: 'post_id', nullable: true, unsigned: true })
-  postId: number | null;
+  @Column('int', { name: 'post_id', nullable: false, unsigned: true })
+  postId: number;
 
-  @Column('int', { name: 'group_order', unsigned: true })
+  @Column('int', { name: 'group_order', nullable: false, unsigned: true })
   groupOrder: number;
 
   @CreateDateColumn({ name: 'created_at', nullable: false })
@@ -45,7 +45,7 @@ export class Comment {
   user: User;
 
   @ManyToOne(() => Post, (post) => post.comments, {
-    onDelete: 'NO ACTION',
+    onDelete: 'CASCADE',
     onUpdate: 'NO ACTION',
   })
   @JoinColumn([{ name: 'post_id', referencedColumnName: 'id' }])

@@ -13,9 +13,10 @@ export class AuthRepository {
   ) {}
 
   async getAuthCategory() {
-    return {
+    const data = {
       field: await this.fieldRepository.find(),
       career: await this.careerRepository.find(),
     };
+    return data;
   }
 }

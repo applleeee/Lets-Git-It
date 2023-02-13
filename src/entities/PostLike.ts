@@ -17,11 +17,11 @@ export class PostLike {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id', unsigned: true })
   id: number;
 
-  @Column('int', { name: 'post_id', nullable: true, unsigned: true })
-  postId: number | null;
+  @Column('int', { name: 'post_id', nullable: false, unsigned: true })
+  postId: number;
 
-  @Column('int', { name: 'user_id', nullable: true, unsigned: true })
-  userId: number | null;
+  @Column('int', { name: 'user_id', nullable: false, unsigned: true })
+  userId: number;
 
   @CreateDateColumn({ name: 'created_at', nullable: false })
   createdAt: Date;

@@ -38,5 +38,6 @@ import { Career } from 'src/entities/Career';
     RankingRepository,
     TierRepository,
   ],
+  exports: [RankerProfileRepository],
 })
 export class RankModule {}
