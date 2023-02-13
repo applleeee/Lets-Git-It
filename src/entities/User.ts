@@ -15,6 +15,7 @@ import { PostLike } from './PostLike';
 import { RankerProfile } from './RankerProfile';
 import { Field } from './Field';
 import { Career } from './Career';
+import { BooleanTransformer } from 'src/utiles/boolean-transformer';
 
 @Index('field_id', ['fieldId'], {})
 @Unique(['githubId'])
@@ -32,12 +33,18 @@ export class User {
   @Column('tinyint', { name: 'career_id', nullable: true, unsigned: true })
   careerId: number | null;
 
-  @Column('tinyint', { name: 'is_korean', nullable: true, width: 1 })
+  @Column('tinyint', {
+    name: 'is_korean',
+    nullable: true,
+    width: 1,
+    transformer: new BooleanTransformer(),
+  })
   isKorean: boolean | null;
 
   @Column('tinyint', {
     name: 'is_admin',
     nullable: true,
+    transformer: new BooleanTransformer(),
     width: 1,
     default: () => "'0'",
   })
