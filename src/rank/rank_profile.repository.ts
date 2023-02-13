@@ -164,7 +164,7 @@ export class RankerProfileRepository {
     } else {
       result = ranker;
     }
-    console.log('ranker: ', result);
+
     return result;
   }
 }
