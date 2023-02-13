@@ -1,4 +1,4 @@
-import { IsDate, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
 
 class PostDto {
   @IsString()
@@ -32,6 +32,9 @@ export class myPageDto {
 
   @IsNumber()
   readonly careerId: number;
+
+  @IsBoolean()
+  readonly isKorean: boolean;
 
   readonly posts: PostDto[];
 }

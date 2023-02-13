@@ -67,7 +67,8 @@ export class UserService {
     const { userName, profileText, profileImageUrl, email } =
       await this.rankerProfileRepository.getMyPage(userId);
     // 개발분야, 경력 -> User
-    const { careerId, fieldId } = await this.userRepository.getByUserId(userId);
+    const { careerId, fieldId, isKorean } =
+      await this.userRepository.getByUserId(userId);
     // 작성한 글 목록(제목, 카테고리, 날짜, id) -> Post
     const posts = await this.communityRepository.getPostsCreatedByUser(userId);
 
@@ -78,6 +79,7 @@ export class UserService {
       email,
       careerId,
       fieldId,
+      isKorean,
       posts,
     };
     return result;
