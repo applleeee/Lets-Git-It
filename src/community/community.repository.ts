@@ -133,13 +133,30 @@ export class CommunityRepository {
     return this.postRepository
       .createQueryBuilder()
       .select([
-        'id',
-        'title',
-        'content_url as contentUrl',
-        'sub_category_id as subCategoryId',
-        'created_at as createdAt',
+        'post.id as id',
+        'post.title as title',
+        'sub_category.name as subCategory',
+        `DATE_FORMAT(post.created_at, '%Y-%m-%d %H:%i:%s') as createdAt`,
       ])
-      .where('user_id = :userId', { userId: userId })
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('COUNT(post_like.id)', 'likeNumber')
+          .from(PostLike, 'post_like')
+          .where('post_like.post_id = post.id');
+      }, 'likeNumber')
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('COUNT(comment.post_id)', 'commentNumber')
+          .from(Comment, 'comment')
+          .where('post.id = comment.post_id');
+      }, 'commentNumber')
+      .leftJoin(
+        'sub_category',
+        'sub_category',
+        'sub_category.id = post.sub_category_id',
+      )
+      .where('post.user_id = :userId', { userId: userId })
+      .groupBy('post.id')
       .getRawMany();
   }
 
