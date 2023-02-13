@@ -1,4 +1,8 @@
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import * as AWS from 'aws-sdk';
 import { Readable } from 'stream';
 
@@ -32,7 +36,8 @@ export const getS3Data = async (filePath: string) => {
 
     return bodyContents.toString();
   } catch (err) {
-    console.log('Error :', err);
+    console.log(err);
+    throw new Error(err);
   }
 };
 
@@ -53,6 +58,21 @@ export const uploadToS3 = async (
 
     return await s3.upload(params).promise();
   } catch (err) {
-    console.log('Error :', err);
+    console.log(err);
+    throw new Error(err);
+  }
+};
+
+export const deleteS3Data = async (filePath: string) => {
+  try {
+    const s3Client = new S3Client(s3Option);
+    const bucketParams = {
+      Bucket: process.env.S3_BUCKET_NAME as string,
+      Key: filePath,
+    };
+    return await s3Client.send(new DeleteObjectCommand(bucketParams));
+  } catch (err) {
+    console.log(err);
+    throw new Error(err);
   }
 };

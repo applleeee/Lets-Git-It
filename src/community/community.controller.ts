@@ -43,7 +43,7 @@ export class CommunityController {
       return await this.communityService.saveImageToS3(image, userId);
     } catch (err) {
       console.log(err);
-      return err;
+      throw new Error(err);
     }
   }
 
@@ -56,8 +56,48 @@ export class CommunityController {
       return { message: 'post created' };
     } catch (err) {
       console.log(err);
-      return err;
+      throw new Error(err);
     }
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/posts/update/:postId')
+  async getPostToUpdate(@Param('postId') postId: number, @Req() req) {
+    const { idsOfPostsCreatedByUser } = req.user;
+    try {
+      if (idsOfPostsCreatedByUser.includes(postId)) {
+        return await this.communityService.getPostToUpdate(postId);
+      } else {
+        return { message: 'This user has never written that post.' };
+      }
+    } catch (err) {
+      console.log(err);
+      throw new Error(err);
+    }
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Put('/posts/update/:postId')
+  async updatePost(
+    @Param('postId') postId: number,
+    @Body() updatedData: CreatePostDto,
+    @Req() req,
+  ) {
+    try {
+      const userId = req.user.id;
+      await this.communityService.updatePost(postId, updatedData, userId);
+      return { message: 'post updated' };
+    } catch (err) {
+      console.log(err);
+      throw new Error(err);
+    }
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('/posts/:postId')
+  async deletePost(@Param('postId') postId: number, @Req() req) {
+    const userId = req.user.id;
+    return await this.communityService.deletePost(postId, userId);
   }
 
   @Get('/posts/list/:subCategoryId')
@@ -70,19 +110,25 @@ export class CommunityController {
   @UseGuards(OptionalAuthGuard)
   @Get('/posts/:postId')
   async getPostDetail(@Param('postId') postId: number, @Req() req) {
-    const result = await this.communityService.getPostDetail(postId);
-    if (req.user) {
-      const { idsOfLikesAboutPostCreatedByUser } = req.user;
-      result.login = true;
-      if (idsOfLikesAboutPostCreatedByUser.length === 0) {
-        result.ifLiked = false;
-      } else {
-        result.ifLiked = true;
+    try {
+      const result = await this.communityService.getPostDetail(postId);
+      if (req.user) {
+        const { idsOfPostLikedByUser } = req.user;
+        result.login = true;
+        console.log(req.user);
+        if (idsOfPostLikedByUser.length === 0) {
+          result.ifLiked = false;
+        } else {
+          result.ifLiked = true;
+        }
+        return result;
       }
-      return result;
-    }
-    if (!req.user) {
-      return result;
+      if (!req.user) {
+        return result;
+      }
+    } catch (err) {
+      console.log(err);
+      throw new Error(err);
     }
   }
 
