@@ -34,6 +34,7 @@ export class RankService {
     //userName DB에 없을 경우 등록 시작
 
     //ranker_profile 등록
+    console.time('유저 등록');
     const { data } = await axios.get(
       `https://api.github.com/users/${userName}`,
       {
@@ -45,11 +46,13 @@ export class RankService {
 
     await this.rankerProfileRepository.createRankerProfile(data);
 
+    console.timeEnd('유저 등록');
     //유저의 팔로워 및 팔로잉 수
     const followingCount = data.following;
     const followersCount = data.followers;
 
     //유저가 누른 스타 수
+    console.time('유저가 누른 스타 수');
     const stars = await axios.get(
       `https://api.github.com/users/${userName}/starred?per_page=100`,
       {
@@ -59,9 +62,11 @@ export class RankService {
       },
     );
     const starringCount = stars.data.length;
+    console.timeEnd('유저가 누른 스타 수');
 
     //유저의 총 이슈(PR 제외), 유저의 PR수, 유저가 기여한 레포의 스타 수
-    const issues = await axios.get(
+    console.time('이슈,PR 그리고 기여 레포의 스타 수');
+    const issues = axios.get(
       `https://api.github.com/search/issues?q=author:${userName}`,
       {
         headers: {
@@ -69,7 +74,7 @@ export class RankService {
         },
       },
     );
-    const pullRequest = await axios.get(
+    const pullRequest = axios.get(
       `https://api.github.com/search/issues?q=type:pr+author:${userName}`,
       {
         headers: {
@@ -78,25 +83,40 @@ export class RankService {
       },
     );
 
-    const pullRequestCount = pullRequest.data.total_count;
-    const issuesCount = issues.data.total_count - pullRequestCount;
+    const [issuesRes, pullRequestRes] = await Promise.all([
+      issues,
+      pullRequest,
+    ]);
 
-    //기여한 레포의 스타 수
-    let contributingRepoStarsCount = 0;
-    const allPR = pullRequest.data.items;
+    const pullRequestCount = pullRequestRes.data.total_count;
+    const issuesCount = issuesRes.data.total_count - pullRequestCount;
+
+    const promises = [];
+    const allPR = pullRequestRes.data.items;
 
     for (let i = 0; i < allPR.length; i++) {
       if (allPR[i].author_association === 'CONTRIBUTOR') {
-        const contributingRepo = await axios.get(allPR[i].repository_url, {
-          headers: {
-            Authorization: `Bearer ${TOKEN}`,
-          },
-        });
-        contributingRepoStarsCount += contributingRepo.data.stargazers_count;
+        promises.push(
+          axios.get(allPR[i].repository_url, {
+            headers: {
+              Authorization: `Bearer ${TOKEN}`,
+            },
+          }),
+        );
       }
     }
 
+    const contributingRepos = await Promise.all(promises);
+
+    let contributingRepoStarsCount = 0;
+
+    for (const repo of contributingRepos) {
+      contributingRepoStarsCount += repo.data.stargazers_count;
+    }
+    console.timeEnd('이슈,PR 그리고 기여 레포의 스타 수');
+
     //유저가 작성한 리뷰 수
+    console.time('리뷰 수');
     const eventList = await axios.get(
       `https://api.github.com/users/${userName}/events?per_page=100`,
       {
@@ -110,8 +130,10 @@ export class RankService {
     );
 
     const reviewCount = reviews.length;
+    console.timeEnd('리뷰 수');
 
     //스폰서 수
+    console.time('스폰서 수');
     const sponsors = await axios.get(
       `https://ghs.vercel.app/count/${userName}`,
     );
@@ -124,8 +146,10 @@ export class RankService {
       );
       sponsorsCount = sponsorsList.data.sponsors.length;
     }
+    console.timeEnd('스폰서 수');
 
     //유저의 커밋 수
+    console.time('커밋 수');
     const commits = await axios.get(
       `https://api.github.com/search/commits?q=author:${userName}`,
       {
@@ -135,9 +159,13 @@ export class RankService {
       },
     );
     const commitsCount = commits.data.total_count;
+    console.timeEnd('커밋 수');
 
     //주 프로그래밍 언어 구하기, 포크 한 수, 개인 레포 수, 포크 된 유저의 레포 수, 와쳐 수, 내가 받은 스타 수
-    const scoreBasis = await axios.get(
+    console.time(
+      '주 언어, 포크 한/된 레포, 개인 레포, 내가 받은 스타, 와쳐 수',
+    );
+    const scoreBasisPromise = axios.get(
       `https://api.github.com/users/${userName}/repos?per_page=100`,
       {
         headers: {
@@ -146,6 +174,8 @@ export class RankService {
       },
     );
 
+    const reposLangPromises = [];
+    const scoreBasis = await scoreBasisPromise;
     const programmingLang = new Object();
     let forkingCount = 0;
     let personalRepoCount = 0;
@@ -156,39 +186,48 @@ export class RankService {
     for (const el of scoreBasis.data) {
       const repoName = el.name;
 
-      if (el.fork) {
-        forkingCount++;
-      } else {
+      if (!el.fork) {
         personalRepoCount++;
-
-        const reposLang = await axios.get(
-          `https://api.github.com/repos/${userName}/${repoName}/languages`,
-          {
-            headers: {
-              Authorization: `Bearer ${TOKEN}`,
+        reposLangPromises.push(
+          axios.get(
+            `https://api.github.com/repos/${userName}/${repoName}/languages`,
+            {
+              headers: {
+                Authorization: `Bearer ${TOKEN}`,
+              },
             },
-          },
+          ),
         );
-        const languages: object = reposLang.data;
-        for (const lang in languages) {
-          if (programmingLang.hasOwnProperty(lang)) {
-            programmingLang[lang] += languages[lang];
-          } else {
-            programmingLang[lang] = languages[lang];
-          }
-        }
+      } else {
+        forkingCount++;
       }
       myStarsCount += el.stargazers_count;
       forkedCount += el.forks;
       watchersCount += el.watchers_count;
     }
 
+    const reposLangArray = await Promise.all(reposLangPromises);
+    for (const reposLang of reposLangArray) {
+      const languages: object = reposLang.data;
+      for (const lang in languages) {
+        if (programmingLang.hasOwnProperty(lang)) {
+          programmingLang[lang] += languages[lang];
+        } else {
+          programmingLang[lang] = languages[lang];
+        }
+      }
+    }
+
     const maxBit = Math.max(...Object.values(programmingLang));
     const mainLanguage = Object.keys(programmingLang).find(
       (key) => programmingLang[key] === maxBit,
     );
+    console.timeEnd(
+      '주 언어, 포크 한/된 레포, 개인 레포, 내가 받은 스타, 와쳐 수',
+    );
 
     //점수 및 티어 계산
+    console.time('점수 및 티어 계산');
     const curiosityScore =
       (issuesCount * 5 +
         forkingCount * 4 +
@@ -259,7 +298,7 @@ export class RankService {
       rankerProfileId,
       tierId,
     );
-
+    console.timeEnd('점수 및 티어 계산');
     //등록 후 반환
     const rankerDetail = await this.rankerProfileRepository.getRankerProfile(
       userName,

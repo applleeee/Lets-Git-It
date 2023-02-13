@@ -1,4 +1,4 @@
-import { RankerProfileRepository } from './../rank/rank_profile.repository';
+import { RankerProfileRepository } from './../rank/rankerProfile.repository';
 import { SignUpDto } from './../auth/dto/auth.dto';
 import { Injectable } from '@nestjs/common';
 import { User } from 'src/entities/User';
