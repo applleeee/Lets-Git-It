@@ -231,10 +231,17 @@ export class CommunityRepository {
   }
 
   async readComments(postId: number) {
-    return await this.commentRepository.find({
-      where: { postId: postId },
-      order: { groupOrder: 'asc', createdAt: 'asc' },
-    });
+    // userName, profileImg -> rankerRepository
+    // id, groupOrder, createdAt, updatedAt, content -> commentRepository
+    // tier -> tearRepository
+    // commentLikeNumber -> commentLikeRepository
+
+    return await this.commentRepository.createQueryBuilder().select();
+
+    // return await this.commentRepository.find({
+    //   where: { postId: postId },
+    //   order: { groupOrder: 'asc', createdAt: 'asc' },
+    // });
   }
 
   async createCommentLikes(criteria: CreateCommentLikesDto) {
