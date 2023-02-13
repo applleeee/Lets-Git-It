@@ -214,16 +214,20 @@ export class CommunityRepository {
   }
 
   async createComment(commentData: CreateCommentDto) {
-    const data = await this.commentRepository.create(commentData);
+    const data = this.commentRepository.create(commentData);
     await this.commentRepository.save(data);
   }
 
-  async deleteComment(creteria: DeleteCommentDto) {
-    await this.commentRepository.delete(creteria);
+  async deleteComment(criteria: DeleteCommentDto) {
+    await this.commentRepository.delete(criteria);
   }
 
-  async updateComment(creteria: UpdateCommentDto, toUpdateContent: string) {
-    await this.commentRepository.update(creteria, { content: toUpdateContent });
+  async updateComment(criteria: UpdateCommentDto, toUpdateContent: string) {
+    await this.commentRepository.update(criteria, { content: toUpdateContent });
+  }
+
+  async isCommentExist(commentId: number) {
+    return await this.commentRepository.exist({ where: { id: commentId } });
   }
 
   async readComments(postId: number) {
@@ -233,14 +237,14 @@ export class CommunityRepository {
     });
   }
 
-  async createCommentLikes(creteria: CreateCommentLikesDto) {
+  async createCommentLikes(criteria: CreateCommentLikesDto) {
     const isExist = await this.commentLikeRepository.exist({
-      where: { userId: creteria.userId, commentId: creteria.commentId },
+      where: { userId: criteria.userId, commentId: criteria.commentId },
     });
 
-    if (!isExist) await this.commentLikeRepository.save(creteria);
+    if (!isExist) return await this.commentLikeRepository.save(criteria);
 
-    await this.commentLikeRepository.delete(creteria);
+    return await this.commentLikeRepository.delete(criteria);
   }
 
   async getCommentsCreatedByUser(userId: number): Promise<Comment[]> {

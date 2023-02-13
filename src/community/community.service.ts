@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Comment } from './../entities/Comment';
+import { HttpException, Injectable, HttpStatus } from '@nestjs/common';
 import { CommunityRepository } from './community.repository';
 import { CreatePostDto } from './dto/createPost.dto';
 import { uploadToS3, getS3Data, deleteS3Data } from 'src/utiles/aws';
@@ -8,6 +9,7 @@ import {
   DeleteCommentDto,
   UpdateCommentDto,
 } from './dto/comment.dto';
+import { Post } from 'src/entities/Post';
 
 @Injectable()
 export class CommunityService {
@@ -119,14 +121,14 @@ export class CommunityService {
     return postDetail;
   }
 
-  async getIdsOfPostsCreatedByUser(userId: number): Promise<number[]> {
+  async getIdsOfPostsCreatedByUser(userId: number) {
     const data = await this.CommunityRepository.getPostsCreatedByUser(userId);
-    return data.map((item) => Object.values(item)[0]);
+    return data.map<Post>((item) => Object.values(item)[0]);
   }
 
-  async getIdsOfPostLikedByUser(userId: number): Promise<number[]> {
+  async getIdsOfPostLikedByUser(userId: number) {
     const data = await this.CommunityRepository.getIdsOfPostLikedByUser(userId);
-    return data.map((item) => Object.values(item)[0]);
+    return data.map<Post['id']>((item) => Object.values(item)[0]);
   }
 
   async createOrDeletePostLike(data, userId) {
@@ -141,32 +143,42 @@ export class CommunityService {
     await this.CommunityRepository.createComment(commentData);
   }
 
-  async deleteComment(creteria: DeleteCommentDto) {
-    await this.CommunityRepository.deleteComment(creteria);
+  async deleteComment(criteria: DeleteCommentDto) {
+    await this.CommunityRepository.deleteComment(criteria);
   }
-  async updateComment(creteria: UpdateCommentDto, toUpdateContent: string) {
-    await this.CommunityRepository.updateComment(creteria, toUpdateContent);
+  async updateComment(criteria: UpdateCommentDto, toUpdateContent: string) {
+    console.log('criteria: ', criteria.id);
+    const isCommentExist = await this.CommunityRepository.isCommentExist(
+      criteria.id,
+    );
+
+    if (!isCommentExist)
+      throw new HttpException(
+        'THE_COMMENT_IS_NOT_EXIST',
+        HttpStatus.BAD_REQUEST,
+      );
+    await this.CommunityRepository.updateComment(criteria, toUpdateContent);
   }
 
   async readComments(postId: number) {
     return await this.CommunityRepository.readComments(postId);
   }
 
-  async createCommentLikes(creteria: CreateCommentLikesDto) {
-    await this.CommunityRepository.createCommentLikes(creteria);
+  async createCommentLikes(criteria: CreateCommentLikesDto) {
+    return await this.CommunityRepository.createCommentLikes(criteria);
   }
 
   async getIdsOfCommentCreatedByUser(userId: number) {
     const data = await this.CommunityRepository.getCommentsCreatedByUser(
       userId,
     );
-    return data.map((item) => Object.values(item)[0]);
+    return data.map<Comment>((item) => Object.values(item)[0]);
   }
 
-  async getIdsOfCommentLikedByUser(userId: number): Promise<number[]> {
+  async getIdsOfCommentLikedByUser(userId: number) {
     const data = await this.CommunityRepository.getIdsOfCommentLikedByUser(
       userId,
     );
-    return data.map((item) => Object.values(item)[0]);
+    return data.map<Comment['id']>((item) => Object.values(item)[0]);
   }
 }

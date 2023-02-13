@@ -6,8 +6,8 @@ export class MainCategory {
   @PrimaryGeneratedColumn({ type: 'tinyint', name: 'id', unsigned: true })
   id: number;
 
-  @Column('varchar', { name: 'name', nullable: true, length: 200 })
-  name: string | null;
+  @Column('varchar', { name: 'name', nullable: false, length: 200 })
+  name: string;
 
   @OneToMany(() => SubCategory, (subCategory) => subCategory.mainCategory)
   subCategories: SubCategory[];

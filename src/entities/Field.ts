@@ -6,8 +6,8 @@ export class Field {
   @PrimaryGeneratedColumn({ type: 'tinyint', name: 'id', unsigned: true })
   id: number;
 
-  @Column('varchar', { name: 'name', nullable: true, length: 100 })
-  name: string | null;
+  @Column('varchar', { name: 'name', nullable: false, length: 100 })
+  name: string;
 
   @OneToMany(() => User, (user) => user.field)
   users: User[];

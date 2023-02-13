@@ -7,7 +7,6 @@ import {
   Param,
   UseInterceptors,
   UseGuards,
-  ValidationPipe,
   Req,
   Delete,
   Put,
@@ -17,9 +16,11 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CommunityService } from './community.service';
 import { CreatePostDto } from './dto/createPost.dto';
 import {
+  CreateCommentBodyDto,
   CreateCommentDto,
   CreateCommentLikesDto,
   DeleteCommentDto,
+  UpdateCommentBodyDto,
   UpdateCommentDto,
 } from './dto/comment.dto';
 import { ValidateSubCategoryIdPipe } from './pipe/getPostList.pipe';
@@ -156,9 +157,9 @@ export class CommunityController {
   @UseGuards(AuthGuard('jwt'))
   @Post('/posts/:post_id/comment')
   async createComment(
-    @Body(ValidationPipe) body,
+    @Body() body: CreateCommentBodyDto,
     @Req() req,
-    @Param('post_id', ValidationPipe) postId,
+    @Param('post_id') postId: number,
   ) {
     const commentData: CreateCommentDto = {
       userId: req.user.id,
@@ -172,12 +173,9 @@ export class CommunityController {
   // 댓글삭제
   @UseGuards(AuthGuard('jwt'))
   @Delete('/comments/:comment_id')
-  async deleteComment(
-    @Req() req,
-    @Param('comment_id', ValidationPipe) commentId,
-  ) {
-    const creteria: DeleteCommentDto = { userId: req.user.id, id: commentId };
-    await this.communityService.deleteComment(creteria);
+  async deleteComment(@Req() req, @Param('comment_id') commentId: number) {
+    const criteria: DeleteCommentDto = { userId: req.user.id, id: commentId };
+    await this.communityService.deleteComment(criteria);
     return { message: 'COMMENT_DELETED' };
   }
 
@@ -186,35 +184,32 @@ export class CommunityController {
   @Put('/comments/:comment_id')
   async updateComment(
     @Req() req,
-    @Param('comment_id', ValidationPipe) commentId,
-    @Body() body,
+    @Param('comment_id') commentId: number,
+    @Body() body: UpdateCommentBodyDto,
   ) {
-    const creteria: UpdateCommentDto = {
+    const criteria: UpdateCommentDto = {
       userId: req.user.id,
       id: commentId,
     };
     const toUpdateContent: string = body.content;
-    await this.communityService.updateComment(creteria, toUpdateContent);
+    await this.communityService.updateComment(criteria, toUpdateContent);
     return { message: 'COMMENT_UPDATED' };
   }
 
   // 댓글조회
   @Get('/posts/:post_id/comments')
-  async getComments(@Param('post_id', ValidationPipe) postId) {
-    return await this.communityService.readComments(postId);
+  async getComments(@Param('post_id') postId: number) {
+    return { data: await this.communityService.readComments(postId) };
   }
   // 댓글좋아요 생성/삭제
   @UseGuards(AuthGuard('jwt'))
   @Post('/comments/:comment_id/likes')
-  async createCommentLikes(
-    @Req() req,
-    @Param('comment_id', ValidationPipe) commentId,
-  ) {
-    const creteria: CreateCommentLikesDto = {
+  async createCommentLikes(@Req() req, @Param('comment_id') commentId: number) {
+    const criteria: CreateCommentLikesDto = {
       userId: req.user.id,
       commentId,
     };
 
-    await this.communityService.createCommentLikes(creteria);
+    return await this.communityService.createCommentLikes(criteria);
   }
 }

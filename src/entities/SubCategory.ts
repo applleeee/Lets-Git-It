@@ -16,15 +16,15 @@ export class SubCategory {
   @PrimaryGeneratedColumn({ type: 'tinyint', name: 'id', unsigned: true })
   id: number;
 
-  @Column('varchar', { name: 'name', nullable: true, length: 200 })
-  name: string | null;
+  @Column('varchar', { name: 'name', nullable: false, length: 200 })
+  name: string;
 
   @Column('tinyint', {
     name: 'main_category_id',
-    nullable: true,
+    nullable: false,
     unsigned: true,
   })
-  mainCategoryId: number | null;
+  mainCategoryId: number;
 
   @OneToMany(() => Post, (post) => post.subCategory)
   posts: Post[];
