@@ -14,6 +14,10 @@ export class UpdateMyPageDto {
   @IsNotEmpty()
   @IsNumber()
   readonly careerId: number;
+
+  @IsNotEmpty()
+  @IsBoolean()
+  readonly isKorean: boolean;
 }
 
 export class PostDto {

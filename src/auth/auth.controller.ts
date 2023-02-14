@@ -8,12 +8,12 @@ export class AuthController {
 
   @Post('/sign-in')
   signIn(@Body() githubCode: GithubCodeDto) {
-    return { data: this.authService.signIn(githubCode) };
+    return this.authService.signIn(githubCode);
   }
 
   @Post('/sign-up')
   signUp(@Body() userData: SignUpDto) {
-    return { data: this.authService.signUp(userData) };
+    return this.authService.signUp(userData);
   }
 
   @Get('/category')

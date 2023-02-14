@@ -31,7 +31,7 @@ export class AuthService {
         secretOrPrivateKey: process.env.JWT_SECRET_KEY,
       });
 
-      return jwtToken;
+      return { isMemeber: true, accessToken: jwtToken };
     }
 
     return { isMember: false, githubId: githubUserInfo.id };
@@ -47,7 +47,7 @@ export class AuthService {
       secretOrPrivateKey: process.env.JWT_SECRET_KEY,
     });
 
-    return jwtToken;
+    return { accessToken: jwtToken };
   }
 
   async getAuthCategory() {
