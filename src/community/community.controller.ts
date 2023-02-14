@@ -10,6 +10,7 @@ import {
   Req,
   Delete,
   Put,
+  Patch,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -166,17 +167,17 @@ export class CommunityController {
       postId,
       ...body,
     };
-    await this.communityService.createComment(commentData);
-    return { message: 'COMMENT_CREATED' };
+    return await this.communityService.createComment(commentData);
   }
 
   // 댓글삭제
+  // todo 댓글 삭제시 대댓글 삭제도 다 되게.
   @UseGuards(AuthGuard('jwt'))
   @Delete('/comments/:comment_id')
   async deleteComment(@Req() req, @Param('comment_id') commentId: number) {
     const criteria: DeleteCommentDto = { userId: req.user.id, id: commentId };
-    await this.communityService.deleteComment(criteria);
-    return { message: 'COMMENT_DELETED' };
+    const result = await this.communityService.deleteComment(criteria);
+    return result;
   }
 
   // 댓글수정
@@ -187,19 +188,20 @@ export class CommunityController {
     @Param('comment_id') commentId: number,
     @Body() body: UpdateCommentBodyDto,
   ) {
+    const toUpdateContent: string = body.content;
     const criteria: UpdateCommentDto = {
       userId: req.user.id,
       id: commentId,
     };
-    const toUpdateContent: string = body.content;
-    await this.communityService.updateComment(criteria, toUpdateContent);
-    return { message: 'COMMENT_UPDATED' };
+    return await this.communityService.updateComment(criteria, toUpdateContent);
   }
 
   // 댓글조회
+  @UseGuards(OptionalAuthGuard)
   @Get('/posts/:post_id/comments')
-  async getComments(@Param('post_id') postId: number) {
-    return { data: await this.communityService.readComments(postId) };
+  async getComments(@Req() req, @Param('post_id') postId: number) {
+    const userId: number = req.user.id;
+    return await this.communityService.readComments(userId, postId);
   }
   // 댓글좋아요 생성/삭제
   @UseGuards(AuthGuard('jwt'))
@@ -210,6 +212,8 @@ export class CommunityController {
       commentId,
     };
 
-    return await this.communityService.createCommentLikes(criteria);
+    const result = await this.communityService.createCommentLikes(criteria);
+
+    return result;
   }
 }

@@ -31,6 +31,9 @@ export class Comment {
   @Column('int', { name: 'group_order', nullable: false, unsigned: true })
   groupOrder: number;
 
+  @Column('int', { name: 'depth', nullable: true, unsigned: true })
+  depth: number;
+
   @CreateDateColumn({ name: 'created_at', nullable: false })
   createdAt: Date;
 

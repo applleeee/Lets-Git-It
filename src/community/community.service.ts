@@ -56,7 +56,7 @@ export class CommunityService {
     try {
       await uploadToS3(content as unknown as Buffer, contentUrl, mimetype);
     } catch (err) {
-      console.log(err);
+      console.dir(err);
       throw new Error(err);
     }
 
@@ -140,14 +140,13 @@ export class CommunityService {
   }
 
   async createComment(commentData: CreateCommentDto) {
-    await this.CommunityRepository.createComment(commentData);
+    return await this.CommunityRepository.createComment(commentData);
   }
 
   async deleteComment(criteria: DeleteCommentDto) {
-    await this.CommunityRepository.deleteComment(criteria);
+    return await this.CommunityRepository.deleteComment(criteria);
   }
   async updateComment(criteria: UpdateCommentDto, toUpdateContent: string) {
-    console.log('criteria: ', criteria.id);
     const isCommentExist = await this.CommunityRepository.isCommentExist(
       criteria.id,
     );
@@ -157,11 +156,30 @@ export class CommunityService {
         'THE_COMMENT_IS_NOT_EXIST',
         HttpStatus.BAD_REQUEST,
       );
-    await this.CommunityRepository.updateComment(criteria, toUpdateContent);
+
+    return await this.CommunityRepository.updateComment(
+      criteria,
+      toUpdateContent,
+    );
   }
 
-  async readComments(postId: number) {
-    return await this.CommunityRepository.readComments(postId);
+  async readComments(userId: number, postId: number) {
+    const comments = await this.CommunityRepository.readComments(postId);
+    const reComments = await this.CommunityRepository.readReComments(postId);
+
+    comments.map((item) => {
+      item.isCreatedByUser = item.userId === userId ? true : false;
+    });
+    reComments.map((item) => {
+      item.isCreatedByUser = item.userId === userId ? true : false;
+    });
+
+    comments.map((comment) => {
+      return (comment.reComments = reComments.filter((reComment) => {
+        return reComment['groupOrder'] === comment['groupOrder'];
+      }));
+    });
+    return comments;
   }
 
   async createCommentLikes(criteria: CreateCommentLikesDto) {
