@@ -2,6 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Ranking } from '../entities/Ranking';
+import {
+  AvgValuesOutput,
+  LangOutput,
+  MaxValuesOutput,
+  TotalScoresOutput,
+} from './dto/ranking.dto';
 
 @Injectable()
 export class RankingRepository {
@@ -10,7 +16,7 @@ export class RankingRepository {
     private rankingRepository: Repository<Ranking>,
   ) {}
 
-  async getAllScores() {
+  async getAllScores(): Promise<TotalScoresOutput[]> {
     return await this.rankingRepository
       .createQueryBuilder()
       .select('total_score')
@@ -18,28 +24,28 @@ export class RankingRepository {
   }
 
   async registerRanking(
-    mainLanguage,
-    curiosityScore,
-    passionScore,
-    fameScore,
-    abilityScore,
-    totalScore,
-    issuesCount,
-    forkingCount,
-    starringCount,
-    followingCount,
-    commitsCount,
-    pullRequestCount,
-    reviewCount,
-    personalRepoCount,
-    followersCount,
-    forkedCount,
-    watchersCount,
-    sponsorsCount,
-    myStarsCount,
-    contributingRepoStarsCount,
-    rankerProfileId,
-    tierId,
+    mainLanguage: string,
+    curiosityScore: number,
+    passionScore: number,
+    fameScore: number,
+    abilityScore: number,
+    totalScore: number,
+    issuesCount: number,
+    forkingCount: number,
+    starringCount: number,
+    followingCount: number,
+    commitsCount: number,
+    pullRequestCount: number,
+    reviewCount: number,
+    personalRepoCount: number,
+    followersCount: number,
+    forkedCount: number,
+    watchersCount: number,
+    sponsorsCount: number,
+    myStarsCount: number,
+    contributingRepoStarsCount: number,
+    rankerProfileId: number,
+    tierId: number,
   ): Promise<void> {
     await this.rankingRepository
       .createQueryBuilder()
@@ -74,8 +80,8 @@ export class RankingRepository {
       .execute();
   }
 
-  async getMaxValues() {
-    const maxValues = await this.rankingRepository
+  async getMaxValues(): Promise<MaxValuesOutput> {
+    const maxValues: MaxValuesOutput = await this.rankingRepository
       .createQueryBuilder()
       .select([
         'MAX(curiosity_score) as maxCuriosityScore',
@@ -103,8 +109,8 @@ export class RankingRepository {
     return maxValues;
   }
 
-  async getAvgValues() {
-    const avgValues = await this.rankingRepository
+  async getAvgValues(): Promise<AvgValuesOutput> {
+    const avgValues: AvgValuesOutput = await this.rankingRepository
       .createQueryBuilder()
       .select([
         'CEIL(AVG(curiosity_score)) as avgCuriosityScore',
@@ -132,8 +138,8 @@ export class RankingRepository {
     return avgValues;
   }
 
-  async getTop100Languages() {
-    const top100Lang = await this.rankingRepository
+  async getTop100Languages(): Promise<LangOutput[]> {
+    const top100Lang: LangOutput[] = await this.rankingRepository
       .createQueryBuilder()
       .select('main_language')
       .orderBy('total_score', 'DESC')

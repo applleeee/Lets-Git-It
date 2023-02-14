@@ -10,7 +10,7 @@ export class TierRepository {
     private tierRepository: Repository<Tier>,
   ) {}
 
-  async getTierData() {
+  async getTierData(): Promise<Tier[]> {
     return await this.tierRepository.find();
   }
 }

@@ -11,7 +11,7 @@ import { UserService } from './user.service';
 import { UserRepository } from './user.repository';
 import { UserController } from './user.controller';
 import { CommunityModule } from './../community/community.module';
-import { RankerProfileRepository } from 'src/rank/rank_profile.repository';
+import { RankerProfileRepository } from 'src/rank/rankerProfile.repository';
 import { RankModule } from 'src/rank/rank.module';
 import { SubCategory } from 'src/entities/SubCategory';
 import { PostLike } from 'src/entities/PostLike';
