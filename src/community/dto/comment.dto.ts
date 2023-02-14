@@ -9,6 +9,10 @@ export class CreateCommentBodyDto {
   @IsNumber()
   @IsNotEmpty()
   readonly groupOrder: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  readonly depth: number;
 }
 
 export class UpdateCommentBodyDto extends PickType(CreateCommentBodyDto, [

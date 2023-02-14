@@ -78,7 +78,6 @@ export class AuthService {
       updateRankerProfileDto.region,
       updateRankerProfileDto.userId,
     );
-    // id name profileImageUrl, profileText, hompageUrl, email, company, region, userId,
 
     return { accessToken: jwtToken };
   }
