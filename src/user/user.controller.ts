@@ -17,7 +17,11 @@ export class UserController {
   @Patch()
   async updateMyPage(@Body() body: UpdateMyPageDto, @Req() req) {
     const userId = req.user.id;
-    const partialEntity = { fieldId: body.fieldId, careerId: body.careerId };
+    const partialEntity = {
+      fieldId: body.fieldId,
+      careerId: body.careerId,
+      isKorean: body.isKorean,
+    };
     await this.userService.updateMyPage(userId, partialEntity);
     return { message: 'USER_INFO_UPDATED' };
   }
