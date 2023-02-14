@@ -10,7 +10,7 @@ export class UserController {
   @UseGuards(AuthGuard('jwt'))
   @Get()
   async getMyPage(@Req() req) {
-    return { data: await this.userService.getMyPage(req.user.id) };
+    return await this.userService.getMyPage(req.user.id);
   }
 
   @UseGuards(AuthGuard('jwt'))
