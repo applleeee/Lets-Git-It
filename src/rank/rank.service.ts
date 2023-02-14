@@ -38,7 +38,6 @@ export class RankService {
     console.time(
       '등록,누른 스타 수,팔로잉,팔로워,이슈,PR 그리고 기여 레포의 스타 수, 리뷰 수',
     );
-    console.log('data: ', data);
 
     const users = axios.get(`https://api.github.com/users/${userName}`, {
       headers: {
