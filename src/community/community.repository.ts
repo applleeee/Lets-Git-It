@@ -215,7 +215,7 @@ export class CommunityRepository {
 
   async createComment(commentData: CreateCommentDto) {
     const data = this.commentRepository.create(commentData);
-    await this.commentRepository.save(data);
+    return await this.commentRepository.save(data);
   }
 
   async deleteComment(criteria: DeleteCommentDto) {
@@ -284,7 +284,7 @@ export class CommunityRepository {
       .select([
         'comment.user_id as userId',
         'comment.group_order as groupOrder',
-        'comment.id as commentId',
+        'comment.id as reCommentId',
         'ranker_profile.name as userName',
         'ranker_profile.profile_image_url as profileImageUrl',
         'comment.content as content',

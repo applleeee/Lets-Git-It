@@ -56,7 +56,7 @@ export class CommunityService {
     try {
       await uploadToS3(content as unknown as Buffer, contentUrl, mimetype);
     } catch (err) {
-      console.log(err);
+      console.dir(err);
       throw new Error(err);
     }
 
@@ -140,7 +140,7 @@ export class CommunityService {
   }
 
   async createComment(commentData: CreateCommentDto) {
-    await this.CommunityRepository.createComment(commentData);
+    return await this.CommunityRepository.createComment(commentData);
   }
 
   async deleteComment(criteria: DeleteCommentDto) {
