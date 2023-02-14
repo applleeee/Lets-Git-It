@@ -49,7 +49,7 @@ export class Post {
   comments: Comment[];
 
   @ManyToOne(() => User, (user) => user.posts, {
-    onDelete: 'NO ACTION',
+    onDelete: 'CASCADE',
     onUpdate: 'NO ACTION',
   })
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])

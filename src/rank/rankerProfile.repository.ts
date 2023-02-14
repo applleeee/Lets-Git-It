@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { identity } from 'rxjs';
 import { Repository } from 'typeorm';
 import { RankerProfile } from '../entities/RankerProfile';
 import { Ranking } from '../entities/Ranking';
@@ -159,7 +160,7 @@ export class RankerProfileRepository {
     let result;
     const ranker = await this.rankerProfileRepository.findBy({
       userId: userId,
-    })[0];
+    });
     if (!ranker) {
       result = {
         userName: '랭킹 정보를 검색해주세요!',
@@ -172,5 +173,22 @@ export class RankerProfileRepository {
     }
 
     return result;
+  }
+
+  async updateRankerProfile(
+    userName,
+    profileImageUrl,
+    homepageUrl,
+    email,
+    company,
+    region,
+    userId,
+  ) {
+    return await this.rankerProfileRepository
+      .createQueryBuilder()
+      .update(RankerProfile)
+      .set({ profileImageUrl, homepageUrl, email, company, region, userId })
+      .where('name = :name', { name: userName })
+      .execute();
   }
 }

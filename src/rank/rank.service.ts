@@ -42,6 +42,7 @@ export class RankService {
         },
       },
     );
+    console.log('data: ', data);
 
     await this.rankerProfileRepository.createRankerProfile(data);
 

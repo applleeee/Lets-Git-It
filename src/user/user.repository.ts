@@ -12,10 +12,17 @@ export class UserRepository {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async getByGithubId(githubId: number): Promise<User> {
+  async getByGithubId(githubId: number) {
     return await this.userRepository.findOneBy({
       githubId,
     });
+  }
+
+  async getUserIdByGithubId(githubId: number) {
+    const user = await this.userRepository.findOneBy({
+      githubId,
+    });
+    return user.id;
   }
 
   async getByUserId(id: number): Promise<User> {
@@ -23,6 +30,7 @@ export class UserRepository {
       id,
     });
   }
+
   async createUser(signUpData: SignUpDto) {
     const user = await this.userRepository.create(signUpData);
     await this.userRepository.save(user);

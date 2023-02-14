@@ -1,3 +1,4 @@
+import { RankerProfile } from 'src/entities/RankerProfile';
 import { RankerProfileRepository } from './../rank/rankerProfile.repository';
 import { SignUpDto } from './../auth/dto/auth.dto';
 import { Injectable } from '@nestjs/common';
@@ -71,16 +72,17 @@ export class UserService {
 
   async getMyPage(userId: number) {
     // 유저네임, 프로필 텍스트, 이메일, 프로필 이미지 -> RankerProfile
-    const { userName, profileText, profileImageUrl, email } =
-      await this.rankerProfileRepository.getMyPage(userId);
+    const [user] = await this.rankerProfileRepository.getMyPage(userId);
+    const { name, profileText, profileImageUrl, email } = user;
     // 개발분야, 경력 -> User
+
     const { careerId, fieldId, isKorean } =
       await this.userRepository.getByUserId(userId);
     // 작성한 글 목록(제목, 카테고리, 날짜, id) -> Post
     const posts = await this.communityRepository.getPostsCreatedByUser(userId);
 
     const result: MyPageDto = {
-      userName,
+      userName: name,
       profileText,
       profileImageUrl,
       email,
