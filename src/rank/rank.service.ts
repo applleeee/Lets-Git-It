@@ -5,6 +5,7 @@ import * as dotenv from 'dotenv';
 import { TierRepository } from './tier.repository';
 import { RankingRepository } from './ranking.repository';
 import { SearchOutput, Top100, Top5 } from './dto/rankerProfile.dto';
+
 dotenv.config();
 
 const TOKEN = process.env.GITHUB_ACCESS_TOKEN;
@@ -33,26 +34,18 @@ export class RankService {
   }
 
   async getRankerDetail(userName: string) {
-    console.time('유저 등록');
-    const { data } = await axios.get(
-      `https://api.github.com/users/${userName}`,
-      {
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
-        },
-      },
+    //등록,누른 스타 수,팔로잉,팔로워,총 이슈(PR 제외), PR수, 기여한 레포의 스타 수, 리뷰 수
+    console.time(
+      '등록,누른 스타 수,팔로잉,팔로워,이슈,PR 그리고 기여 레포의 스타 수, 리뷰 수',
     );
 
-    await this.rankerProfileRepository.createRankerProfile(data);
+    const users = axios.get(`https://api.github.com/users/${userName}`, {
+      headers: {
+        Authorization: `Bearer ${TOKEN}`,
+      },
+    });
 
-    console.timeEnd('유저 등록');
-    //유저의 팔로워 및 팔로잉 수
-    const followingCount = data.following;
-    const followersCount = data.followers;
-
-    //유저가 누른 스타 수
-    console.time('유저가 누른 스타 수');
-    const stars = await axios.get(
+    const stars = axios.get(
       `https://api.github.com/users/${userName}/starred?per_page=100`,
       {
         headers: {
@@ -60,11 +53,7 @@ export class RankService {
         },
       },
     );
-    const starringCount = stars.data.length;
-    console.timeEnd('유저가 누른 스타 수');
 
-    //유저의 총 이슈(PR 제외), 유저의 PR수, 유저가 기여한 레포의 스타 수
-    console.time('이슈,PR 그리고 기여 레포의 스타 수');
     const issues = axios.get(
       `https://api.github.com/search/issues?q=author:${userName}`,
       {
@@ -73,6 +62,7 @@ export class RankService {
         },
       },
     );
+
     const pullRequest = axios.get(
       `https://api.github.com/search/issues?q=type:pr+author:${userName}`,
       {
@@ -81,12 +71,23 @@ export class RankService {
         },
       },
     );
+    const eventList = axios.get(
+      `https://api.github.com/users/${userName}/events?per_page=100`,
+      {
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+        },
+      },
+    );
 
-    const [issuesRes, pullRequestRes] = await Promise.all([
-      issues,
-      pullRequest,
-    ]);
+    const [issuesRes, pullRequestRes, usersRes, starsRes, eventListRes] =
+      await Promise.all([issues, pullRequest, users, stars, eventList]);
 
+    await this.rankerProfileRepository.createRankerProfile(usersRes.data);
+
+    const starringCount = starsRes.data.length;
+    const followingCount = usersRes.data.following;
+    const followersCount = usersRes.data.followers;
     const pullRequestCount = pullRequestRes.data.total_count;
     const issuesCount = issuesRes.data.total_count - pullRequestCount;
 
@@ -112,24 +113,15 @@ export class RankService {
     for (const repo of contributingRepos) {
       contributingRepoStarsCount += repo.data.stargazers_count;
     }
-    console.timeEnd('이슈,PR 그리고 기여 레포의 스타 수');
 
-    //유저가 작성한 리뷰 수
-    console.time('리뷰 수');
-    const eventList = await axios.get(
-      `https://api.github.com/users/${userName}/events?per_page=100`,
-      {
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
-        },
-      },
-    );
-    const reviews = eventList.data.filter(
+    const reviews = eventListRes.data.filter(
       (event: object) => event['type'] === 'PullRequestReviewEvent',
     );
 
     const reviewCount = reviews.length;
-    console.timeEnd('리뷰 수');
+    console.timeEnd(
+      '등록,누른 스타 수,팔로잉,팔로워,이슈,PR 그리고 기여 레포의 스타 수, 리뷰 수',
+    );
 
     //스폰서 수
     console.time('스폰서 수');
@@ -301,6 +293,7 @@ export class RankService {
       rankerProfileId,
       tierId,
     );
+
     console.timeEnd('점수 및 티어 계산');
     //등록 후 반환
     const rankerDetail = await this.rankerProfileRepository.getRankerProfile(
