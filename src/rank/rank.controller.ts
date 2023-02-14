@@ -25,7 +25,7 @@ export class RankController {
     maxValues: MaxValuesOutput;
     avgValues: AvgValuesOutput;
   }> {
-    return await this.rankService.getRankerDetail(userName);
+    return await this.rankService.checkRanker(userName);
   }
 
   @Get('/ranking/top5')
@@ -39,5 +39,12 @@ export class RankController {
     top100: Top100[];
   }> {
     return await this.rankService.getTop100(langFilter);
+  }
+
+  @Get()
+  async compareRanker(@Query('userName') userName: string[]) {
+    const firstUser = await this.rankService.checkRanker(userName[0]);
+    const secondUser = await this.rankService.checkRanker(userName[1]);
+    return { firstUser, secondUser };
   }
 }

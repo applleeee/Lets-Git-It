@@ -17,11 +17,9 @@ export class RankService {
     private tierRepository: TierRepository,
   ) {}
 
-  async getRankerDetail(userName: string) {
-    // DB내 검색된 유저 있는지 확인
+  async checkRanker(userName: string) {
     const check = await this.rankerProfileRepository.checkRanker(userName);
 
-    // DB내 userName이 존재할 경우, Early Return
     if (check) {
       const rankerDetail = await this.rankerProfileRepository.getRankerProfile(
         userName,
@@ -31,9 +29,10 @@ export class RankService {
       return { rankerDetail, maxValues, avgValues };
     }
 
-    //userName DB에 없을 경우 등록 시작
+    return this.getRankerDetail(userName);
+  }
 
-    //ranker_profile 등록
+  async getRankerDetail(userName: string) {
     console.time('유저 등록');
     const { data } = await axios.get(
       `https://api.github.com/users/${userName}`,
@@ -219,9 +218,13 @@ export class RankService {
     }
 
     const maxBit = Math.max(...Object.values(programmingLang));
-    const mainLanguage = Object.keys(programmingLang).find(
-      (key) => programmingLang[key] === maxBit,
-    );
+
+    const mainLanguage =
+      maxBit > 0
+        ? Object.keys(programmingLang).find(
+            (key) => programmingLang[key] === maxBit,
+          )
+        : 'none';
     console.timeEnd(
       '주 언어, 포크 한/된 레포, 개인 레포, 내가 받은 스타, 와쳐 수',
     );
@@ -342,34 +345,3 @@ export class RankService {
     return await this.rankerProfileRepository.findRanker(userName);
   }
 }
-
-// scoreBasis.data.forEach(async (el) => {
-//   try {
-//     if (el.fork) {
-//       forkingCount++;
-//     } else {
-//       personalRepoCount++;
-//       const repoName = el.name;
-//       const reposLang = await axios.get(
-//         `https://api.github.com/repos/${userName}/${repoName}/languages`,
-//         {
-//           headers: {
-//             Authorization: `Bearer ${TOKEN}`,
-//           },
-//         },
-//       );
-//       const languages = reposLang.data;
-//       for (const lang in languages) {
-//         if (programmingLang.hasOwnProperty(lang)) {
-//           programmingLang[lang] += languages[lang];
-//         } else {
-//           programmingLang[lang] = languages[lang];
-//         }
-//       }
-//     }
-//     forkedCount += el.forks;
-//     watchersCount += el.watchers_count;
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
