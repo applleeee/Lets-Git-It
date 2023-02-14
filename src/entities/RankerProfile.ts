@@ -34,8 +34,8 @@ export class RankerProfile {
   @Column('varchar', { name: 'homepage_url', nullable: true, length: 2083 })
   homepageUrl: string | null;
 
-  @Column('varchar', { name: 'email', length: 255 })
-  email: string;
+  @Column('varchar', { name: 'email', nullable: true, length: 255 })
+  email: string | null;
 
   @Column('varchar', { name: 'company', nullable: true, length: 255 })
   company: string | null;

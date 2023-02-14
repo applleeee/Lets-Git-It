@@ -25,6 +25,11 @@ import { Ranking } from 'src/entities/Ranking';
 import { Tier } from 'src/entities/Tier';
 import { Comment } from 'src/entities/Comment';
 import { CommunityService } from 'src/community/community.service';
+import { RankService } from 'src/rank/rank.service';
+import { RankingRepository } from 'src/rank/ranking.repository';
+import { TierRepository } from 'src/rank/tier.repository';
+import { UserRepository } from 'src/user/user.repository';
+import { RankerProfileRepository } from 'src/rank/rankerProfile.repository';
 
 @Module({
   imports: [
@@ -50,6 +55,7 @@ import { CommunityService } from 'src/community/community.service';
       signOptions: { expiresIn: jwtConstants.expiresIn },
     }),
     RankModule,
+    RankerProfile,
   ],
   controllers: [AuthController],
   providers: [
@@ -59,6 +65,11 @@ import { CommunityService } from 'src/community/community.service';
     AuthRepository,
     CommunityRepository,
     CommunityService,
+    RankService,
+    RankingRepository,
+    TierRepository,
+    UserRepository,
+    RankerProfileRepository,
   ],
   exports: [AuthService, AuthRepository],
 })

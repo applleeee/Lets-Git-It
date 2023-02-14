@@ -37,7 +37,7 @@ export class CommentLike {
   comment: Comment;
 
   @ManyToOne(() => User, (user) => user.commentLikes, {
-    onDelete: 'NO ACTION',
+    onDelete: 'CASCADE',
     onUpdate: 'NO ACTION',
   })
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])

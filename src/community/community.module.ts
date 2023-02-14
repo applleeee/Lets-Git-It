@@ -19,6 +19,11 @@ import { UserModule } from 'src/user/user.module';
 import { jwtConstants } from 'src/auth/constants';
 import { AuthService } from 'src/auth/auth.service';
 import { JwtStrategy } from 'src/auth/jwt.strategy';
+import { RankerProfileRepository } from 'src/rank/rankerProfile.repository';
+import { RankService } from 'src/rank/rank.service';
+import { RankModule } from 'src/rank/rank.module';
+import { RankingRepository } from 'src/rank/ranking.repository';
+import { TierRepository } from 'src/rank/tier.repository';
 
 @Module({
   imports: [
@@ -36,6 +41,7 @@ import { JwtStrategy } from 'src/auth/jwt.strategy';
     ]),
     AuthModule,
     UserModule,
+    RankModule,
     JwtModule.register({
       secret: jwtConstants.secret,
       signOptions: { expiresIn: jwtConstants.expiresIn },
@@ -48,6 +54,10 @@ import { JwtStrategy } from 'src/auth/jwt.strategy';
     AuthService,
     JwtService,
     JwtStrategy,
+    RankService,
+    RankerProfileRepository,
+    RankingRepository,
+    TierRepository,
   ],
   exports: [CommunityRepository, CommunityService],
 })

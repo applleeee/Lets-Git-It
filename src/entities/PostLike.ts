@@ -30,14 +30,14 @@ export class PostLike {
   updatedAt: Date | null;
 
   @ManyToOne(() => Post, (post) => post.postLikes, {
-    onDelete: 'NO ACTION',
+    onDelete: 'CASCADE',
     onUpdate: 'NO ACTION',
   })
   @JoinColumn([{ name: 'post_id', referencedColumnName: 'id' }])
   post: Post;
 
   @ManyToOne(() => User, (user) => user.postLikes, {
-    onDelete: 'NO ACTION',
+    onDelete: 'CASCADE',
     onUpdate: 'NO ACTION',
   })
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])

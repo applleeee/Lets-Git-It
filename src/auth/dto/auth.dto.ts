@@ -26,6 +26,12 @@ export class SignUpDto {
   readonly isKorean: boolean;
 }
 
+export class SignUpWithUserNameDto extends SignUpDto {
+  @Type(() => String)
+  @IsString()
+  readonly userName: string;
+}
+
 export class AuthorizedUser {
   readonly id: number;
   readonly idsOfPostsCreatedByUser?: Post[];
