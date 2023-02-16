@@ -307,7 +307,7 @@ export class CommunityRepository {
     return await this.commentRepository.exist({ where: { id: commentId } });
   }
 
-  async readComments(postId: number) {
+  async readComments(postId: number, depth: number) {
     return await this.commentRepository
       .createQueryBuilder()
       .select([
@@ -340,128 +340,14 @@ export class CommunityRepository {
         'ranking.ranker_profile_id = ranker_profile.id',
       )
       .leftJoin('tier', 'tier', 'ranking.tier_id = tier.id')
-      .where('comment.post_id = :postId AND comment.depth = 1', {
+      .where('comment.post_id = :postId AND comment.depth = :depth', {
         postId: postId,
+        depth: depth,
       })
       .orderBy('comment.group_order', 'ASC')
       .addOrderBy('comment.created_at', 'ASC')
       .getRawMany();
   }
-
-  async readReComments(postId: number) {
-    return await this.commentRepository
-      .createQueryBuilder()
-      .select([
-        'comment.user_id as userId',
-        'comment.group_order as groupOrder',
-        'comment.id as reCommentId',
-        'ranker_profile.name as userName',
-        'ranker_profile.profile_image_url as profileImageUrl',
-        'comment.content as content',
-        'tier.name as tier',
-        'comment.depth as depth',
-        `DATE_FORMAT(comment.created_at, '%Y-%m-%d %H:%i:%s') as createdAt`,
-        `DATE_FORMAT(comment.updated_at, '%Y-%m-%d %H:%i:%s') as updatedAt`,
-      ])
-      .addSelect((subQuery) => {
-        return subQuery
-          .select('COUNT(comment_like.id)', 'likeNumber')
-          .from(CommentLike, 'comment_like')
-          .where('comment.id = comment_like.comment_id');
-      }, 'likeNumber')
-      .leftJoin('user', 'user', 'comment.user_id = user.id')
-      .leftJoin(
-        'ranker_profile',
-        'ranker_profile',
-        'user.id = ranker_profile.user_id',
-      )
-      .leftJoin(
-        'ranking',
-        'ranking',
-        'ranking.ranker_profile_id = ranker_profile.id',
-      )
-      .leftJoin('tier', 'tier', 'ranking.tier_id = tier.id')
-      .where('comment.post_id = :postId AND comment.depth = 2', {
-        postId: postId,
-      })
-      .orderBy('comment.group_order', 'ASC')
-      .addOrderBy('comment.created_at', 'ASC')
-      .getRawMany();
-  }
-
-  // async readComments(postId: number) {
-  //   // userName, profileImg -> rankerRepository
-  //   // id, groupOrder, createdAt, updatedAt, content -> commentRepository
-  //   // tier -> tearRepository
-  //   // commentLikeNumber -> commentLikeRepository
-
-  //   const comments = await this.commentRepository
-  //     .createQueryBuilder()
-  //     .select([
-  //       'comment.user_id as userId',
-  //       'comment.group_order as groupOrder',
-  //       'comment.id as commentId',
-  //       'ranker_profile.name as userName',
-  //       'ranker_profile.profile_image_url as profileImageUrl',
-  //       'comment.content as content',
-  //       'tier.name as tier',
-  //       'comment.depth as depth',
-  //       `DATE_FORMAT(comment.created_at, '%Y-%m-%d %H:%i:%s') as createdAt`,
-  //       `DATE_FORMAT(comment.updated_at, '%Y-%m-%d %H:%i:%s') as updatedAt`,
-  //     ])
-  //     .addSelect((subQuery) => {
-  //       return subQuery
-  //         .select('COUNT(comment_like.id)', 'likeNumber')
-  //         .from(CommentLike, 'comment_like')
-  //         .where('comment.id = comment_like.comment_id');
-  //     }, 'likeNumber')
-  //     // .addSelect(
-  //     //   `(SELECT JSON_ARRAYAGG(JSON_OBJECT(
-  //     //     'groupOrder', comment.group_order,
-  //     //     'commentId',comment.id,
-  //     //     'userName',ranker_profile.name,
-  //     //     'profileImageUrl', ranker_profile.profile_image_url,
-  //     //   'content', comment.content,
-  //     //   'tier', tier.name,
-  //     //   'createdAt', DATE_FORMAT(comment.created_at, '%Y-%m-%d %H:%i:%s'),
-  //     //   'updatedAt', DATE_FORMAT(comment.updated_at, '%Y-%m-%d %H:%i:%s')
-  //     //     )) from comment where comment.group_order = groupOrder) as reComment`,
-  //     // )
-  //     .leftJoin('user', 'user', 'comment.user_id = user.id')
-  //     .leftJoin(
-  //       'ranker_profile',
-  //       'ranker_profile',
-  //       'user.id = ranker_profile.user_id',
-  //     )
-  //     .leftJoin(
-  //       'ranking',
-  //       'ranking',
-  //       'ranking.ranker_profile_id = ranker_profile.id',
-  //     )
-  //     .leftJoin('tier', 'tier', 'ranking.tier_id = tier.id')
-  //     .where('comment.post_id = :postId', { postId: postId })
-  //     .orderBy('comment.group_order', 'ASC')
-  //     .addOrderBy('comment.created_at', 'ASC')
-  //     // .groupBy('comment.group_order')
-  //     // .addGroupBy('comment.id')
-  //     // .addGroupBy('user.id')
-  //     // .addGroupBy('ranker_profile.profile_image_url')
-  //     // .addGroupBy('comment.content')
-  //     // .addGroupBy('tier.name')
-  //     // .addGroupBy('comment.created_at')
-  //     // .addGroupBy('comment.updated_at')
-  //     .getRawMany();
-
-  //   return comments;
-  //   // comments.map((comment, i) => {
-  //   //   comment[i].groupOrder;
-  //   // });
-
-  //   // return await this.commentRepository.find({
-  //   //   where: { postId: postId },
-  //   //   order: { groupOrder: 'asc', createdAt: 'asc' },
-  //   // });
-  // }
 
   async createCommentLikes(criteria: CreateCommentLikesDto) {
     const isExist = await this.commentLikeRepository.exist({
