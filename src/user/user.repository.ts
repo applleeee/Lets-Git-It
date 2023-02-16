@@ -32,7 +32,7 @@ export class UserRepository {
   }
 
   async createUser(signUpData: SignUpDto) {
-    const user = await this.userRepository.create(signUpData);
+    const user = this.userRepository.create(signUpData);
     await this.userRepository.save(user);
   }
 

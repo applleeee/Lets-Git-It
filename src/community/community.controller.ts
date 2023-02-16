@@ -12,6 +12,8 @@ import {
   Put,
   NotFoundException,
   Query,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -20,7 +22,7 @@ import { CreatePostDto } from './dto/createPost.dto';
 import {
   CreateCommentBodyDto,
   CreateCommentDto,
-  CreateCommentLikesDto,
+  CreateOrDeleteCommentLikesDto,
   DeleteCommentDto,
   UpdateCommentBodyDto,
   UpdateCommentDto,
@@ -29,6 +31,7 @@ import { ValidateSubCategoryIdPipe } from './pipe/getPostList.pipe';
 import { OptionalAuthGuard } from './guard/optionalGuard';
 import { GetPostListDto } from './dto/getPostList.dto';
 import { SearchDto } from './dto/searchPost.dto';
+import { response } from 'express';
 
 @Controller('/community')
 export class CommunityController {
@@ -191,32 +194,34 @@ export class CommunityController {
   // 댓글생성
   @UseGuards(AuthGuard('jwt'))
   @Post('/posts/:post_id/comment')
+  @HttpCode(HttpStatus.CREATED)
   async createComment(
     @Body() body: CreateCommentBodyDto,
     @Req() req,
     @Param('post_id') postId: number,
   ) {
+    const user = req.user;
     const commentData: CreateCommentDto = {
-      userId: req.user.id,
+      userId: user.id,
       postId,
       ...body,
     };
-    return await this.communityService.createComment(commentData);
+    return await this.communityService.createComment(user, commentData);
   }
 
   // 댓글삭제
-  // todo 댓글 삭제시 대댓글 삭제도 다 되게.
   @UseGuards(AuthGuard('jwt'))
   @Delete('/comments/:comment_id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async deleteComment(@Req() req, @Param('comment_id') commentId: number) {
     const criteria: DeleteCommentDto = { userId: req.user.id, id: commentId };
-    const result = await this.communityService.deleteComment(criteria);
-    return result;
+    return await this.communityService.deleteComment(criteria);
   }
 
   // 댓글수정
   @UseGuards(AuthGuard('jwt'))
   @Put('/comments/:comment_id')
+  @HttpCode(HttpStatus.CREATED)
   async updateComment(
     @Req() req,
     @Param('comment_id') commentId: number,
@@ -233,21 +238,22 @@ export class CommunityController {
   // 댓글조회
   @UseGuards(OptionalAuthGuard)
   @Get('/posts/:post_id/comments')
+  @HttpCode(HttpStatus.OK)
   async getComments(@Req() req, @Param('post_id') postId: number) {
     const user = req.user;
     return await this.communityService.readComments(user, postId);
   }
+
   // 댓글좋아요 생성/삭제
   @UseGuards(AuthGuard('jwt'))
   @Post('/comments/:comment_id/likes')
+  @HttpCode(HttpStatus.CREATED)
   async createCommentLikes(@Req() req, @Param('comment_id') commentId: number) {
-    const criteria: CreateCommentLikesDto = {
+    const criteria: CreateOrDeleteCommentLikesDto = {
       userId: req.user.id,
       commentId,
     };
 
-    const result = await this.communityService.createCommentLikes(criteria);
-
-    return result;
+    return await this.communityService.createOrDeleteCommentLikes(criteria);
   }
 }
