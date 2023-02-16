@@ -10,7 +10,8 @@ import {
   Req,
   Delete,
   Put,
-  Patch,
+  NotFoundException,
+  Query,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -26,6 +27,8 @@ import {
 } from './dto/comment.dto';
 import { ValidateSubCategoryIdPipe } from './pipe/getPostList.pipe';
 import { OptionalAuthGuard } from './guard/optionalGuard';
+import { GetPostListDto } from './dto/getPostList.dto';
+import { SearchDto } from './dto/searchPost.dto';
 
 @Controller('/community')
 export class CommunityController {
@@ -47,6 +50,12 @@ export class CommunityController {
       console.log(err);
       throw new Error(err);
     }
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('/post/image')
+  async deleteImageInS3(@Body() toDeleteImageData) {
+    return await this.communityService.deleteImageInS3(toDeleteImageData);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -85,10 +94,15 @@ export class CommunityController {
     @Body() updatedData: CreatePostDto,
     @Req() req,
   ) {
+    const { idsOfPostsCreatedByUser } = req.user;
+    const userId = req.user.id;
     try {
-      const userId = req.user.id;
-      await this.communityService.updatePost(postId, updatedData, userId);
-      return { message: 'post updated' };
+      if (idsOfPostsCreatedByUser.includes(postId)) {
+        await this.communityService.updatePost(postId, updatedData, userId);
+        return { message: 'post updated' };
+      } else {
+        return { message: 'This user has never written that post.' };
+      }
     } catch (err) {
       console.log(err);
       throw new Error(err);
@@ -98,15 +112,25 @@ export class CommunityController {
   @UseGuards(AuthGuard('jwt'))
   @Delete('/posts/:postId')
   async deletePost(@Param('postId') postId: number, @Req() req) {
-    const userId = req.user.id;
-    return await this.communityService.deletePost(postId, userId);
+    const { idsOfPostsCreatedByUser } = req.user;
+    console.log(idsOfPostsCreatedByUser);
+    if (idsOfPostsCreatedByUser.includes(postId)) {
+      const result = await this.communityService.deletePost(postId);
+      if (result.affected === 0) {
+        throw new NotFoundException(`Could not find a post with id ${postId}`);
+      }
+      return { message: 'post deleted' };
+    } else {
+      throw new NotFoundException('This user has never written that post.');
+    }
   }
 
   @Get('/posts/list/:subCategoryId')
   async getPostList(
     @Param('subCategoryId', ValidateSubCategoryIdPipe) subCategoryId: number,
+    @Query() query: GetPostListDto,
   ) {
-    return await this.communityService.getPostList(subCategoryId);
+    return await this.communityService.getPostList(subCategoryId, query);
   }
 
   @UseGuards(OptionalAuthGuard)
@@ -115,17 +139,22 @@ export class CommunityController {
     try {
       const result = await this.communityService.getPostDetail(postId);
       if (req.user) {
-        const { idsOfPostLikedByUser } = req.user;
-        result.login = true;
-        console.log(req.user);
-        if (idsOfPostLikedByUser.length === 0) {
-          result.ifLiked = false;
+        const { idsOfPostLikedByUser, idsOfPostsCreatedByUser } = req.user;
+        result.isLogin = true;
+        if (idsOfPostsCreatedByUser.includes(postId)) {
+          result.isAuthor = true;
         } else {
+          result.isAuthor = false;
+        }
+        if (idsOfPostLikedByUser.includes(postId)) {
           result.ifLiked = true;
+        } else {
+          result.ifLiked = false;
         }
         return result;
       }
       if (!req.user) {
+        result.isLogin = false;
         return result;
       }
     } catch (err) {
@@ -152,6 +181,11 @@ export class CommunityController {
       console.log(err);
       return err;
     }
+  }
+
+  @Get('/search')
+  async searchPost(@Query() query: SearchDto) {
+    return await this.communityService.searchPost(query);
   }
 
   // 댓글생성

@@ -10,6 +10,8 @@ import {
   UpdateCommentDto,
 } from './dto/comment.dto';
 import { Post } from 'src/entities/Post';
+import { GetPostListDto } from './dto/getPostList.dto';
+import { SearchDto } from './dto/searchPost.dto';
 
 @Injectable()
 export class CommunityService {
@@ -29,11 +31,6 @@ export class CommunityService {
   }
 
   async saveImageToS3(image, userId: number) {
-    // const now = new Date(+new Date() + 3240 * 10000)
-    //   .toISOString()
-    //   .replace('T', '_')
-    //   .replace(/\..*/, '')
-    //   .replace(/\:/g, '-');
     const now = this.getCurrentTime();
 
     const name = `post_images/${userId}_${now}`;
@@ -42,23 +39,21 @@ export class CommunityService {
     return saveToS3.Location;
   }
 
+  async deleteImageInS3(toDeleteImageData) {
+    const { toDeleteImage } = toDeleteImageData;
+    if (toDeleteImage.length !== 0) {
+      return await deleteS3Data(toDeleteImage);
+    }
+    return { message: 'No image to delete' };
+  }
+
   async createPost(postData: CreatePostDto, userId: number) {
-    // const now = new Date(+new Date() + 3240 * 10000)
-    //   .toISOString()
-    //   .replace('T', '_')
-    //   .replace(/\..*/, '')
-    //   .replace(/\:/g, '-');
     const now = this.getCurrentTime();
 
     const { title, subCategoryId, content } = postData;
     const contentUrl = `post/${userId}_${title}_${now}`;
     const mimetype = 'string';
-    try {
-      await uploadToS3(content as unknown as Buffer, contentUrl, mimetype);
-    } catch (err) {
-      console.dir(err);
-      throw new Error(err);
-    }
+    await uploadToS3(content as unknown as Buffer, contentUrl, mimetype);
 
     await this.CommunityRepository.createPost(
       title,
@@ -69,7 +64,7 @@ export class CommunityService {
   }
 
   async getPostToUpdate(postId: number) {
-    const postDetail = await this.CommunityRepository.getPostToUpdate(postId);
+    const postDetail = await this.CommunityRepository.getPostById(postId);
     const postContent = await getS3Data(postDetail.contentUrl);
     postDetail['content'] = postContent;
     delete postDetail.contentUrl;
@@ -77,17 +72,17 @@ export class CommunityService {
   }
 
   async updatePost(postId: number, updatedData: CreatePostDto, userId: number) {
-    const originPost = await this.CommunityRepository.getPostToUpdate(postId);
+    const originPost = await this.CommunityRepository.getPostById(postId);
     try {
-      await deleteS3Data(originPost.contentUrl);
+      await deleteS3Data([originPost.contentUrl]);
     } catch (err) {
       console.log(err);
       throw new Error(err);
     }
 
     const now = this.getCurrentTime();
-
     const { title, subCategoryId, content } = updatedData;
+
     const contentUrl = `post/${userId}_${title}_${now}`;
     const mimetype = 'string';
     try {
@@ -105,12 +100,23 @@ export class CommunityService {
     );
   }
 
-  async deletePost(postId: number, userId: number) {
-    return await this.CommunityRepository.deletePost(postId, userId);
+  async deletePost(postId: number) {
+    const originPost = await this.CommunityRepository.getPostById(postId);
+    await deleteS3Data([originPost.contentUrl]);
+    return await this.CommunityRepository.deletePost(postId);
   }
 
-  async getPostList(subCategoryId: number) {
-    return await this.CommunityRepository.getPostList(subCategoryId);
+  async getPostList(subCategoryId: number, query: GetPostListDto) {
+    const { sort, date, offset, limit } = query;
+    const result = await this.CommunityRepository.getPostList(
+      subCategoryId,
+      sort,
+      date,
+      offset,
+      limit,
+    );
+    result['total'] = result.length;
+    return result;
   }
 
   async getPostDetail(postId: number) {
@@ -136,6 +142,16 @@ export class CommunityService {
     return await this.CommunityRepository.createOrDeletePostLike(
       postId,
       userId,
+    );
+  }
+
+  async searchPost(query: SearchDto) {
+    const { option, keyword, offset, limit } = query;
+    return await this.CommunityRepository.searchPost(
+      option,
+      keyword,
+      offset,
+      limit,
     );
   }
 
