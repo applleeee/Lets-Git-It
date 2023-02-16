@@ -148,4 +148,62 @@ export class RankingRepository {
 
     return top100Lang;
   }
+
+  async checkRanking(rankerProfileId: number): Promise<boolean> {
+    return await this.rankingRepository.exist({ where: { rankerProfileId } });
+  }
+
+  async updateRanking(
+    mainLanguage: string,
+    curiosityScore: number,
+    passionScore: number,
+    fameScore: number,
+    abilityScore: number,
+    totalScore: number,
+    issuesCount: number,
+    forkingCount: number,
+    starringCount: number,
+    followingCount: number,
+    commitsCount: number,
+    pullRequestCount: number,
+    reviewCount: number,
+    personalRepoCount: number,
+    followersCount: number,
+    forkedCount: number,
+    watchersCount: number,
+    sponsorsCount: number,
+    myStarsCount: number,
+    contributingRepoStarsCount: number,
+    rankerProfileId: number,
+    tierId: number,
+  ): Promise<void> {
+    await this.rankingRepository
+      .createQueryBuilder()
+      .update(Ranking)
+      .set({
+        mainLanguage,
+        curiosityScore,
+        passionScore,
+        fameScore,
+        abilityScore,
+        totalScore,
+        curiosityRaiseIssueNumber: issuesCount,
+        curiosityForkRepositoryNumber: forkingCount,
+        curiosityGiveStarRepositoryNumber: starringCount,
+        curiosityFollowingNumber: followingCount,
+        passionCommitNumber: commitsCount,
+        passionPrNumber: pullRequestCount,
+        passionReviewNumber: reviewCount,
+        passionCreateRepositoryNumber: personalRepoCount,
+        fameFollowerNumber: followersCount,
+        fameRepositoryForkedNumber: forkedCount,
+        fameRepositoryWatchedNumber: watchersCount,
+        abilitySponseredNumber: sponsorsCount,
+        abilityPublicRepositoryStarNumber: myStarsCount,
+        abilityContributeRepositoryStarNumber: contributingRepoStarsCount,
+        tierId,
+      })
+      .where('ranker_profile_id =: rankerId', { rankerId: rankerProfileId })
+      .execute();
+  }
 }

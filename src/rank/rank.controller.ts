@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Patch, Query } from '@nestjs/common';
 import {
   RankerProfileOutput,
   SearchOutput,
@@ -46,5 +46,9 @@ export class RankController {
     const firstUser = await this.rankService.checkRanker(userName[0]);
     const secondUser = await this.rankService.checkRanker(userName[1]);
     return { firstUser, secondUser };
+  }
+  @Patch('/latest/:userName')
+  async updateRankerProfile(@Param('userName') userName: string) {
+    await this.rankService.getRankerDetail(userName);
   }
 }

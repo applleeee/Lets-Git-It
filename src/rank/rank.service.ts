@@ -25,6 +25,7 @@ export class RankService {
       const rankerDetail = await this.rankerProfileRepository.getRankerProfile(
         userName,
       );
+      rankerDetail['blank'] = null;
       const maxValues = await this.rankingRepository.getMaxValues();
       const avgValues = await this.rankingRepository.getAvgValues();
       return { rankerDetail, maxValues, avgValues };
@@ -38,7 +39,6 @@ export class RankService {
     console.time(
       '등록,누른 스타 수,팔로잉,팔로워,이슈,PR 그리고 기여 레포의 스타 수, 리뷰 수',
     );
-    console.log('data: ', data);
 
     const users = axios.get(`https://api.github.com/users/${userName}`, {
       headers: {
@@ -80,11 +80,19 @@ export class RankService {
         },
       },
     );
-
+    // 동기, 비동기 (콜백 함수) => Promise(resolve,reject) => async/await
     const [issuesRes, pullRequestRes, usersRes, starsRes, eventListRes] =
       await Promise.all([issues, pullRequest, users, stars, eventList]);
 
-    await this.rankerProfileRepository.createRankerProfile(usersRes.data);
+    const checkRanker = await this.rankerProfileRepository.checkRanker(
+      userName,
+    );
+
+    if (checkRanker) {
+      await this.rankerProfileRepository.getLatestRankerData(usersRes.data);
+    } else {
+      await this.rankerProfileRepository.createRankerProfile(usersRes.data);
+    }
 
     const starringCount = starsRes.data.length;
     const followingCount = usersRes.data.following;
@@ -269,31 +277,61 @@ export class RankService {
     const rankerProfileId = await this.rankerProfileRepository.getRankerId(
       userName,
     );
-
-    await this.rankingRepository.registerRanking(
-      mainLanguage,
-      curiosityScore,
-      passionScore,
-      fameScore,
-      abilityScore,
-      totalScore,
-      issuesCount,
-      forkingCount,
-      starringCount,
-      followingCount,
-      commitsCount,
-      pullRequestCount,
-      reviewCount,
-      personalRepoCount,
-      followersCount,
-      forkedCount,
-      watchersCount,
-      sponsorsCount,
-      myStarsCount,
-      contributingRepoStarsCount,
+    const checkRanking = await this.rankingRepository.checkRanking(
       rankerProfileId,
-      tierId,
     );
+
+    if (checkRanking) {
+      await this.rankingRepository.updateRanking(
+        mainLanguage,
+        curiosityScore,
+        passionScore,
+        fameScore,
+        abilityScore,
+        totalScore,
+        issuesCount,
+        forkingCount,
+        starringCount,
+        followingCount,
+        commitsCount,
+        pullRequestCount,
+        reviewCount,
+        personalRepoCount,
+        followersCount,
+        forkedCount,
+        watchersCount,
+        sponsorsCount,
+        myStarsCount,
+        contributingRepoStarsCount,
+        rankerProfileId,
+        tierId,
+      );
+    } else {
+      await this.rankingRepository.registerRanking(
+        mainLanguage,
+        curiosityScore,
+        passionScore,
+        fameScore,
+        abilityScore,
+        totalScore,
+        issuesCount,
+        forkingCount,
+        starringCount,
+        followingCount,
+        commitsCount,
+        pullRequestCount,
+        reviewCount,
+        personalRepoCount,
+        followersCount,
+        forkedCount,
+        watchersCount,
+        sponsorsCount,
+        myStarsCount,
+        contributingRepoStarsCount,
+        rankerProfileId,
+        tierId,
+      );
+    }
 
     console.timeEnd('점수 및 티어 계산');
     //등록 후 반환
@@ -337,5 +375,17 @@ export class RankService {
 
   async findRanker(userName: string): Promise<SearchOutput[]> {
     return await this.rankerProfileRepository.findRanker(userName);
+  }
+
+  async updateRanker(userName: string) {
+    const { data } = await axios.get(
+      `https://api.github.com/users/${userName}`,
+      {
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+        },
+      },
+    );
+    await this.rankerProfileRepository.getLatestRankerData(data);
   }
 }

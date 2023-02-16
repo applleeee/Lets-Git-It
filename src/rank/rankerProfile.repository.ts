@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { identity } from 'rxjs';
 import { Repository } from 'typeorm';
 import { RankerProfile } from '../entities/RankerProfile';
 import { Ranking } from '../entities/Ranking';
@@ -189,6 +188,22 @@ export class RankerProfileRepository {
       .update(RankerProfile)
       .set({ profileImageUrl, homepageUrl, email, company, region, userId })
       .where('name = :name', { name: userName })
+      .execute();
+  }
+
+  async getLatestRankerData(data: RankerProfile): Promise<void> {
+    await this.rankerProfileRepository
+      .createQueryBuilder()
+      .update(RankerProfile)
+      .set({
+        profileImageUrl: data['avatar_url'],
+        profileText: data['bio'],
+        homepageUrl: data['blog'],
+        email: data['email'],
+        company: data['company'],
+        region: data['location'],
+      })
+      .where('name = :name', { name: data['login'] })
       .execute();
   }
 }
