@@ -234,8 +234,8 @@ export class CommunityController {
   @UseGuards(OptionalAuthGuard)
   @Get('/posts/:post_id/comments')
   async getComments(@Req() req, @Param('post_id') postId: number) {
-    const userId: number = req.user.id;
-    return await this.communityService.readComments(userId, postId);
+    const user = req.user;
+    return await this.communityService.readComments(user, postId);
   }
   // 댓글좋아요 생성/삭제
   @UseGuards(AuthGuard('jwt'))

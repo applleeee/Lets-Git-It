@@ -179,15 +179,41 @@ export class CommunityService {
     );
   }
 
-  async readComments(userId: number, postId: number) {
-    const comments = await this.CommunityRepository.readComments(postId);
-    const reComments = await this.CommunityRepository.readReComments(postId);
+  async readComments(user, postId: number) {
+    enum depth {
+      COMMENT = 1,
+      RE_COMMENT = 2,
+    }
 
-    comments.map((item) => {
-      item.isCreatedByUser = item.userId === userId ? true : false;
+    const comments = await this.CommunityRepository.readComments(
+      postId,
+      depth.COMMENT,
+    );
+    const reComments = await this.CommunityRepository.readComments(
+      postId,
+      depth.RE_COMMENT,
+    );
+
+    comments.map((comment) => {
+      comment.isCreatedByUser =
+        user.idsOfCommentsCreatedByUser.indexOf(comment.commentId) >= 0
+          ? true
+          : false;
+      comment.isLikedByUser =
+        user.idsOfCommentLikedByUser.indexOf(comment.commentId) >= 0
+          ? true
+          : false;
     });
-    reComments.map((item) => {
-      item.isCreatedByUser = item.userId === userId ? true : false;
+
+    reComments.map((reComment) => {
+      reComment.isCreatedByUser =
+        user.idsOfCommentsCreatedByUser.indexOf(reComment.commentId) >= 0
+          ? true
+          : false;
+      reComment.isLikedByUser =
+        user.idsOfCommentLikedByUser.indexOf(reComment.commentId) >= 0
+          ? true
+          : false;
     });
 
     comments.map((comment) => {
@@ -195,6 +221,7 @@ export class CommunityService {
         return reComment['groupOrder'] === comment['groupOrder'];
       }));
     });
+
     return comments;
   }
 
