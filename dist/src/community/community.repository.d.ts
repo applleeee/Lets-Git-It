@@ -1,0 +1,36 @@
+import { Repository } from 'typeorm';
+import { SubCategory } from '../entities/SubCategory';
+import { Post } from 'src/entities/Post';
+import { PostLike } from 'src/entities/PostLike';
+import { Comment } from 'src/entities/Comment';
+import { CreateCommentDto, CreateCommentLikesDto, DeleteCommentDto, UpdateCommentDto } from './dto/comment.dto';
+import { CommentLike } from 'src/entities/CommentLike';
+import { DateEnum, SortEnum } from './dto/getPostList.dto';
+export declare class CommunityRepository {
+    private subCategoryRepository;
+    private postRepository;
+    private postLikeRepository;
+    private commentRepository;
+    private commentLikeRepository;
+    constructor(subCategoryRepository: Repository<SubCategory>, postRepository: Repository<Post>, postLikeRepository: Repository<PostLike>, commentRepository: Repository<Comment>, commentLikeRepository: Repository<CommentLike>);
+    private postList;
+    getAllCategories(): Promise<SubCategory[]>;
+    createPost(title: string, userId: number, subCategoryId: number, contentUrl: string): Promise<import("typeorm").InsertResult>;
+    getPostById(postId: number): Promise<Post>;
+    updatePost(postId: number, title: string, subCategoryId: number, contentUrl: string): Promise<import("typeorm").UpdateResult>;
+    deletePost(postId: number): Promise<import("typeorm").DeleteResult>;
+    getPostList(subCategoryId: number, sort: SortEnum, date: DateEnum, offset: number, limit: number): Promise<any[]>;
+    getPostDatail(postId: number): Promise<any>;
+    getPostsCreatedByUser(userId: number): Promise<Post[]>;
+    createOrDeletePostLike(postId: number, userId: number): Promise<PostLike | import("typeorm").DeleteResult>;
+    searchPost(option: string, keyword: string, offset: number, limit: number): Promise<any[]>;
+    getIdsOfPostLikedByUser(userId: number): Promise<Post[]>;
+    createComment(commentData: CreateCommentDto): Promise<Comment>;
+    deleteComment(criteria: DeleteCommentDto): Promise<import("typeorm").DeleteResult>;
+    updateComment(criteria: UpdateCommentDto, toUpdateContent: string): Promise<import("typeorm").UpdateResult>;
+    isCommentExist(commentId: number): Promise<boolean>;
+    readComments(postId: number, depth: number): Promise<any[]>;
+    createCommentLikes(criteria: CreateCommentLikesDto): Promise<import("typeorm").DeleteResult | (CreateCommentLikesDto & CommentLike)>;
+    getCommentsCreatedByUser(userId: number): Promise<Comment[]>;
+    getIdsOfCommentLikedByUser(userId: number): Promise<CommentLike[]>;
+}
