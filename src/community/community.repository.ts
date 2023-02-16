@@ -12,6 +12,7 @@ import {
   UpdateCommentDto,
 } from './dto/comment.dto';
 import { CommentLike } from 'src/entities/CommentLike';
+import { DateEnum, SortEnum } from './dto/getPostList.dto';
 
 @Injectable()
 export class CommunityRepository {
@@ -27,6 +28,40 @@ export class CommunityRepository {
     @InjectRepository(CommentLike)
     private commentLikeRepository: Repository<CommentLike>,
   ) {}
+
+  private postList(offset: number, limit: number) {
+    return this.postRepository
+      .createQueryBuilder()
+      .select([
+        'post.id as postId',
+        'post.title',
+        'post.view',
+        'DATE_FORMAT(post.created_at, "%Y-%m-%d") AS createdAt',
+        'user.id as userId',
+        'ranker_profile.name AS userName',
+        'COUNT(DISTINCT post_like.id) AS postLike',
+        'COUNT(DISTINCT comment.id) AS comment',
+        'tier.name AS tierName',
+        'tier.id AS tierId',
+        'sub_category.name AS subCategoryName',
+      ])
+      .from(Post, 'post')
+      .leftJoin('post.user', 'user')
+      .leftJoin('post.postLikes', 'post_like')
+      .leftJoin('post.comments', 'comment')
+      .leftJoin('user.rankerProfiles', 'ranker_profile')
+      .leftJoin('ranker_profile.rankings', 'ranking')
+      .leftJoin('ranking.tier', 'tier')
+      .leftJoin('post.subCategory', 'sub_category')
+      .groupBy('post.id')
+      .addGroupBy('ranker_profile.name')
+      .addGroupBy('tier.name')
+      .addGroupBy('tier.id')
+      .addGroupBy('ranker_profile.name')
+      .addGroupBy('tier.name')
+      .offset(offset)
+      .limit(limit);
+  }
 
   async getAllCategories() {
     const categories = await this.subCategoryRepository.find();
@@ -53,7 +88,7 @@ export class CommunityRepository {
     return result;
   }
 
-  async getPostToUpdate(postId: number) {
+  async getPostById(postId: number) {
     return await this.postRepository.findOne({ where: { id: postId } });
   }
 
@@ -75,51 +110,46 @@ export class CommunityRepository {
       .execute();
   }
 
-  async deletePost(postId: number, userId: number) {}
-
-  async getPostList(subCategoryId: number) {
-    const result = await this.postRepository
-      .createQueryBuilder()
-      .select([
-        'post.id as postId',
-        'post.title',
-        'post.view',
-        'DATE_FORMAT(post.created_at, "%Y-%m-%d") AS createdAt',
-        'user.id as userId',
-        'ranker_profile.name AS userName',
-        'COUNT(post_like.id) AS postLike',
-        'COUNT(comment.id) AS comment',
-        'tier.name AS tierName',
-        'tier.id AS tierId',
-        'sub_category.name AS subCategoryName',
-      ])
-      .from(Post, 'post')
-      .leftJoin('post.user', 'user')
-      .leftJoin('post.postLikes', 'post_like')
-      .leftJoin('post.comments', 'comment')
-      .leftJoin('user.rankerProfiles', 'ranker_profile')
-      .leftJoin('ranker_profile.rankings', 'ranking')
-      .leftJoin('ranking.tier', 'tier')
-      .leftJoin('post.subCategory', 'sub_category')
-      .where('post.subCategoryId = :subCategoryId', {
-        subCategoryId: subCategoryId,
-      })
-      .groupBy('post.id')
-      .addGroupBy('ranker_profile.name')
-      .addGroupBy('tier.name')
-      .addGroupBy('tier.id')
-      .addGroupBy('ranker_profile.name')
-      .addGroupBy('tier.name')
-      .getRawMany();
-    return result;
+  async deletePost(postId: number) {
+    return await this.postRepository.delete({ id: postId });
   }
 
-  async getPostDatail(postId) {
+  async getPostList(
+    subCategoryId: number,
+    sort: SortEnum,
+    date: DateEnum,
+    offset: number,
+    limit: number,
+  ) {
+    const queryBuilder = this.postList(offset, limit);
+    queryBuilder.where('post.subCategoryId = :subCategoryId', {
+      subCategoryId: subCategoryId,
+    });
+    if (sort === 'latest') {
+      queryBuilder.orderBy('post.created_at', 'DESC');
+    }
+    if (sort === 'mostLiked' && date !== undefined) {
+      if (date !== 'all') {
+        queryBuilder
+          .orderBy('postLike', 'DESC')
+          .andWhere(
+            `DATE_FORMAT(post.created_at, "%Y-%m-%d") >= DATE_SUB(NOW(), INTERVAL 1 ${date})`,
+          );
+      } else if (date === 'all') {
+        queryBuilder.orderBy('postLike', 'DESC');
+      }
+    }
+
+    return await queryBuilder.getRawMany();
+  }
+
+  async getPostDatail(postId: number) {
     const postContent = await this.postRepository
       .createQueryBuilder('post')
       .select('post.content_url AS contentUrl')
       .where('post.id = :postId', { postId: postId })
       .getRawOne();
+
     const postDetail = await this.postRepository
       .createQueryBuilder('post')
       .leftJoin('user', 'user', 'user.id = post.user_id')
@@ -134,20 +164,29 @@ export class CommunityRepository {
         'post.sub_category_id = sub_category.id',
       )
       .leftJoin('post_like', 'post_like', 'post_like.post_id = post.id')
-      .where('post.id = :postId', { postId: postId })
+      .leftJoin(
+        'ranking',
+        'ranking',
+        'ranking.ranker_profile_id = ranker_profile.id',
+      )
+      .leftJoin('tier', 'tier', 'tier.id = ranking.tier_id')
       .select([
+        'post.title AS postTitle',
         'post.id AS postId',
-        'post.title',
         'post.user_id AS userId',
         'ranker_profile.name AS userName',
+        'ranker_profile.profile_image_url AS userProfileImage',
+        'tier.id AS tierId',
+        'tier.name AS tierName',
         'post.sub_category_id AS subCategoryId',
         'sub_category.name AS subCategoryName',
-        `DATE_FORMAT(post.created_at, '%Y-%m-%d %H:%i:%s') AS createdAt`,
+        "DATE_FORMAT(post.created_at, '%Y-%m-%d %H:%i:%s') AS createdAt",
       ])
       .addSelect(
         `(SELECT JSON_ARRAYAGG(JSON_OBJECT("likeId", post_like.id, "userId", post_like.user_id, "createdAt", post_like.created_at))
-      from post_like where post_like.id = 1) as likes`,
+      from post_like where post_like.post_id = post.id) as likes`,
       )
+      .where('post.id = :id', { id: postId })
       .getRawOne();
     postDetail.content = postContent.contentUrl;
     return postDetail;
@@ -184,10 +223,11 @@ export class CommunityRepository {
       .getRawMany();
   }
 
-  async createOrDeletePostLike(postId, userId) {
+  async createOrDeletePostLike(postId: number, userId: number) {
     const ifLiked = await this.postLikeRepository.findOne({
       where: { postId: postId, userId: userId },
     });
+
     if (!ifLiked) {
       try {
         const postLike = new PostLike();
@@ -204,6 +244,36 @@ export class CommunityRepository {
       return await this.postLikeRepository.delete({ id: ifLiked.id });
     }
   }
+
+  // 작성자명으로 검색 기능 추가(유저테이블에 유저이름 추가 필요?)
+  async searchPost(
+    option: string,
+    keyword: string,
+    offset: number,
+    limit: number,
+  ) {
+    const queryBuilder = this.postList(offset, limit);
+    if (option === 'title') {
+      queryBuilder.where('post.title LIKE :keyword', {
+        keyword: `%${keyword}%`,
+      });
+    }
+    return await queryBuilder.getRawMany();
+  }
+
+  // async getPostsCreatedByUser(userId: number): Promise<Post[]> {
+  //   return this.postRepository
+  //     .createQueryBuilder()
+  //     .select([
+  //       'id',
+  //       'title',
+  //       'content_url as contentUrl',
+  //       'sub_category_id as subCategoryId',
+  //       'created_at as createdAt',
+  //     ])
+  //     .where('user_id = :userId', { userId: userId })
+  //     .getRawMany();
+  // }
 
   async getIdsOfPostLikedByUser(userId: number): Promise<Post[]> {
     return this.postLikeRepository
