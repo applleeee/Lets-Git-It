@@ -194,7 +194,7 @@ export class CommunityRepository {
 
   async getPostsCreatedByUser(userId: number): Promise<Post[]> {
     return this.postRepository
-      .createQueryBuilder()
+      .createQueryBuilder('post')
       .select([
         'post.id as id',
         'post.title as title',
@@ -263,7 +263,7 @@ export class CommunityRepository {
 
   async getIdsOfPostLikedByUser(userId: number): Promise<Post[]> {
     return this.postLikeRepository
-      .createQueryBuilder()
+      .createQueryBuilder('post')
       .select(['post_id'])
       .where('user_id = :userId', { userId: userId })
       .getRawMany();
@@ -295,7 +295,7 @@ export class CommunityRepository {
 
   async readComments(postId: number, depth: number) {
     return await this.commentRepository
-      .createQueryBuilder()
+      .createQueryBuilder('comment')
       .select([
         'comment.user_id as userId',
         'comment.group_order as groupOrder',
@@ -335,7 +335,7 @@ export class CommunityRepository {
       .getRawMany();
   }
 
-  async createOrDeleteCommentLikes(criteria) {
+  async createOrDeleteCommentLikes(criteria: CreateOrDeleteCommentLikesDto) {
     const isExist = await this.commentLikeRepository.exist({
       where: { userId: criteria.userId, commentId: criteria.commentId },
     });
@@ -347,7 +347,7 @@ export class CommunityRepository {
 
   async getCommentsCreatedByUser(userId: number): Promise<Comment[]> {
     return this.commentRepository
-      .createQueryBuilder()
+      .createQueryBuilder('comment')
       .select(['id', 'content', 'post_id as postId', 'created_at as createdAt'])
       .where('user_id = :userId', { userId: userId })
       .getRawMany();
@@ -355,7 +355,7 @@ export class CommunityRepository {
 
   async getIdsOfCommentLikedByUser(userId: number): Promise<CommentLike[]> {
     return this.commentLikeRepository
-      .createQueryBuilder()
+      .createQueryBuilder('comment')
       .select(['comment_id'])
       .where('user_id = :userId', { userId: userId })
       .getRawMany();
