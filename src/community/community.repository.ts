@@ -7,7 +7,7 @@ import { PostLike } from 'src/entities/PostLike';
 import { Comment } from 'src/entities/Comment';
 import {
   CreateCommentDto,
-  CreateCommentLikesDto,
+  CreateOrDeleteCommentLikesDto,
   DeleteCommentDto,
   UpdateCommentDto,
 } from './dto/comment.dto';
@@ -261,20 +261,6 @@ export class CommunityRepository {
     return await queryBuilder.getRawMany();
   }
 
-  // async getPostsCreatedByUser(userId: number): Promise<Post[]> {
-  //   return this.postRepository
-  //     .createQueryBuilder()
-  //     .select([
-  //       'id',
-  //       'title',
-  //       'content_url as contentUrl',
-  //       'sub_category_id as subCategoryId',
-  //       'created_at as createdAt',
-  //     ])
-  //     .where('user_id = :userId', { userId: userId })
-  //     .getRawMany();
-  // }
-
   async getIdsOfPostLikedByUser(userId: number): Promise<Post[]> {
     return this.postLikeRepository
       .createQueryBuilder()
@@ -349,7 +335,7 @@ export class CommunityRepository {
       .getRawMany();
   }
 
-  async createCommentLikes(criteria: CreateCommentLikesDto) {
+  async createOrDeleteCommentLikes(criteria) {
     const isExist = await this.commentLikeRepository.exist({
       where: { userId: criteria.userId, commentId: criteria.commentId },
     });

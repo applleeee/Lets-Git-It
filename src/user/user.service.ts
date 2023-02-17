@@ -1,7 +1,12 @@
 import { RankerProfile } from 'src/entities/RankerProfile';
 import { RankerProfileRepository } from './../rank/rankerProfile.repository';
 import { SignUpDto } from './../auth/dto/auth.dto';
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  HttpException,
+  HttpStatus,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { User } from 'src/entities/User';
 import { UserRepository } from './user.repository';
 import { lastValueFrom, map } from 'rxjs';
@@ -41,7 +46,7 @@ export class UserService {
         accept: 'application/json',
       },
     };
-    return await lastValueFrom(
+    const result = await lastValueFrom(
       this.http
         .post(
           `https://github.com/login/oauth/access_token`,
@@ -50,6 +55,11 @@ export class UserService {
         )
         .pipe(map((res) => res.data?.access_token)),
     );
+
+    if (result === undefined) {
+      throw new HttpException('WRONG_GITHUB_CODE', HttpStatus.UNAUTHORIZED);
+    }
+    return result;
   }
 
   async getByGithubAccessToken(githubAccessToken: string) {
@@ -59,11 +69,18 @@ export class UserService {
         Authorization: `token ${githubAccessToken}`,
       },
     };
-    return await lastValueFrom(
+    const result = await lastValueFrom(
       this.http
         .get(`https://api.github.com/user`, config)
         .pipe(map((res) => res.data)),
     );
+    if (result === undefined) {
+      throw new HttpException(
+        'WRONG_GITHUB_ACCESS_TOKEN',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+    return result;
   }
 
   async createUser(signUpData: SignUpDto) {

@@ -5,9 +5,10 @@ import { CreatePostDto } from './dto/createPost.dto';
 import { uploadToS3, getS3Data, deleteS3Data } from 'src/utiles/aws';
 import {
   CreateCommentDto,
-  CreateCommentLikesDto,
+  CreateOrDeleteCommentLikesDto,
   DeleteCommentDto,
   UpdateCommentDto,
+  Depth,
 } from './dto/comment.dto';
 import { Post } from 'src/entities/Post';
 import { GetPostListDto } from './dto/getPostList.dto';
@@ -155,43 +156,79 @@ export class CommunityService {
     );
   }
 
-  async createComment(commentData: CreateCommentDto) {
-    return await this.CommunityRepository.createComment(commentData);
+  async createComment(user, commentData: CreateCommentDto) {
+    const comments = await this.readComments(user, commentData.postId);
+    const groupOrderArr = comments.map((comment) => comment.groupOrder);
+
+    if (
+      groupOrderArr.indexOf(commentData.groupOrder) === -1 &&
+      commentData.depth === Depth.RE_COMMENT
+    )
+      throw new HttpException(
+        'CANNOT_CREATE_RE_COMMENT_WITHOUT_COMMENT',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    if (
+      commentData.groupOrder <= groupOrderArr[groupOrderArr.length - 1] &&
+      commentData.depth === Depth.COMMENT
+    )
+      throw new HttpException(
+        'ALREADY_EXIST_COMMENT_IN_THE_GROUPORDER',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const result = await this.CommunityRepository.createComment(commentData);
+
+    return result;
   }
 
   async deleteComment(criteria: DeleteCommentDto) {
-    return await this.CommunityRepository.deleteComment(criteria);
-  }
-  async updateComment(criteria: UpdateCommentDto, toUpdateContent: string) {
+    const commentIdsCreatedByUser = (await this.getIdsOfCommentCreatedByUser(
+      criteria.userId,
+    )) as unknown[];
+
     const isCommentExist = await this.CommunityRepository.isCommentExist(
       criteria.id,
     );
 
     if (!isCommentExist)
-      throw new HttpException(
-        'THE_COMMENT_IS_NOT_EXIST',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('THE_COMMENT_NOT_EXIST', HttpStatus.NOT_FOUND);
 
-    return await this.CommunityRepository.updateComment(
-      criteria,
-      toUpdateContent,
+    if (commentIdsCreatedByUser.indexOf(criteria.id) === -1)
+      throw new HttpException('NOT_CREATED_BY_USER', HttpStatus.FORBIDDEN);
+
+    await this.CommunityRepository.deleteComment(criteria);
+  }
+
+  async updateComment(criteria: UpdateCommentDto, toUpdateContent: string) {
+    const commentIdsCreatedByUser = (await this.getIdsOfCommentCreatedByUser(
+      criteria.userId,
+    )) as unknown[];
+
+    const isCommentExist = await this.CommunityRepository.isCommentExist(
+      criteria.id,
     );
+
+    if (!isCommentExist)
+      throw new HttpException('THE_COMMENT_IS_NOT_EXIST', HttpStatus.NOT_FOUND);
+
+    if (commentIdsCreatedByUser.indexOf(criteria.id) === -1)
+      throw new HttpException('NOT_CREATED_BY_USER', HttpStatus.FORBIDDEN);
+
+    await this.CommunityRepository.updateComment(criteria, toUpdateContent);
+
+    return { message: 'COMMENT_UPDATED' };
   }
 
   async readComments(user, postId: number) {
-    enum depth {
-      COMMENT = 1,
-      RE_COMMENT = 2,
-    }
-
     const comments = await this.CommunityRepository.readComments(
       postId,
-      depth.COMMENT,
+      Depth.COMMENT,
     );
     const reComments = await this.CommunityRepository.readComments(
       postId,
-      depth.RE_COMMENT,
+      Depth.RE_COMMENT,
     );
 
     comments.map((comment) => {
@@ -225,8 +262,15 @@ export class CommunityService {
     return comments;
   }
 
-  async createCommentLikes(criteria: CreateCommentLikesDto) {
-    return await this.CommunityRepository.createCommentLikes(criteria);
+  async createOrDeleteCommentLikes(criteria: CreateOrDeleteCommentLikesDto) {
+    const isCommentExist = await this.CommunityRepository.isCommentExist(
+      criteria.commentId,
+    );
+
+    if (!isCommentExist)
+      throw new HttpException('THE_COMMENT_IS_NOT_EXIST', HttpStatus.NOT_FOUND);
+
+    return await this.CommunityRepository.createOrDeleteCommentLikes(criteria);
   }
 
   async getIdsOfCommentCreatedByUser(userId: number) {

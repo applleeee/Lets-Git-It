@@ -1,5 +1,10 @@
 import { PickType } from '@nestjs/mapped-types';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsEnum } from 'class-validator';
+
+export enum Depth {
+  COMMENT = 1,
+  RE_COMMENT,
+}
 
 export class CreateCommentBodyDto {
   @IsString()
@@ -10,24 +15,16 @@ export class CreateCommentBodyDto {
   @IsNotEmpty()
   readonly groupOrder: number;
 
-  @IsNumber()
+  @IsEnum(Depth)
   @IsNotEmpty()
-  readonly depth: number;
+  readonly depth: Depth;
 }
 
 export class UpdateCommentBodyDto extends PickType(CreateCommentBodyDto, [
   'content',
 ] as const) {}
 
-export class CreateCommentDto {
-  @IsString()
-  @IsNotEmpty()
-  readonly content: string;
-
-  @IsNumber()
-  @IsNotEmpty()
-  readonly groupOrder: number;
-
+export class CreateCommentDto extends CreateCommentBodyDto {
   @IsNumber()
   @IsNotEmpty()
   readonly userId: number;
@@ -49,7 +46,7 @@ export class UpdateCommentDto {
 
 export class DeleteCommentDto extends UpdateCommentDto {}
 
-export class CreateCommentLikesDto {
+export class CreateOrDeleteCommentLikesDto {
   @IsNumber()
   @IsNotEmpty()
   readonly userId: number;

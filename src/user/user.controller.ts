@@ -1,5 +1,14 @@
 import { AuthGuard } from '@nestjs/passport';
-import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Patch,
+  Req,
+  UseGuards,
+  HttpStatus,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateMyPageDto } from './dto/mypage.dto';
 
@@ -9,12 +18,15 @@ export class UserController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
+  @HttpCode(HttpStatus.OK)
   async getMyPage(@Req() req) {
-    return await this.userService.getMyPage(req.user.id);
+    const userId = req.user.id;
+    return await this.userService.getMyPage(userId);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Patch()
+  @HttpCode(HttpStatus.CREATED)
   async updateMyPage(@Body() body: UpdateMyPageDto, @Req() req) {
     const userId = req.user.id;
     const partialEntity = {

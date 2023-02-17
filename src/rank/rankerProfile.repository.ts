@@ -23,6 +23,13 @@ export class RankerProfileRepository {
     return await this.rankerProfileRepository.exist({ where: { name } });
   }
 
+  async getUserNameByUserId(userId: number) {
+    const user = await this.rankerProfileRepository.findOne({
+      where: { userId: userId },
+    });
+    return user.name;
+  }
+
   async getRankerId(name: string): Promise<number> {
     const { id } = await this.rankerProfileRepository.findOne({
       where: { name },
@@ -155,12 +162,11 @@ export class RankerProfileRepository {
   }
 
   async getMyPage(userId: number) {
-    //todo 추후에 auth 로직에서 해당 유저의 ranker profile 정보가 없을 경우 현상님의 로직을 사용해서 회원 가입 시 애초애 정보를 등록하는 과정으로 리펙토링 하겠습니다.
-
     let result;
     const ranker = await this.rankerProfileRepository.findBy({
       userId: userId,
     });
+
     if (!ranker) {
       result = {
         userName: '랭킹 정보를 검색해주세요!',
