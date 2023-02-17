@@ -191,7 +191,7 @@ export class RankerProfileRepository {
     userId,
   ) {
     return await this.rankerProfileRepository
-      .createQueryBuilder()
+      .createQueryBuilder('ranker_profile')
       .update(RankerProfile)
       .set({ profileImageUrl, homepageUrl, email, company, region, userId })
       .where('name = :name', { name: userName })
