@@ -1,7 +1,6 @@
 import { Comment } from './../entities/Comment';
 import { HttpException, Injectable, HttpStatus } from '@nestjs/common';
 import { CommunityRepository } from './community.repository';
-import { CreatePostDto } from './dto/createPost.dto';
 import { uploadToS3, getS3Data, deleteS3Data } from 'src/utiles/aws';
 import {
   CreateCommentDto,
@@ -11,9 +10,13 @@ import {
   Depth,
 } from './dto/comment.dto';
 import { Post } from 'src/entities/Post';
-import { GetPostListDto } from './dto/getPostList.dto';
-import { SearchDto } from './dto/searchPost.dto';
-
+import {
+  GetPostListDto,
+  CreatePostDto,
+  SearchPostDto,
+  DeleteImageDto,
+  PostLikeDto,
+} from './dto/Post.dto';
 @Injectable()
 export class CommunityService {
   constructor(private CommunityRepository: CommunityRepository) {}
@@ -27,8 +30,7 @@ export class CommunityService {
   }
 
   async getAllCategories() {
-    const categories = this.CommunityRepository.getAllCategories();
-    return categories;
+    return this.CommunityRepository.getAllCategories();
   }
 
   async saveImageToS3(image, userId: number) {
@@ -40,7 +42,7 @@ export class CommunityService {
     return saveToS3.Location;
   }
 
-  async deleteImageInS3(toDeleteImageData) {
+  async deleteImageInS3(toDeleteImageData: DeleteImageDto) {
     const { toDeleteImage } = toDeleteImageData;
     if (toDeleteImage.length !== 0) {
       return await deleteS3Data(toDeleteImage);
@@ -54,8 +56,14 @@ export class CommunityService {
     const { title, subCategoryId, content } = postData;
     const contentUrl = `post/${userId}_${title}_${now}`;
     const mimetype = 'string';
-    await uploadToS3(content as unknown as Buffer, contentUrl, mimetype);
-
+    try {
+      await uploadToS3(content as unknown as Buffer, contentUrl, mimetype);
+    } catch (err) {
+      throw new HttpException(
+        'CANNOT_UPLOAD_POST_TO_S3' + err,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
     await this.CommunityRepository.createPost(
       title,
       userId,
@@ -66,10 +74,17 @@ export class CommunityService {
 
   async getPostToUpdate(postId: number) {
     const postDetail = await this.CommunityRepository.getPostById(postId);
-    const postContent = await getS3Data(postDetail.contentUrl);
-    postDetail['content'] = postContent;
-    delete postDetail.contentUrl;
-    return postDetail;
+    try {
+      const postContent = await getS3Data(postDetail.contentUrl);
+      postDetail['content'] = postContent;
+      delete postDetail.contentUrl;
+      return postDetail;
+    } catch (err) {
+      throw new HttpException(
+        'CANNOT_GET_POST_FROM_S3' + err,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async updatePost(postId: number, updatedData: CreatePostDto, userId: number) {
@@ -77,8 +92,10 @@ export class CommunityService {
     try {
       await deleteS3Data([originPost.contentUrl]);
     } catch (err) {
-      console.log(err);
-      throw new Error(err);
+      throw new HttpException(
+        'CANNOT_DELETE_POST_IN_S3' + err,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     const now = this.getCurrentTime();
@@ -89,8 +106,10 @@ export class CommunityService {
     try {
       await uploadToS3(content as unknown as Buffer, contentUrl, mimetype);
     } catch (err) {
-      console.log(err);
-      throw new Error(err);
+      throw new HttpException(
+        'CANNOT_UPLOAD_POST_TO_S3' + err,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     await this.CommunityRepository.updatePost(
@@ -103,8 +122,15 @@ export class CommunityService {
 
   async deletePost(postId: number) {
     const originPost = await this.CommunityRepository.getPostById(postId);
-    await deleteS3Data([originPost.contentUrl]);
-    return await this.CommunityRepository.deletePost(postId);
+    try {
+      await deleteS3Data([originPost.contentUrl]);
+      return await this.CommunityRepository.deletePost(postId);
+    } catch (err) {
+      throw new HttpException(
+        'CANNOT_DELETE_POST_IN_S3' + err,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async getPostList(subCategoryId: number, query: GetPostListDto) {
@@ -122,10 +148,35 @@ export class CommunityService {
 
   async getPostDetail(postId: number) {
     const postDetail = await this.CommunityRepository.getPostDatail(postId);
-    const postContent = await getS3Data(postDetail.content);
-    postDetail.content = postContent;
 
-    return postDetail;
+    try {
+      const postContent = await getS3Data(postDetail.content);
+      postDetail.content = postContent;
+      return postDetail;
+    } catch (err) {
+      throw new HttpException(
+        'CANNOT_GET_POST_FROM_S3' + err,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async createOrDeletePostLike(data: PostLikeDto, userId: number) {
+    const { postId } = data;
+    return await this.CommunityRepository.createOrDeletePostLike(
+      postId,
+      userId,
+    );
+  }
+
+  async searchPost(query: SearchPostDto) {
+    const { option, keyword, offset, limit } = query;
+    return await this.CommunityRepository.searchPost(
+      option,
+      keyword,
+      offset,
+      limit,
+    );
   }
 
   async getIdsOfPostsCreatedByUser(userId: number) {
@@ -136,24 +187,6 @@ export class CommunityService {
   async getIdsOfPostLikedByUser(userId: number) {
     const data = await this.CommunityRepository.getIdsOfPostLikedByUser(userId);
     return data.map<Post['id']>((item) => Object.values(item)[0]);
-  }
-
-  async createOrDeletePostLike(data, userId) {
-    const { postId } = data;
-    return await this.CommunityRepository.createOrDeletePostLike(
-      postId,
-      userId,
-    );
-  }
-
-  async searchPost(query: SearchDto) {
-    const { option, keyword, offset, limit } = query;
-    return await this.CommunityRepository.searchPost(
-      option,
-      keyword,
-      offset,
-      limit,
-    );
   }
 
   async createComment(user, commentData: CreateCommentDto) {

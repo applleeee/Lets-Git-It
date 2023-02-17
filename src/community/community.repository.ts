@@ -12,7 +12,7 @@ import {
   UpdateCommentDto,
 } from './dto/comment.dto';
 import { CommentLike } from 'src/entities/CommentLike';
-import { DateEnum, SortEnum } from './dto/getPostList.dto';
+import { DateEnum, SortEnum } from './dto/Post.dto';
 
 @Injectable()
 export class CommunityRepository {
@@ -192,6 +192,55 @@ export class CommunityRepository {
     return postDetail;
   }
 
+  async createOrDeletePostLike(postId: number, userId: number) {
+    const ifLiked = await this.postLikeRepository.findOne({
+      where: { postId: postId, userId: userId },
+    });
+
+    if (!ifLiked) {
+      try {
+        const postLike = new PostLike();
+        postLike.postId = postId;
+        postLike.userId = userId;
+        return await this.postLikeRepository.save(postLike);
+      } catch (err) {
+        throw new HttpException(
+          'Error: invaild postId',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    } else if (ifLiked) {
+      return await this.postLikeRepository.delete({ id: ifLiked.id });
+    }
+  }
+
+  async searchPost(
+    option: string,
+    keyword: string,
+    offset: number,
+    limit: number,
+  ) {
+    const queryBuilder = this.postList(offset, limit);
+    if (option === 'title') {
+      queryBuilder.where('post.title LIKE :keyword', {
+        keyword: `%${keyword}%`,
+      });
+    } else if (option === 'author') {
+      queryBuilder.where('ranker_profile.name LIKE :keyword', {
+        keyword: `%${keyword}%`,
+      });
+    } else if (option === 'title_author') {
+      queryBuilder
+        .where('post.title LIKE :keyword', {
+          keyword: `%${keyword}%`,
+        })
+        .orWhere('ranker_profile.name LIKE :keyword', {
+          keyword: `%${keyword}%`,
+        });
+    }
+    return await queryBuilder.getRawMany();
+  }
+
   async getPostsCreatedByUser(userId: number): Promise<Post[]> {
     return this.postRepository
       .createQueryBuilder('post')
@@ -221,44 +270,6 @@ export class CommunityRepository {
       .where('post.user_id = :userId', { userId: userId })
       .groupBy('post.id')
       .getRawMany();
-  }
-
-  async createOrDeletePostLike(postId: number, userId: number) {
-    const ifLiked = await this.postLikeRepository.findOne({
-      where: { postId: postId, userId: userId },
-    });
-
-    if (!ifLiked) {
-      try {
-        const postLike = new PostLike();
-        postLike.postId = postId;
-        postLike.userId = userId;
-        return await this.postLikeRepository.save(postLike);
-      } catch (err) {
-        throw new HttpException(
-          'Error: invaild postId',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-    } else if (ifLiked) {
-      return await this.postLikeRepository.delete({ id: ifLiked.id });
-    }
-  }
-
-  // 작성자명으로 검색 기능 추가(유저테이블에 유저이름 추가 필요?)
-  async searchPost(
-    option: string,
-    keyword: string,
-    offset: number,
-    limit: number,
-  ) {
-    const queryBuilder = this.postList(offset, limit);
-    if (option === 'title') {
-      queryBuilder.where('post.title LIKE :keyword', {
-        keyword: `%${keyword}%`,
-      });
-    }
-    return await queryBuilder.getRawMany();
   }
 
   async getIdsOfPostLikedByUser(userId: number): Promise<Post[]> {

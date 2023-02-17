@@ -14,11 +14,11 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  HttpException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CommunityService } from './community.service';
-import { CreatePostDto } from './dto/createPost.dto';
 import {
   CreateCommentBodyDto,
   CreateCommentDto,
@@ -29,64 +29,61 @@ import {
 } from './dto/comment.dto';
 import { ValidateSubCategoryIdPipe } from './pipe/getPostList.pipe';
 import { OptionalAuthGuard } from './guard/optionalGuard';
-import { GetPostListDto } from './dto/getPostList.dto';
-import { SearchDto } from './dto/searchPost.dto';
-import { response } from 'express';
+import {
+  GetPostListDto,
+  CreatePostDto,
+  SearchPostDto,
+  DeleteImageDto,
+  PostLikeDto,
+} from './dto/Post.dto';
+import { SubCategoryOutput } from './dto/subCategory.dto';
 
 @Controller('/community')
 export class CommunityController {
   constructor(private communityService: CommunityService) {}
 
   @Get('/categories')
-  async getAllCategories() {
+  async getAllCategories(): Promise<SubCategoryOutput[]> {
     return await this.communityService.getAllCategories();
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Post('/post/image')
   @UseInterceptors(FileInterceptor('image'))
-  async saveImageToS3(@UploadedFile() image, @Req() req) {
-    try {
-      const userId: number = req.user.id;
-      return await this.communityService.saveImageToS3(image, userId);
-    } catch (err) {
-      console.log(err);
-      throw new Error(err);
-    }
+  async saveImageToS3(
+    @UploadedFile() image: Express.Multer.File,
+    @Req() req,
+  ): Promise<string> {
+    const userId: number = req.user.id;
+    return await this.communityService.saveImageToS3(image, userId);
   }
 
+  // 타입 확인(동섭님)
   @UseGuards(AuthGuard('jwt'))
   @Delete('/post/image')
-  async deleteImageInS3(@Body() toDeleteImageData) {
+  async deleteImageInS3(@Body() toDeleteImageData: DeleteImageDto) {
     return await this.communityService.deleteImageInS3(toDeleteImageData);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Post('/post')
   async createPost(@Body() postData: CreatePostDto, @Req() req) {
-    try {
-      const userId: number = req.user.id;
-      await this.communityService.createPost(postData, userId);
-      return { message: 'post created' };
-    } catch (err) {
-      console.log(err);
-      throw new Error(err);
-    }
+    const userId: number = req.user.id;
+    await this.communityService.createPost(postData, userId);
+    return { message: 'post created' };
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get('/posts/update/:postId')
   async getPostToUpdate(@Param('postId') postId: number, @Req() req) {
     const { idsOfPostsCreatedByUser } = req.user;
-    try {
-      if (idsOfPostsCreatedByUser.includes(postId)) {
-        return await this.communityService.getPostToUpdate(postId);
-      } else {
-        return { message: 'This user has never written that post.' };
-      }
-    } catch (err) {
-      console.log(err);
-      throw new Error(err);
+    if (idsOfPostsCreatedByUser.includes(postId)) {
+      return await this.communityService.getPostToUpdate(postId);
+    } else {
+      throw new HttpException(
+        'THIS_USER_HAS_NEVER_WRITTEN_THAT_POST',
+        HttpStatus.FORBIDDEN,
+      );
     }
   }
 
@@ -98,17 +95,16 @@ export class CommunityController {
     @Req() req,
   ) {
     const { idsOfPostsCreatedByUser } = req.user;
-    const userId = req.user.id;
-    try {
-      if (idsOfPostsCreatedByUser.includes(postId)) {
-        await this.communityService.updatePost(postId, updatedData, userId);
-        return { message: 'post updated' };
-      } else {
-        return { message: 'This user has never written that post.' };
-      }
-    } catch (err) {
-      console.log(err);
-      throw new Error(err);
+    const userId: number = req.user.id;
+
+    if (idsOfPostsCreatedByUser.includes(postId)) {
+      await this.communityService.updatePost(postId, updatedData, userId);
+      return { message: 'post updated' };
+    } else {
+      throw new HttpException(
+        'THIS_USER_HAS_NEVER_WRITTEN_THAT_POST',
+        HttpStatus.FORBIDDEN,
+      );
     }
   }
 
@@ -139,55 +135,46 @@ export class CommunityController {
   @UseGuards(OptionalAuthGuard)
   @Get('/posts/:postId')
   async getPostDetail(@Param('postId') postId: number, @Req() req) {
-    try {
-      const result = await this.communityService.getPostDetail(postId);
-      if (req.user) {
-        const { idsOfPostLikedByUser, idsOfPostsCreatedByUser } = req.user;
-        result.isLogin = true;
-        if (idsOfPostsCreatedByUser.includes(postId)) {
-          result.isAuthor = true;
-        } else {
-          result.isAuthor = false;
-        }
-        if (idsOfPostLikedByUser.includes(postId)) {
-          result.ifLiked = true;
-        } else {
-          result.ifLiked = false;
-        }
-        return result;
+    const result = await this.communityService.getPostDetail(postId);
+
+    if (req.user) {
+      const { idsOfPostLikedByUser, idsOfPostsCreatedByUser } = req.user;
+      result.isLogin = true;
+      if (idsOfPostsCreatedByUser.includes(postId)) {
+        result.isAuthor = true;
+      } else {
+        result.isAuthor = false;
       }
-      if (!req.user) {
-        result.isLogin = false;
-        return result;
+      if (idsOfPostLikedByUser.includes(postId)) {
+        result.ifLiked = true;
+      } else {
+        result.ifLiked = false;
       }
-    } catch (err) {
-      console.log(err);
-      throw new Error(err);
+      return result;
+    }
+    if (!req.user) {
+      result.isLogin = false;
+      return result;
     }
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Post('/like')
-  async createOrDeletePostLike(@Body() data, @Req() req) {
-    try {
-      const userId = req.user.id;
-      const result = await this.communityService.createOrDeletePostLike(
-        data,
-        userId,
-      );
-      if (result['raw']) {
-        return { message: 'like deleted' };
-      } else {
-        return { message: 'like created' };
-      }
-    } catch (err) {
-      console.log(err);
-      return err;
+  async createOrDeletePostLike(@Body() data: PostLikeDto, @Req() req) {
+    const userId: number = req.user.id;
+    const result = await this.communityService.createOrDeletePostLike(
+      data,
+      userId,
+    );
+    if (result['raw']) {
+      return { message: 'like deleted' };
+    } else {
+      return { message: 'like created' };
     }
   }
 
   @Get('/search')
-  async searchPost(@Query() query: SearchDto) {
+  async searchPost(@Query() query: SearchPostDto) {
     return await this.communityService.searchPost(query);
   }
 
