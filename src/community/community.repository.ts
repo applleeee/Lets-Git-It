@@ -2,16 +2,16 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SubCategory } from '../entities/SubCategory';
-import { Post } from 'src/entities/Post';
-import { PostLike } from 'src/entities/PostLike';
-import { Comment } from 'src/entities/Comment';
+import { Post } from '../entities/Post';
+import { PostLike } from '../entities/PostLike';
+import { Comment } from '../entities/Comment';
 import {
   CreateCommentDto,
   CreateOrDeleteCommentLikesDto,
   DeleteCommentDto,
   UpdateCommentDto,
 } from './dto/comment.dto';
-import { CommentLike } from 'src/entities/CommentLike';
+import { CommentLike } from '../entities/CommentLike';
 import { DateEnum, SortEnum } from './dto/Post.dto';
 
 @Injectable()

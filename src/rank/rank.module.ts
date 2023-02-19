@@ -8,13 +8,13 @@ import { RankerProfileRepository } from './rankerProfile.repository';
 import { RankService } from './rank.service';
 import { RankingRepository } from './ranking.repository';
 import { TierRepository } from './tier.repository';
-import { User } from 'src/entities/User';
-import { Comment } from 'src/entities/Comment';
-import { CommentLike } from 'src/entities/CommentLike';
-import { Post } from 'src/entities/Post';
-import { PostLike } from 'src/entities/PostLike';
-import { Field } from 'src/entities/Field';
-import { Career } from 'src/entities/Career';
+import { User } from '../entities/User';
+import { Comment } from '../entities/Comment';
+import { CommentLike } from '../entities/CommentLike';
+import { Post } from '../entities/Post';
+import { PostLike } from '../entities/PostLike';
+import { Field } from '../entities/Field';
+import { Career } from '../entities/Career';
 
 @Module({
   imports: [
