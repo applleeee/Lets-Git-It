@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Tier } from '../entities/Tier';
@@ -11,6 +11,13 @@ export class TierRepository {
   ) {}
 
   async getTierData(): Promise<Tier[]> {
-    return await this.tierRepository.find();
+    try {
+      return await this.tierRepository.find();
+    } catch (e) {
+      throw new HttpException(
+        'DATABASE SERVER CONNECTION ERROR',
+        HttpStatus.BAD_GATEWAY,
+      );
+    }
   }
 }
