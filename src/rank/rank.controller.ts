@@ -19,6 +19,13 @@ export class RankController {
     return await this.rankService.findRanker(userName);
   }
 
+  @Get('/versus')
+  async compareRanker(@Query('userName') userName: string[]) {
+    const firstUser = await this.rankService.checkRanker(userName[0]);
+    const secondUser = await this.rankService.checkRanker(userName[1]);
+    return { firstUser, secondUser };
+  }
+
   @Get('/:userName')
   async getRankerDetail(@Param('userName') userName: string): Promise<{
     rankerDetail: RankerProfileOutput;
@@ -41,14 +48,9 @@ export class RankController {
     return await this.rankService.getTop100(langFilter);
   }
 
-  @Get()
-  async compareRanker(@Query('userName') userName: string[]) {
-    const firstUser = await this.rankService.checkRanker(userName[0]);
-    const secondUser = await this.rankService.checkRanker(userName[1]);
-    return { firstUser, secondUser };
-  }
   @Patch('/latest/:userName')
   async updateRankerProfile(@Param('userName') userName: string) {
     await this.rankService.getRankerDetail(userName);
+    return { URL: `/userDetail/${userName}` };
   }
 }

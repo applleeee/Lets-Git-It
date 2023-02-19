@@ -35,11 +35,6 @@ export class RankService {
   }
 
   async getRankerDetail(userName: string) {
-    //등록,누른 스타 수,팔로잉,팔로워,총 이슈(PR 제외), PR수, 기여한 레포의 스타 수, 리뷰 수
-    console.time(
-      '등록,누른 스타 수,팔로잉,팔로워,이슈,PR 그리고 기여 레포의 스타 수, 리뷰 수',
-    );
-
     const users = axios.get(`https://api.github.com/users/${userName}`, {
       headers: {
         Authorization: `Bearer ${TOKEN}`,
@@ -80,7 +75,7 @@ export class RankService {
         },
       },
     );
-    // 동기, 비동기 (콜백 함수) => Promise(resolve,reject) => async/await
+
     const [issuesRes, pullRequestRes, usersRes, starsRes, eventListRes] =
       await Promise.all([issues, pullRequest, users, stars, eventList]);
 
@@ -128,12 +123,7 @@ export class RankService {
     );
 
     const reviewCount = reviews.length;
-    console.timeEnd(
-      '등록,누른 스타 수,팔로잉,팔로워,이슈,PR 그리고 기여 레포의 스타 수, 리뷰 수',
-    );
 
-    //스폰서 수
-    console.time('스폰서 수');
     const sponsors = await axios.get(
       `https://ghs.vercel.app/count/${userName}`,
     );
@@ -146,10 +136,7 @@ export class RankService {
       );
       sponsorsCount = sponsorsList.data.sponsors.length;
     }
-    console.timeEnd('스폰서 수');
 
-    //유저의 커밋 수
-    console.time('커밋 수');
     const commits = await axios.get(
       `https://api.github.com/search/commits?q=author:${userName}`,
       {
@@ -159,12 +146,7 @@ export class RankService {
       },
     );
     const commitsCount = commits.data.total_count;
-    console.timeEnd('커밋 수');
 
-    //주 프로그래밍 언어 구하기, 포크 한 수, 개인 레포 수, 포크 된 유저의 레포 수, 와쳐 수, 내가 받은 스타 수
-    console.time(
-      '주 언어, 포크 한/된 레포, 개인 레포, 내가 받은 스타, 와쳐 수',
-    );
     const scoreBasisPromise = axios.get(
       `https://api.github.com/users/${userName}/repos?per_page=100`,
       {
@@ -226,12 +208,7 @@ export class RankService {
             (key) => programmingLang[key] === maxBit,
           )
         : 'none';
-    console.timeEnd(
-      '주 언어, 포크 한/된 레포, 개인 레포, 내가 받은 스타, 와쳐 수',
-    );
 
-    //점수 및 티어 계산
-    console.time('점수 및 티어 계산');
     const curiosityScore =
       (issuesCount * 5 +
         forkingCount * 4 +
@@ -333,8 +310,6 @@ export class RankService {
       );
     }
 
-    console.timeEnd('점수 및 티어 계산');
-    //등록 후 반환
     const rankerDetail = await this.rankerProfileRepository.getRankerProfile(
       userName,
     );
@@ -375,17 +350,5 @@ export class RankService {
 
   async findRanker(userName: string): Promise<SearchOutput[]> {
     return await this.rankerProfileRepository.findRanker(userName);
-  }
-
-  async updateRanker(userName: string) {
-    const { data } = await axios.get(
-      `https://api.github.com/users/${userName}`,
-      {
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
-        },
-      },
-    );
-    await this.rankerProfileRepository.getLatestRankerData(data);
   }
 }

@@ -203,7 +203,7 @@ export class RankingRepository {
         abilityContributeRepositoryStarNumber: contributingRepoStarsCount,
         tierId,
       })
-      .where('ranker_profile_id =: rankerId', { rankerId: rankerProfileId })
+      .where(`ranker_profile_id=:rankerId`, { rankerId: rankerProfileId })
       .execute();
   }
 }
