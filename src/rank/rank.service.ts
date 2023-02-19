@@ -348,7 +348,7 @@ export class RankService {
     return await this.rankerProfileRepository.getTop5();
   }
 
-  async getTop100(langFilter: string): Promise<{
+  async getTop100(langFilter: unknown): Promise<{
     langCategory: unknown[];
     top100: Top100[];
   }> {
