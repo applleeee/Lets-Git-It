@@ -135,14 +135,14 @@ export class CommunityService {
 
   async getPostList(subCategoryId: number, query: GetPostListDto) {
     const { sort, date, offset, limit } = query;
-    const result = await this.CommunityRepository.getPostList(
+    const postLists = await this.CommunityRepository.getPostList(
       subCategoryId,
       sort,
       date,
       offset,
       limit,
     );
-    result['total'] = result.length;
+    const result = { postLists: postLists, total: postLists.length };
     return result;
   }
 
@@ -171,12 +171,17 @@ export class CommunityService {
 
   async searchPost(query: SearchPostDto) {
     const { option, keyword, offset, limit } = query;
-    return await this.CommunityRepository.searchPost(
+    const searchedPosts = await this.CommunityRepository.searchPost(
       option,
       keyword,
       offset,
       limit,
     );
+    const result = {
+      searchedPosts: searchedPosts,
+      total: searchedPosts.length,
+    };
+    return result;
   }
 
   async getIdsOfPostsCreatedByUser(userId: number) {
