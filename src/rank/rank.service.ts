@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { RankerProfileRepository } from './rankerProfile.repository';
 import * as dotenv from 'dotenv';
@@ -35,287 +35,313 @@ export class RankService {
   }
 
   async getRankerDetail(userName: string) {
-    const users = axios.get(`https://api.github.com/users/${userName}`, {
-      headers: {
-        Authorization: `Bearer ${TOKEN}`,
-      },
-    });
+    try {
+      const users = axios
+        .get(`https://api.github.com/users/${userName}`, {
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+          },
+        })
+        .catch((e) => {
+          throw new HttpException('INVALID USER', HttpStatus.NOT_FOUND);
+        });
 
-    const stars = axios.get(
-      `https://api.github.com/users/${userName}/starred?per_page=100`,
-      {
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
+      const stars = axios.get(
+        `https://api.github.com/users/${userName}/starred?per_page=100`,
+        {
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+          },
         },
-      },
-    );
-
-    const issues = axios.get(
-      `https://api.github.com/search/issues?q=author:${userName}`,
-      {
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
-        },
-      },
-    );
-
-    const pullRequest = axios.get(
-      `https://api.github.com/search/issues?q=type:pr+author:${userName}`,
-      {
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
-        },
-      },
-    );
-    const eventList = axios.get(
-      `https://api.github.com/users/${userName}/events?per_page=100`,
-      {
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
-        },
-      },
-    );
-
-    const [issuesRes, pullRequestRes, usersRes, starsRes, eventListRes] =
-      await Promise.all([issues, pullRequest, users, stars, eventList]);
-
-    const checkRanker = await this.rankerProfileRepository.checkRanker(
-      userName,
-    );
-
-    if (checkRanker) {
-      await this.rankerProfileRepository.getLatestRankerData(usersRes.data);
-    } else {
-      await this.rankerProfileRepository.createRankerProfile(usersRes.data);
-    }
-
-    const starringCount = starsRes.data.length;
-    const followingCount = usersRes.data.following;
-    const followersCount = usersRes.data.followers;
-    const pullRequestCount = pullRequestRes.data.total_count;
-    const issuesCount = issuesRes.data.total_count - pullRequestCount;
-
-    const promises = [];
-    const allPR = pullRequestRes.data.items;
-
-    for (let i = 0; i < allPR.length; i++) {
-      if (allPR[i].author_association === 'CONTRIBUTOR') {
-        promises.push(
-          axios.get(allPR[i].repository_url, {
-            headers: {
-              Authorization: `Bearer ${TOKEN}`,
-            },
-          }),
-        );
-      }
-    }
-
-    const contributingRepos = await Promise.all(promises);
-
-    let contributingRepoStarsCount = 0;
-
-    for (const repo of contributingRepos) {
-      contributingRepoStarsCount += repo.data.stargazers_count;
-    }
-
-    const reviews = eventListRes.data.filter(
-      (event: object) => event['type'] === 'PullRequestReviewEvent',
-    );
-
-    const reviewCount = reviews.length;
-
-    const sponsors = await axios.get(
-      `https://ghs.vercel.app/count/${userName}`,
-    );
-
-    let sponsorsCount = 0;
-
-    if (!Boolean(sponsors.data)) {
-      const sponsorsList = await axios.get(
-        `https://ghs.vercel.app/sponsors/${userName}`,
       );
-      sponsorsCount = sponsorsList.data.sponsors.length;
-    }
 
-    const commits = await axios.get(
-      `https://api.github.com/search/commits?q=author:${userName}`,
-      {
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
+      const issues = axios.get(
+        `https://api.github.com/search/issues?q=author:${userName}`,
+        {
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+          },
         },
-      },
-    );
-    const commitsCount = commits.data.total_count;
+      );
 
-    const scoreBasisPromise = axios.get(
-      `https://api.github.com/users/${userName}/repos?per_page=100`,
-      {
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
+      const pullRequest = axios.get(
+        `https://api.github.com/search/issues?q=type:pr+author:${userName}`,
+        {
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+          },
         },
-      },
-    );
+      );
+      const eventList = axios.get(
+        `https://api.github.com/users/${userName}/events?per_page=100`,
+        {
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+          },
+        },
+      );
 
-    const reposLangPromises = [];
-    const scoreBasis = await scoreBasisPromise;
-    const programmingLang = new Object();
-    let forkingCount = 0;
-    let personalRepoCount = 0;
-    let forkedCount = 0;
-    let watchersCount = 0;
-    let myStarsCount = 0;
+      const commits = axios.get(
+        `https://api.github.com/search/commits?q=author:${userName}`,
+        {
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+          },
+        },
+      );
 
-    for (const el of scoreBasis.data) {
-      const repoName = el.name;
+      const [
+        issuesRes,
+        pullRequestRes,
+        usersRes,
+        starsRes,
+        eventListRes,
+        commitsRes,
+      ] = await Promise.all([
+        issues,
+        pullRequest,
+        users,
+        stars,
+        eventList,
+        commits,
+      ]);
 
-      if (!el.fork) {
-        personalRepoCount++;
-        reposLangPromises.push(
-          axios.get(
-            `https://api.github.com/repos/${userName}/${repoName}/languages`,
-            {
+      const checkRanker = await this.rankerProfileRepository.checkRanker(
+        userName,
+      );
+
+      if (checkRanker) {
+        await this.rankerProfileRepository.getLatestRankerData(usersRes.data);
+      } else {
+        await this.rankerProfileRepository.createRankerProfile(usersRes.data);
+      }
+
+      const starringCount = starsRes.data.length;
+      const followingCount = usersRes.data.following;
+      const followersCount = usersRes.data.followers;
+      const pullRequestCount = pullRequestRes.data.total_count;
+      const issuesCount = issuesRes.data.total_count - pullRequestCount;
+      const commitsCount = commitsRes.data.total_count;
+
+      const promises = [];
+      const allPR = pullRequestRes.data.items;
+
+      for (let i = 0; i < allPR.length; i++) {
+        if (allPR[i].author_association === 'CONTRIBUTOR') {
+          promises.push(
+            axios.get(allPR[i].repository_url, {
               headers: {
                 Authorization: `Bearer ${TOKEN}`,
               },
-            },
-          ),
-        );
-      } else {
-        forkingCount++;
-      }
-      myStarsCount += el.stargazers_count;
-      forkedCount += el.forks;
-      watchersCount += el.watchers_count;
-    }
-
-    const reposLangArray = await Promise.all(reposLangPromises);
-    for (const reposLang of reposLangArray) {
-      const languages: object = reposLang.data;
-      for (const lang in languages) {
-        if (programmingLang.hasOwnProperty(lang)) {
-          programmingLang[lang] += languages[lang];
-        } else {
-          programmingLang[lang] = languages[lang];
+            }),
+          );
         }
       }
-    }
 
-    const maxBit = Math.max(...Object.values(programmingLang));
+      const contributingRepos = await Promise.all(promises);
 
-    const mainLanguage =
-      maxBit > 0
-        ? Object.keys(programmingLang).find(
-            (key) => programmingLang[key] === maxBit,
-          )
-        : 'none';
+      let contributingRepoStarsCount = 0;
 
-    const curiosityScore =
-      (issuesCount * 5 +
-        forkingCount * 4 +
-        starringCount * 2 +
-        followingCount * 1) *
-      0.1;
-    const passionScore =
-      (commitsCount * 5 +
-        pullRequestCount * 4 +
-        reviewCount * 2 +
-        personalRepoCount * 1) *
-      0.2;
-    const fameScore =
-      (followersCount * 5 + forkedCount * 4 + watchersCount * 3) * 0.35;
-    const abilityScore =
-      (sponsorsCount * 5 + myStarsCount * 4 + contributingRepoStarsCount * 3) *
-      0.35;
-
-    const totalScore = Math.floor(
-      curiosityScore + passionScore + fameScore + abilityScore,
-    );
-
-    const tierData = await this.tierRepository.getTierData();
-    const scores = await this.rankingRepository.getAllScores();
-
-    const ranking = scores
-      .map((el) => parseFloat(el.total_score))
-      .concat(totalScore)
-      .sort((a, b) => b - a);
-
-    const percentile =
-      ((ranking.indexOf(totalScore) + 1) / ranking.length) * 100;
-
-    let tierId = 0;
-    for (const t of tierData) {
-      if (
-        percentile > parseFloat(t.endPercent) &&
-        percentile <= parseFloat(t.startPercent)
-      ) {
-        tierId = t.id;
+      for (const repo of contributingRepos) {
+        contributingRepoStarsCount += repo.data.stargazers_count;
       }
-    }
-    const rankerProfileId = await this.rankerProfileRepository.getRankerId(
-      userName,
-    );
-    const checkRanking = await this.rankingRepository.checkRanking(
-      rankerProfileId,
-    );
 
-    if (checkRanking) {
-      await this.rankingRepository.updateRanking(
-        mainLanguage,
-        curiosityScore,
-        passionScore,
-        fameScore,
-        abilityScore,
-        totalScore,
-        issuesCount,
-        forkingCount,
-        starringCount,
-        followingCount,
-        commitsCount,
-        pullRequestCount,
-        reviewCount,
-        personalRepoCount,
-        followersCount,
-        forkedCount,
-        watchersCount,
-        sponsorsCount,
-        myStarsCount,
-        contributingRepoStarsCount,
-        rankerProfileId,
-        tierId,
+      const reviews = eventListRes.data.filter(
+        (event: object) => event['type'] === 'PullRequestReviewEvent',
       );
-    } else {
-      await this.rankingRepository.registerRanking(
-        mainLanguage,
-        curiosityScore,
-        passionScore,
-        fameScore,
-        abilityScore,
-        totalScore,
-        issuesCount,
-        forkingCount,
-        starringCount,
-        followingCount,
-        commitsCount,
-        pullRequestCount,
-        reviewCount,
-        personalRepoCount,
-        followersCount,
-        forkedCount,
-        watchersCount,
-        sponsorsCount,
-        myStarsCount,
-        contributingRepoStarsCount,
+
+      const reviewCount = reviews.length;
+
+      const sponsors = await axios.get(
+        `https://ghs.vercel.app/count/${userName}`,
+      );
+
+      let sponsorsCount = 0;
+
+      if (!Boolean(sponsors.data)) {
+        const sponsorsList = await axios.get(
+          `https://ghs.vercel.app/sponsors/${userName}`,
+        );
+        sponsorsCount = sponsorsList.data.sponsors.length;
+      }
+
+      const scoreBasisPromise = axios.get(
+        `https://api.github.com/users/${userName}/repos?per_page=100`,
+        {
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+          },
+        },
+      );
+
+      const reposLangPromises = [];
+      const scoreBasis = await scoreBasisPromise;
+      const programmingLang = new Object();
+      let forkingCount = 0;
+      let personalRepoCount = 0;
+      let forkedCount = 0;
+      let watchersCount = 0;
+      let myStarsCount = 0;
+
+      for (const el of scoreBasis.data) {
+        const repoName = el.name;
+
+        if (!el.fork) {
+          personalRepoCount++;
+          reposLangPromises.push(
+            axios.get(
+              `https://api.github.com/repos/${userName}/${repoName}/languages`,
+              {
+                headers: {
+                  Authorization: `Bearer ${TOKEN}`,
+                },
+              },
+            ),
+          );
+        } else {
+          forkingCount++;
+        }
+        myStarsCount += el.stargazers_count;
+        forkedCount += el.forks;
+        watchersCount += el.watchers_count;
+      }
+
+      const reposLangArray = await Promise.all(reposLangPromises);
+      for (const reposLang of reposLangArray) {
+        const languages: object = reposLang.data;
+        for (const lang in languages) {
+          if (programmingLang.hasOwnProperty(lang)) {
+            programmingLang[lang] += languages[lang];
+          } else {
+            programmingLang[lang] = languages[lang];
+          }
+        }
+      }
+
+      const maxBit = Math.max(...Object.values(programmingLang));
+
+      const mainLanguage =
+        maxBit > 0
+          ? Object.keys(programmingLang).find(
+              (key) => programmingLang[key] === maxBit,
+            )
+          : 'none';
+
+      const curiosityScore =
+        (issuesCount * 5 +
+          forkingCount * 4 +
+          starringCount * 2 +
+          followingCount * 1) *
+        0.1;
+      const passionScore =
+        (commitsCount * 5 +
+          pullRequestCount * 4 +
+          reviewCount * 2 +
+          personalRepoCount * 1) *
+        0.2;
+      const fameScore =
+        (followersCount * 5 + forkedCount * 4 + watchersCount * 3) * 0.35;
+      const abilityScore =
+        (sponsorsCount * 5 +
+          myStarsCount * 4 +
+          contributingRepoStarsCount * 3) *
+        0.35;
+
+      const totalScore = Math.floor(
+        curiosityScore + passionScore + fameScore + abilityScore,
+      );
+
+      const tierData = await this.tierRepository.getTierData();
+      const scores = await this.rankingRepository.getAllScores();
+
+      const ranking = scores
+        .map((el) => parseFloat(el.total_score))
+        .concat(totalScore)
+        .sort((a, b) => b - a);
+
+      const percentile =
+        ((ranking.indexOf(totalScore) + 1) / ranking.length) * 100;
+
+      let tierId = 0;
+      for (const t of tierData) {
+        if (
+          percentile > parseFloat(t.endPercent) &&
+          percentile <= parseFloat(t.startPercent)
+        ) {
+          tierId = t.id;
+        }
+      }
+      const rankerProfileId = await this.rankerProfileRepository.getRankerId(
+        userName,
+      );
+      const checkRanking = await this.rankingRepository.checkRanking(
         rankerProfileId,
-        tierId,
+      );
+
+      if (checkRanking) {
+        await this.rankingRepository.updateRanking(
+          mainLanguage,
+          curiosityScore,
+          passionScore,
+          fameScore,
+          abilityScore,
+          totalScore,
+          issuesCount,
+          forkingCount,
+          starringCount,
+          followingCount,
+          commitsCount,
+          pullRequestCount,
+          reviewCount,
+          personalRepoCount,
+          followersCount,
+          forkedCount,
+          watchersCount,
+          sponsorsCount,
+          myStarsCount,
+          contributingRepoStarsCount,
+          rankerProfileId,
+          tierId,
+        );
+      } else {
+        await this.rankingRepository.registerRanking(
+          mainLanguage,
+          curiosityScore,
+          passionScore,
+          fameScore,
+          abilityScore,
+          totalScore,
+          issuesCount,
+          forkingCount,
+          starringCount,
+          followingCount,
+          commitsCount,
+          pullRequestCount,
+          reviewCount,
+          personalRepoCount,
+          followersCount,
+          forkedCount,
+          watchersCount,
+          sponsorsCount,
+          myStarsCount,
+          contributingRepoStarsCount,
+          rankerProfileId,
+          tierId,
+        );
+      }
+
+      const rankerDetail = await this.rankerProfileRepository.getRankerProfile(
+        userName,
+      );
+      const maxValues = await this.rankingRepository.getMaxValues();
+      const avgValues = await this.rankingRepository.getAvgValues();
+      return { rankerDetail, maxValues, avgValues };
+    } catch (e) {
+      throw new HttpException(
+        'GITHUB API IS OVERLOADED',
+        HttpStatus.BAD_GATEWAY,
       );
     }
-
-    const rankerDetail = await this.rankerProfileRepository.getRankerProfile(
-      userName,
-    );
-    const maxValues = await this.rankingRepository.getMaxValues();
-    const avgValues = await this.rankingRepository.getAvgValues();
-    return { rankerDetail, maxValues, avgValues };
   }
 
   async getTop5(): Promise<Top5[]> {
