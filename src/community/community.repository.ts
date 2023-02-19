@@ -7,12 +7,12 @@ import { PostLike } from 'src/entities/PostLike';
 import { Comment } from 'src/entities/Comment';
 import {
   CreateCommentDto,
-  CreateCommentLikesDto,
+  CreateOrDeleteCommentLikesDto,
   DeleteCommentDto,
   UpdateCommentDto,
 } from './dto/comment.dto';
 import { CommentLike } from 'src/entities/CommentLike';
-import { DateEnum, SortEnum } from './dto/getPostList.dto';
+import { DateEnum, SortEnum } from './dto/Post.dto';
 
 @Injectable()
 export class CommunityRepository {
@@ -192,9 +192,58 @@ export class CommunityRepository {
     return postDetail;
   }
 
+  async createOrDeletePostLike(postId: number, userId: number) {
+    const ifLiked = await this.postLikeRepository.findOne({
+      where: { postId: postId, userId: userId },
+    });
+
+    if (!ifLiked) {
+      try {
+        const postLike = new PostLike();
+        postLike.postId = postId;
+        postLike.userId = userId;
+        return await this.postLikeRepository.save(postLike);
+      } catch (err) {
+        throw new HttpException(
+          'Error: invaild postId',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    } else if (ifLiked) {
+      return await this.postLikeRepository.delete({ id: ifLiked.id });
+    }
+  }
+
+  async searchPost(
+    option: string,
+    keyword: string,
+    offset: number,
+    limit: number,
+  ) {
+    const queryBuilder = this.postList(offset, limit);
+    if (option === 'title') {
+      queryBuilder.where('post.title LIKE :keyword', {
+        keyword: `%${keyword}%`,
+      });
+    } else if (option === 'author') {
+      queryBuilder.where('ranker_profile.name LIKE :keyword', {
+        keyword: `%${keyword}%`,
+      });
+    } else if (option === 'title_author') {
+      queryBuilder
+        .where('post.title LIKE :keyword', {
+          keyword: `%${keyword}%`,
+        })
+        .orWhere('ranker_profile.name LIKE :keyword', {
+          keyword: `%${keyword}%`,
+        });
+    }
+    return await queryBuilder.getRawMany();
+  }
+
   async getPostsCreatedByUser(userId: number): Promise<Post[]> {
     return this.postRepository
-      .createQueryBuilder()
+      .createQueryBuilder('post')
       .select([
         'post.id as id',
         'post.title as title',
@@ -223,61 +272,9 @@ export class CommunityRepository {
       .getRawMany();
   }
 
-  async createOrDeletePostLike(postId: number, userId: number) {
-    const ifLiked = await this.postLikeRepository.findOne({
-      where: { postId: postId, userId: userId },
-    });
-
-    if (!ifLiked) {
-      try {
-        const postLike = new PostLike();
-        postLike.postId = postId;
-        postLike.userId = userId;
-        return await this.postLikeRepository.save(postLike);
-      } catch (err) {
-        throw new HttpException(
-          'Error: invaild postId',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-    } else if (ifLiked) {
-      return await this.postLikeRepository.delete({ id: ifLiked.id });
-    }
-  }
-
-  // 작성자명으로 검색 기능 추가(유저테이블에 유저이름 추가 필요?)
-  async searchPost(
-    option: string,
-    keyword: string,
-    offset: number,
-    limit: number,
-  ) {
-    const queryBuilder = this.postList(offset, limit);
-    if (option === 'title') {
-      queryBuilder.where('post.title LIKE :keyword', {
-        keyword: `%${keyword}%`,
-      });
-    }
-    return await queryBuilder.getRawMany();
-  }
-
-  // async getPostsCreatedByUser(userId: number): Promise<Post[]> {
-  //   return this.postRepository
-  //     .createQueryBuilder()
-  //     .select([
-  //       'id',
-  //       'title',
-  //       'content_url as contentUrl',
-  //       'sub_category_id as subCategoryId',
-  //       'created_at as createdAt',
-  //     ])
-  //     .where('user_id = :userId', { userId: userId })
-  //     .getRawMany();
-  // }
-
   async getIdsOfPostLikedByUser(userId: number): Promise<Post[]> {
     return this.postLikeRepository
-      .createQueryBuilder()
+      .createQueryBuilder('post')
       .select(['post_id'])
       .where('user_id = :userId', { userId: userId })
       .getRawMany();
@@ -309,7 +306,7 @@ export class CommunityRepository {
 
   async readComments(postId: number, depth: number) {
     return await this.commentRepository
-      .createQueryBuilder()
+      .createQueryBuilder('comment')
       .select([
         'comment.user_id as userId',
         'comment.group_order as groupOrder',
@@ -349,7 +346,7 @@ export class CommunityRepository {
       .getRawMany();
   }
 
-  async createCommentLikes(criteria: CreateCommentLikesDto) {
+  async createOrDeleteCommentLikes(criteria: CreateOrDeleteCommentLikesDto) {
     const isExist = await this.commentLikeRepository.exist({
       where: { userId: criteria.userId, commentId: criteria.commentId },
     });
@@ -361,7 +358,7 @@ export class CommunityRepository {
 
   async getCommentsCreatedByUser(userId: number): Promise<Comment[]> {
     return this.commentRepository
-      .createQueryBuilder()
+      .createQueryBuilder('comment')
       .select(['id', 'content', 'post_id as postId', 'created_at as createdAt'])
       .where('user_id = :userId', { userId: userId })
       .getRawMany();
@@ -369,7 +366,7 @@ export class CommunityRepository {
 
   async getIdsOfCommentLikedByUser(userId: number): Promise<CommentLike[]> {
     return this.commentLikeRepository
-      .createQueryBuilder()
+      .createQueryBuilder('comment')
       .select(['comment_id'])
       .where('user_id = :userId', { userId: userId })
       .getRawMany();

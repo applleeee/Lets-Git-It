@@ -18,19 +18,19 @@ export class Ranking {
   @Column('varchar', { name: 'main_language', length: 255 })
   mainLanguage: string;
 
-  @Column('decimal', { name: 'curiosity_score', precision: 8, scale: 4 })
+  @Column('decimal', { name: 'curiosity_score', precision: 16, scale: 4 })
   curiosityScore: number;
 
-  @Column('decimal', { name: 'passion_score', precision: 8, scale: 4 })
+  @Column('decimal', { name: 'passion_score', precision: 16, scale: 4 })
   passionScore: number;
 
-  @Column('decimal', { name: 'fame_score', precision: 8, scale: 4 })
+  @Column('decimal', { name: 'fame_score', precision: 16, scale: 4 })
   fameScore: number;
 
-  @Column('decimal', { name: 'ability_score', precision: 8, scale: 4 })
+  @Column('decimal', { name: 'ability_score', precision: 16, scale: 4 })
   abilityScore: number;
 
-  @Column('decimal', { name: 'total_score', precision: 9, scale: 4 })
+  @Column('decimal', { name: 'total_score', precision: 16, scale: 4 })
   totalScore: number;
 
   @Column('int', { name: 'curiosity_raise_issue_number', unsigned: true })

@@ -1,18 +1,22 @@
 import { Comment } from './../entities/Comment';
 import { HttpException, Injectable, HttpStatus } from '@nestjs/common';
 import { CommunityRepository } from './community.repository';
-import { CreatePostDto } from './dto/createPost.dto';
 import { uploadToS3, getS3Data, deleteS3Data } from 'src/utiles/aws';
 import {
   CreateCommentDto,
-  CreateCommentLikesDto,
+  CreateOrDeleteCommentLikesDto,
   DeleteCommentDto,
   UpdateCommentDto,
+  Depth,
 } from './dto/comment.dto';
 import { Post } from 'src/entities/Post';
-import { GetPostListDto } from './dto/getPostList.dto';
-import { SearchDto } from './dto/searchPost.dto';
-
+import {
+  GetPostListDto,
+  CreatePostDto,
+  SearchPostDto,
+  DeleteImageDto,
+  PostLikeDto,
+} from './dto/Post.dto';
 @Injectable()
 export class CommunityService {
   constructor(private CommunityRepository: CommunityRepository) {}
@@ -26,8 +30,7 @@ export class CommunityService {
   }
 
   async getAllCategories() {
-    const categories = this.CommunityRepository.getAllCategories();
-    return categories;
+    return this.CommunityRepository.getAllCategories();
   }
 
   async saveImageToS3(image, userId: number) {
@@ -39,7 +42,7 @@ export class CommunityService {
     return saveToS3.Location;
   }
 
-  async deleteImageInS3(toDeleteImageData) {
+  async deleteImageInS3(toDeleteImageData: DeleteImageDto) {
     const { toDeleteImage } = toDeleteImageData;
     if (toDeleteImage.length !== 0) {
       return await deleteS3Data(toDeleteImage);
@@ -53,8 +56,14 @@ export class CommunityService {
     const { title, subCategoryId, content } = postData;
     const contentUrl = `post/${userId}_${title}_${now}`;
     const mimetype = 'string';
-    await uploadToS3(content as unknown as Buffer, contentUrl, mimetype);
-
+    try {
+      await uploadToS3(content as unknown as Buffer, contentUrl, mimetype);
+    } catch (err) {
+      throw new HttpException(
+        'CANNOT_UPLOAD_POST_TO_S3' + err,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
     await this.CommunityRepository.createPost(
       title,
       userId,
@@ -65,10 +74,17 @@ export class CommunityService {
 
   async getPostToUpdate(postId: number) {
     const postDetail = await this.CommunityRepository.getPostById(postId);
-    const postContent = await getS3Data(postDetail.contentUrl);
-    postDetail['content'] = postContent;
-    delete postDetail.contentUrl;
-    return postDetail;
+    try {
+      const postContent = await getS3Data(postDetail.contentUrl);
+      postDetail['content'] = postContent;
+      delete postDetail.contentUrl;
+      return postDetail;
+    } catch (err) {
+      throw new HttpException(
+        'CANNOT_GET_POST_FROM_S3' + err,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async updatePost(postId: number, updatedData: CreatePostDto, userId: number) {
@@ -76,8 +92,10 @@ export class CommunityService {
     try {
       await deleteS3Data([originPost.contentUrl]);
     } catch (err) {
-      console.log(err);
-      throw new Error(err);
+      throw new HttpException(
+        'CANNOT_DELETE_POST_IN_S3' + err,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     const now = this.getCurrentTime();
@@ -88,8 +106,10 @@ export class CommunityService {
     try {
       await uploadToS3(content as unknown as Buffer, contentUrl, mimetype);
     } catch (err) {
-      console.log(err);
-      throw new Error(err);
+      throw new HttpException(
+        'CANNOT_UPLOAD_POST_TO_S3' + err,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     await this.CommunityRepository.updatePost(
@@ -102,29 +122,66 @@ export class CommunityService {
 
   async deletePost(postId: number) {
     const originPost = await this.CommunityRepository.getPostById(postId);
-    await deleteS3Data([originPost.contentUrl]);
-    return await this.CommunityRepository.deletePost(postId);
+    try {
+      await deleteS3Data([originPost.contentUrl]);
+      return await this.CommunityRepository.deletePost(postId);
+    } catch (err) {
+      throw new HttpException(
+        'CANNOT_DELETE_POST_IN_S3' + err,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async getPostList(subCategoryId: number, query: GetPostListDto) {
     const { sort, date, offset, limit } = query;
-    const result = await this.CommunityRepository.getPostList(
+    const postLists = await this.CommunityRepository.getPostList(
       subCategoryId,
       sort,
       date,
       offset,
       limit,
     );
-    result['total'] = result.length;
+    const result = { postLists: postLists, total: postLists.length };
     return result;
   }
 
   async getPostDetail(postId: number) {
     const postDetail = await this.CommunityRepository.getPostDatail(postId);
-    const postContent = await getS3Data(postDetail.content);
-    postDetail.content = postContent;
 
-    return postDetail;
+    try {
+      const postContent = await getS3Data(postDetail.content);
+      postDetail.content = postContent;
+      return postDetail;
+    } catch (err) {
+      throw new HttpException(
+        'CANNOT_GET_POST_FROM_S3' + err,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async createOrDeletePostLike(data: PostLikeDto, userId: number) {
+    const { postId } = data;
+    return await this.CommunityRepository.createOrDeletePostLike(
+      postId,
+      userId,
+    );
+  }
+
+  async searchPost(query: SearchPostDto) {
+    const { option, keyword, offset, limit } = query;
+    const searchedPosts = await this.CommunityRepository.searchPost(
+      option,
+      keyword,
+      offset,
+      limit,
+    );
+    const result = {
+      searchedPosts: searchedPosts,
+      total: searchedPosts.length,
+    };
+    return result;
   }
 
   async getIdsOfPostsCreatedByUser(userId: number) {
@@ -137,61 +194,79 @@ export class CommunityService {
     return data.map<Post['id']>((item) => Object.values(item)[0]);
   }
 
-  async createOrDeletePostLike(data, userId) {
-    const { postId } = data;
-    return await this.CommunityRepository.createOrDeletePostLike(
-      postId,
-      userId,
-    );
-  }
+  async createComment(user, commentData: CreateCommentDto) {
+    const comments = await this.readComments(user, commentData.postId);
+    const groupOrderArr = comments.map((comment) => comment.groupOrder);
 
-  async searchPost(query: SearchDto) {
-    const { option, keyword, offset, limit } = query;
-    return await this.CommunityRepository.searchPost(
-      option,
-      keyword,
-      offset,
-      limit,
-    );
-  }
+    if (
+      groupOrderArr.indexOf(commentData.groupOrder) === -1 &&
+      commentData.depth === Depth.RE_COMMENT
+    )
+      throw new HttpException(
+        'CANNOT_CREATE_RE_COMMENT_WITHOUT_COMMENT',
+        HttpStatus.BAD_REQUEST,
+      );
 
-  async createComment(commentData: CreateCommentDto) {
-    return await this.CommunityRepository.createComment(commentData);
+    if (
+      commentData.groupOrder <= groupOrderArr[groupOrderArr.length - 1] &&
+      commentData.depth === Depth.COMMENT
+    )
+      throw new HttpException(
+        'ALREADY_EXIST_COMMENT_IN_THE_GROUPORDER',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const result = await this.CommunityRepository.createComment(commentData);
+
+    return result;
   }
 
   async deleteComment(criteria: DeleteCommentDto) {
-    return await this.CommunityRepository.deleteComment(criteria);
-  }
-  async updateComment(criteria: UpdateCommentDto, toUpdateContent: string) {
+    const commentIdsCreatedByUser = (await this.getIdsOfCommentCreatedByUser(
+      criteria.userId,
+    )) as unknown[];
+
     const isCommentExist = await this.CommunityRepository.isCommentExist(
       criteria.id,
     );
 
     if (!isCommentExist)
-      throw new HttpException(
-        'THE_COMMENT_IS_NOT_EXIST',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('THE_COMMENT_NOT_EXIST', HttpStatus.NOT_FOUND);
 
-    return await this.CommunityRepository.updateComment(
-      criteria,
-      toUpdateContent,
+    if (commentIdsCreatedByUser.indexOf(criteria.id) === -1)
+      throw new HttpException('NOT_CREATED_BY_USER', HttpStatus.FORBIDDEN);
+
+    await this.CommunityRepository.deleteComment(criteria);
+  }
+
+  async updateComment(criteria: UpdateCommentDto, toUpdateContent: string) {
+    const commentIdsCreatedByUser = (await this.getIdsOfCommentCreatedByUser(
+      criteria.userId,
+    )) as unknown[];
+
+    const isCommentExist = await this.CommunityRepository.isCommentExist(
+      criteria.id,
     );
+
+    if (!isCommentExist)
+      throw new HttpException('THE_COMMENT_IS_NOT_EXIST', HttpStatus.NOT_FOUND);
+
+    if (commentIdsCreatedByUser.indexOf(criteria.id) === -1)
+      throw new HttpException('NOT_CREATED_BY_USER', HttpStatus.FORBIDDEN);
+
+    await this.CommunityRepository.updateComment(criteria, toUpdateContent);
+
+    return { message: 'COMMENT_UPDATED' };
   }
 
   async readComments(user, postId: number) {
-    enum depth {
-      COMMENT = 1,
-      RE_COMMENT = 2,
-    }
-
     const comments = await this.CommunityRepository.readComments(
       postId,
-      depth.COMMENT,
+      Depth.COMMENT,
     );
     const reComments = await this.CommunityRepository.readComments(
       postId,
-      depth.RE_COMMENT,
+      Depth.RE_COMMENT,
     );
 
     comments.map((comment) => {
@@ -225,8 +300,15 @@ export class CommunityService {
     return comments;
   }
 
-  async createCommentLikes(criteria: CreateCommentLikesDto) {
-    return await this.CommunityRepository.createCommentLikes(criteria);
+  async createOrDeleteCommentLikes(criteria: CreateOrDeleteCommentLikesDto) {
+    const isCommentExist = await this.CommunityRepository.isCommentExist(
+      criteria.commentId,
+    );
+
+    if (!isCommentExist)
+      throw new HttpException('THE_COMMENT_IS_NOT_EXIST', HttpStatus.NOT_FOUND);
+
+    return await this.CommunityRepository.createOrDeleteCommentLikes(criteria);
   }
 
   async getIdsOfCommentCreatedByUser(userId: number) {
