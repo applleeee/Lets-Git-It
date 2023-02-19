@@ -25,6 +25,7 @@ export class RankService {
       const rankerDetail = await this.rankerProfileRepository.getRankerProfile(
         userName,
       );
+      rankerDetail['blank'] = null;
       const maxValues = await this.rankingRepository.getMaxValues();
       const avgValues = await this.rankingRepository.getAvgValues();
       return { rankerDetail, maxValues, avgValues };
@@ -34,11 +35,6 @@ export class RankService {
   }
 
   async getRankerDetail(userName: string) {
-    //등록,누른 스타 수,팔로잉,팔로워,총 이슈(PR 제외), PR수, 기여한 레포의 스타 수, 리뷰 수
-    console.time(
-      '등록,누른 스타 수,팔로잉,팔로워,이슈,PR 그리고 기여 레포의 스타 수, 리뷰 수',
-    );
-
     const users = axios.get(`https://api.github.com/users/${userName}`, {
       headers: {
         Authorization: `Bearer ${TOKEN}`,
@@ -83,7 +79,15 @@ export class RankService {
     const [issuesRes, pullRequestRes, usersRes, starsRes, eventListRes] =
       await Promise.all([issues, pullRequest, users, stars, eventList]);
 
-    await this.rankerProfileRepository.createRankerProfile(usersRes.data);
+    const checkRanker = await this.rankerProfileRepository.checkRanker(
+      userName,
+    );
+
+    if (checkRanker) {
+      await this.rankerProfileRepository.getLatestRankerData(usersRes.data);
+    } else {
+      await this.rankerProfileRepository.createRankerProfile(usersRes.data);
+    }
 
     const starringCount = starsRes.data.length;
     const followingCount = usersRes.data.following;
@@ -119,12 +123,7 @@ export class RankService {
     );
 
     const reviewCount = reviews.length;
-    console.timeEnd(
-      '등록,누른 스타 수,팔로잉,팔로워,이슈,PR 그리고 기여 레포의 스타 수, 리뷰 수',
-    );
 
-    //스폰서 수
-    console.time('스폰서 수');
     const sponsors = await axios.get(
       `https://ghs.vercel.app/count/${userName}`,
     );
@@ -137,10 +136,7 @@ export class RankService {
       );
       sponsorsCount = sponsorsList.data.sponsors.length;
     }
-    console.timeEnd('스폰서 수');
 
-    //유저의 커밋 수
-    console.time('커밋 수');
     const commits = await axios.get(
       `https://api.github.com/search/commits?q=author:${userName}`,
       {
@@ -150,12 +146,7 @@ export class RankService {
       },
     );
     const commitsCount = commits.data.total_count;
-    console.timeEnd('커밋 수');
 
-    //주 프로그래밍 언어 구하기, 포크 한 수, 개인 레포 수, 포크 된 유저의 레포 수, 와쳐 수, 내가 받은 스타 수
-    console.time(
-      '주 언어, 포크 한/된 레포, 개인 레포, 내가 받은 스타, 와쳐 수',
-    );
     const scoreBasisPromise = axios.get(
       `https://api.github.com/users/${userName}/repos?per_page=100`,
       {
@@ -217,12 +208,7 @@ export class RankService {
             (key) => programmingLang[key] === maxBit,
           )
         : 'none';
-    console.timeEnd(
-      '주 언어, 포크 한/된 레포, 개인 레포, 내가 받은 스타, 와쳐 수',
-    );
 
-    //점수 및 티어 계산
-    console.time('점수 및 티어 계산');
     const curiosityScore =
       (issuesCount * 5 +
         forkingCount * 4 +
@@ -268,34 +254,62 @@ export class RankService {
     const rankerProfileId = await this.rankerProfileRepository.getRankerId(
       userName,
     );
-
-    await this.rankingRepository.registerRanking(
-      mainLanguage,
-      curiosityScore,
-      passionScore,
-      fameScore,
-      abilityScore,
-      totalScore,
-      issuesCount,
-      forkingCount,
-      starringCount,
-      followingCount,
-      commitsCount,
-      pullRequestCount,
-      reviewCount,
-      personalRepoCount,
-      followersCount,
-      forkedCount,
-      watchersCount,
-      sponsorsCount,
-      myStarsCount,
-      contributingRepoStarsCount,
+    const checkRanking = await this.rankingRepository.checkRanking(
       rankerProfileId,
-      tierId,
     );
 
-    console.timeEnd('점수 및 티어 계산');
-    //등록 후 반환
+    if (checkRanking) {
+      await this.rankingRepository.updateRanking(
+        mainLanguage,
+        curiosityScore,
+        passionScore,
+        fameScore,
+        abilityScore,
+        totalScore,
+        issuesCount,
+        forkingCount,
+        starringCount,
+        followingCount,
+        commitsCount,
+        pullRequestCount,
+        reviewCount,
+        personalRepoCount,
+        followersCount,
+        forkedCount,
+        watchersCount,
+        sponsorsCount,
+        myStarsCount,
+        contributingRepoStarsCount,
+        rankerProfileId,
+        tierId,
+      );
+    } else {
+      await this.rankingRepository.registerRanking(
+        mainLanguage,
+        curiosityScore,
+        passionScore,
+        fameScore,
+        abilityScore,
+        totalScore,
+        issuesCount,
+        forkingCount,
+        starringCount,
+        followingCount,
+        commitsCount,
+        pullRequestCount,
+        reviewCount,
+        personalRepoCount,
+        followersCount,
+        forkedCount,
+        watchersCount,
+        sponsorsCount,
+        myStarsCount,
+        contributingRepoStarsCount,
+        rankerProfileId,
+        tierId,
+      );
+    }
+
     const rankerDetail = await this.rankerProfileRepository.getRankerProfile(
       userName,
     );
