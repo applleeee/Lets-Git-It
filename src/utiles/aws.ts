@@ -1,5 +1,5 @@
 import {
-  DeleteObjectCommand,
+  DeleteObjectsCommand,
   GetObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -63,14 +63,17 @@ export const uploadToS3 = async (
   }
 };
 
-export const deleteS3Data = async (filePath: string) => {
+export const deleteS3Data = async (filePaths: string[]) => {
   try {
     const s3Client = new S3Client(s3Option);
     const bucketParams = {
       Bucket: process.env.S3_BUCKET_NAME as string,
-      Key: filePath,
+      Delete: {
+        Objects: filePaths.map((filePath) => ({ Key: filePath })),
+        Quiet: false,
+      },
     };
-    return await s3Client.send(new DeleteObjectCommand(bucketParams));
+    return await s3Client.send(new DeleteObjectsCommand(bucketParams));
   } catch (err) {
     console.log(err);
     throw new Error(err);

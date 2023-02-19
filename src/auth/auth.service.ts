@@ -32,16 +32,21 @@ export class AuthService {
     const userName = githubUserInfo.login;
     const user = await this.userService.getByGithubId(githubUserInfo.id);
 
-    if (user) {
-      const jwtToken = this.jwtService.sign({
-        userId: user.id,
-        secretOrPrivateKey: process.env.JWT_SECRET_KEY,
-      });
-
-      return { isMemeber: true, userName: userName, accessToken: jwtToken };
+    if (user === undefined) {
+      return {
+        isMember: false,
+        userName: userName,
+        githubId: githubUserInfo.id,
+      };
     }
 
-    return { isMember: false, userName: userName, githubId: githubUserInfo.id };
+    const jwtToken = this.jwtService.sign({
+      userId: user.id,
+      userName: userName,
+      secretOrPrivateKey: process.env.JWT_SECRET_KEY,
+    });
+
+    return { isMemeber: true, userName: userName, accessToken: jwtToken };
   }
 
   async signUp(signUpDataWithUserName: SignUpWithUserNameDto) {
@@ -52,10 +57,11 @@ export class AuthService {
 
     const jwtToken = this.jwtService.sign({
       userId: user.id,
+      userName: userName,
       secretOrPrivateKey: process.env.JWT_SECRET_KEY,
     });
 
-    const profile = await this.rankService.checkRanker(userName);
+    await this.rankService.checkRanker(userName);
     const userId = await this.userRepository.getUserIdByGithubId(user.githubId);
 
     const ranker = await this.rankerProfileRepository.getRankerProfile(
@@ -78,7 +84,6 @@ export class AuthService {
       updateRankerProfileDto.region,
       updateRankerProfileDto.userId,
     );
-    // id name profileImageUrl, profileText, hompageUrl, email, company, region, userId,
 
     return { accessToken: jwtToken };
   }

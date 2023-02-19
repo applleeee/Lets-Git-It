@@ -5,11 +5,14 @@ import { CreatePostDto } from './dto/createPost.dto';
 import { uploadToS3, getS3Data, deleteS3Data } from 'src/utiles/aws';
 import {
   CreateCommentDto,
-  CreateCommentLikesDto,
+  CreateOrDeleteCommentLikesDto,
   DeleteCommentDto,
   UpdateCommentDto,
+  Depth,
 } from './dto/comment.dto';
 import { Post } from 'src/entities/Post';
+import { GetPostListDto } from './dto/getPostList.dto';
+import { SearchDto } from './dto/searchPost.dto';
 
 @Injectable()
 export class CommunityService {
@@ -29,11 +32,6 @@ export class CommunityService {
   }
 
   async saveImageToS3(image, userId: number) {
-    // const now = new Date(+new Date() + 3240 * 10000)
-    //   .toISOString()
-    //   .replace('T', '_')
-    //   .replace(/\..*/, '')
-    //   .replace(/\:/g, '-');
     const now = this.getCurrentTime();
 
     const name = `post_images/${userId}_${now}`;
@@ -42,23 +40,21 @@ export class CommunityService {
     return saveToS3.Location;
   }
 
+  async deleteImageInS3(toDeleteImageData) {
+    const { toDeleteImage } = toDeleteImageData;
+    if (toDeleteImage.length !== 0) {
+      return await deleteS3Data(toDeleteImage);
+    }
+    return { message: 'No image to delete' };
+  }
+
   async createPost(postData: CreatePostDto, userId: number) {
-    // const now = new Date(+new Date() + 3240 * 10000)
-    //   .toISOString()
-    //   .replace('T', '_')
-    //   .replace(/\..*/, '')
-    //   .replace(/\:/g, '-');
     const now = this.getCurrentTime();
 
     const { title, subCategoryId, content } = postData;
     const contentUrl = `post/${userId}_${title}_${now}`;
     const mimetype = 'string';
-    try {
-      await uploadToS3(content as unknown as Buffer, contentUrl, mimetype);
-    } catch (err) {
-      console.log(err);
-      throw new Error(err);
-    }
+    await uploadToS3(content as unknown as Buffer, contentUrl, mimetype);
 
     await this.CommunityRepository.createPost(
       title,
@@ -69,7 +65,7 @@ export class CommunityService {
   }
 
   async getPostToUpdate(postId: number) {
-    const postDetail = await this.CommunityRepository.getPostToUpdate(postId);
+    const postDetail = await this.CommunityRepository.getPostById(postId);
     const postContent = await getS3Data(postDetail.contentUrl);
     postDetail['content'] = postContent;
     delete postDetail.contentUrl;
@@ -77,17 +73,17 @@ export class CommunityService {
   }
 
   async updatePost(postId: number, updatedData: CreatePostDto, userId: number) {
-    const originPost = await this.CommunityRepository.getPostToUpdate(postId);
+    const originPost = await this.CommunityRepository.getPostById(postId);
     try {
-      await deleteS3Data(originPost.contentUrl);
+      await deleteS3Data([originPost.contentUrl]);
     } catch (err) {
       console.log(err);
       throw new Error(err);
     }
 
     const now = this.getCurrentTime();
-
     const { title, subCategoryId, content } = updatedData;
+
     const contentUrl = `post/${userId}_${title}_${now}`;
     const mimetype = 'string';
     try {
@@ -105,12 +101,23 @@ export class CommunityService {
     );
   }
 
-  async deletePost(postId: number, userId: number) {
-    return await this.CommunityRepository.deletePost(postId, userId);
+  async deletePost(postId: number) {
+    const originPost = await this.CommunityRepository.getPostById(postId);
+    await deleteS3Data([originPost.contentUrl]);
+    return await this.CommunityRepository.deletePost(postId);
   }
 
-  async getPostList(subCategoryId: number) {
-    return await this.CommunityRepository.getPostList(subCategoryId);
+  async getPostList(subCategoryId: number, query: GetPostListDto) {
+    const { sort, date, offset, limit } = query;
+    const result = await this.CommunityRepository.getPostList(
+      subCategoryId,
+      sort,
+      date,
+      offset,
+      limit,
+    );
+    result['total'] = result.length;
+    return result;
   }
 
   async getPostDetail(postId: number) {
@@ -139,33 +146,131 @@ export class CommunityService {
     );
   }
 
-  async createComment(commentData: CreateCommentDto) {
-    await this.CommunityRepository.createComment(commentData);
+  async searchPost(query: SearchDto) {
+    const { option, keyword, offset, limit } = query;
+    return await this.CommunityRepository.searchPost(
+      option,
+      keyword,
+      offset,
+      limit,
+    );
+  }
+
+  async createComment(user, commentData: CreateCommentDto) {
+    const comments = await this.readComments(user, commentData.postId);
+    const groupOrderArr = comments.map((comment) => comment.groupOrder);
+
+    if (
+      groupOrderArr.indexOf(commentData.groupOrder) === -1 &&
+      commentData.depth === Depth.RE_COMMENT
+    )
+      throw new HttpException(
+        'CANNOT_CREATE_RE_COMMENT_WITHOUT_COMMENT',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    if (
+      commentData.groupOrder <= groupOrderArr[groupOrderArr.length - 1] &&
+      commentData.depth === Depth.COMMENT
+    )
+      throw new HttpException(
+        'ALREADY_EXIST_COMMENT_IN_THE_GROUPORDER',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const result = await this.CommunityRepository.createComment(commentData);
+
+    return result;
   }
 
   async deleteComment(criteria: DeleteCommentDto) {
-    await this.CommunityRepository.deleteComment(criteria);
-  }
-  async updateComment(criteria: UpdateCommentDto, toUpdateContent: string) {
-    console.log('criteria: ', criteria.id);
+    const commentIdsCreatedByUser = (await this.getIdsOfCommentCreatedByUser(
+      criteria.userId,
+    )) as unknown[];
+
     const isCommentExist = await this.CommunityRepository.isCommentExist(
       criteria.id,
     );
 
     if (!isCommentExist)
-      throw new HttpException(
-        'THE_COMMENT_IS_NOT_EXIST',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('THE_COMMENT_NOT_EXIST', HttpStatus.NOT_FOUND);
+
+    if (commentIdsCreatedByUser.indexOf(criteria.id) === -1)
+      throw new HttpException('NOT_CREATED_BY_USER', HttpStatus.FORBIDDEN);
+
+    await this.CommunityRepository.deleteComment(criteria);
+  }
+
+  async updateComment(criteria: UpdateCommentDto, toUpdateContent: string) {
+    const commentIdsCreatedByUser = (await this.getIdsOfCommentCreatedByUser(
+      criteria.userId,
+    )) as unknown[];
+
+    const isCommentExist = await this.CommunityRepository.isCommentExist(
+      criteria.id,
+    );
+
+    if (!isCommentExist)
+      throw new HttpException('THE_COMMENT_IS_NOT_EXIST', HttpStatus.NOT_FOUND);
+
+    if (commentIdsCreatedByUser.indexOf(criteria.id) === -1)
+      throw new HttpException('NOT_CREATED_BY_USER', HttpStatus.FORBIDDEN);
+
     await this.CommunityRepository.updateComment(criteria, toUpdateContent);
+
+    return { message: 'COMMENT_UPDATED' };
   }
 
-  async readComments(postId: number) {
-    return await this.CommunityRepository.readComments(postId);
+  async readComments(user, postId: number) {
+    const comments = await this.CommunityRepository.readComments(
+      postId,
+      Depth.COMMENT,
+    );
+    const reComments = await this.CommunityRepository.readComments(
+      postId,
+      Depth.RE_COMMENT,
+    );
+
+    comments.map((comment) => {
+      comment.isCreatedByUser =
+        user.idsOfCommentsCreatedByUser.indexOf(comment.commentId) >= 0
+          ? true
+          : false;
+      comment.isLikedByUser =
+        user.idsOfCommentLikedByUser.indexOf(comment.commentId) >= 0
+          ? true
+          : false;
+    });
+
+    reComments.map((reComment) => {
+      reComment.isCreatedByUser =
+        user.idsOfCommentsCreatedByUser.indexOf(reComment.commentId) >= 0
+          ? true
+          : false;
+      reComment.isLikedByUser =
+        user.idsOfCommentLikedByUser.indexOf(reComment.commentId) >= 0
+          ? true
+          : false;
+    });
+
+    comments.map((comment) => {
+      return (comment.reComments = reComments.filter((reComment) => {
+        return reComment['groupOrder'] === comment['groupOrder'];
+      }));
+    });
+
+    return comments;
   }
 
-  async createCommentLikes(criteria: CreateCommentLikesDto) {
-    return await this.CommunityRepository.createCommentLikes(criteria);
+  async createOrDeleteCommentLikes(criteria: CreateOrDeleteCommentLikesDto) {
+    const isCommentExist = await this.CommunityRepository.isCommentExist(
+      criteria.commentId,
+    );
+
+    if (!isCommentExist)
+      throw new HttpException('THE_COMMENT_IS_NOT_EXIST', HttpStatus.NOT_FOUND);
+
+    return await this.CommunityRepository.createOrDeleteCommentLikes(criteria);
   }
 
   async getIdsOfCommentCreatedByUser(userId: number) {
