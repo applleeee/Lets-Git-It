@@ -36,7 +36,7 @@ export class CommunityRepository {
         'post.id as postId',
         'post.title',
         'post.view',
-        'DATE_FORMAT(post.created_at, "%Y-%m-%d") AS createdAt',
+        'DATE_FORMAT(post.created_at, "%Y-%m-%d %H:%i:%s") AS createdAt',
         'user.id as userId',
         'ranker_profile.name AS userName',
         'COUNT(DISTINCT post_like.id) AS postLike',
