@@ -274,4 +274,23 @@ export class RankerProfileRepository {
       );
     }
   }
+
+  async getUserTier(userName: string) {
+    try {
+      return await this.rankerProfileRepository
+        .createQueryBuilder()
+        .select(['t.name as tierName', 't.image_url as tierImage'])
+        .leftJoin(Ranking, `r`, 'RankerProfile.id = r.ranker_profile_id')
+        .leftJoin(Tier, `t`, `t.id=r.tier_id`)
+        .where('RankerProfile.name LIKE :rankerName', {
+          rankerName: `%${userName}%`,
+        })
+        .getRawOne();
+    } catch (e) {
+      throw new HttpException(
+        'DATABASE SERVER CONNECTION ERROR',
+        HttpStatus.BAD_GATEWAY,
+      );
+    }
+  }
 }
