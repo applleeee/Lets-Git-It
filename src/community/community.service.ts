@@ -38,8 +38,15 @@ export class CommunityService {
 
     const name = `post_images/${userId}_${now}`;
     const mimetype = image.mimetype;
-    const saveToS3 = await uploadToS3(image.buffer, name, mimetype);
-    return saveToS3.Location;
+    try {
+      const saveToS3 = await uploadToS3(image.buffer, name, mimetype);
+      return saveToS3.Location;
+    } catch (err) {
+      throw new HttpException(
+        'CANNOT_SAVE_IMAGE_TO_S3' + err,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async deleteImageInS3(toDeleteImageData: DeleteImageDto) {

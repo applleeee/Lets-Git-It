@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { CommunityController } from './community.controller';
 import { CommunityService } from './community.service';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
+import { HttpStatus } from '@nestjs/common';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -92,6 +93,18 @@ describe('CommunityController', () => {
       );
 
       expect(result).toEqual(expectedResult);
+    });
+
+    it('FAILURE : should return internal server error', async () => {
+      const mockError = new Error('S3_UPLOAD_FAILED');
+      communityService.saveImageToS3 = jest.fn().mockRejectedValue(mockError);
+
+      try {
+        await communityController.saveImageToS3(mockImage as any, mockReq);
+      } catch (err) {
+        expect(err.message).toEqual('S3_UPLOAD_FAILED');
+        expect(err.status).toEqual(500);
+      }
     });
   });
 });
