@@ -142,6 +142,9 @@ export class CommunityRepository {
           .andWhere(
             `DATE_FORMAT(post.created_at, "%Y-%m-%d") >= DATE_SUB(NOW(), INTERVAL 1 ${date})`,
           );
+        queryBuilderForCount.andWhere(
+          `DATE_FORMAT(post.created_at, "%Y-%m-%d") >= DATE_SUB(NOW(), INTERVAL 1 ${date})`,
+        );
       } else if (date === 'all') {
         queryBuilderForData.orderBy('postLike', 'DESC');
       }
