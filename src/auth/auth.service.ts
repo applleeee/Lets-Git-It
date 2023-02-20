@@ -32,7 +32,7 @@ export class AuthService {
     const userName = githubUserInfo.login;
     const user = await this.userService.getByGithubId(githubUserInfo.id);
 
-    if (user === undefined) {
+    if (!user) {
       return {
         isMember: false,
         userName: userName,

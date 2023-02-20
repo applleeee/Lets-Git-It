@@ -20,7 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any): Promise<AuthorizedUser> {
-    const { userId, userNameInPayload } = payload;
+    const { userId, userName } = payload;
 
     const userNameInDb = await this.rankerProfileRepository.getUserNameByUserId(
       userId,
@@ -29,7 +29,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!userNameInDb)
       throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
 
-    if (userNameInDb !== userNameInPayload)
+    if (userNameInDb !== userName)
       throw new HttpException('FORBIDDEN', HttpStatus.FORBIDDEN);
 
     const idsOfPostsCreatedByUser =
