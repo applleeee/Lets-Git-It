@@ -1,7 +1,7 @@
 import { Comment } from './../entities/Comment';
 import { HttpException, Injectable, HttpStatus } from '@nestjs/common';
 import { CommunityRepository } from './community.repository';
-import { uploadToS3, getS3Data, deleteS3Data } from 'src/utiles/aws';
+import { uploadToS3, getS3Data, deleteS3Data } from '../utiles/aws';
 import {
   CreateCommentDto,
   CreateOrDeleteCommentLikesDto,
@@ -9,7 +9,7 @@ import {
   UpdateCommentDto,
   Depth,
 } from './dto/comment.dto';
-import { Post } from 'src/entities/Post';
+import { Post } from '../entities/Post';
 import {
   GetPostListDto,
   CreatePostDto,

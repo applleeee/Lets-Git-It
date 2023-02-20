@@ -1,18 +1,97 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { CommunityController } from './community.controller';
+import { CommunityService } from './community.service';
+import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
+
+const moduleMocker = new ModuleMocker(global);
 
 describe('CommunityController', () => {
-  let controller: CommunityController;
+  let communityController: CommunityController;
+  let communityService: CommunityService;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const moduleRef = await Test.createTestingModule({
       controllers: [CommunityController],
-    }).compile();
+      providers: [CommunityService],
+    })
+      .useMocker((token) => {
+        if (token === CommunityService) {
+          return {
+            getAllCategories: jest.fn(),
+            sigsaveImageToS3nUp: jest.fn(),
+            deleteImageInS3: jest.fn(),
+            createPost: jest.fn(),
+            getPostToUpdate: jest.fn(),
+            updatePost: jest.fn(),
+            deletePost: jest.fn(),
+            getPostList: jest.fn(),
+            getPostDetail: jest.fn(),
+            createOrDeletePostLike: jest.fn(),
+            searchPost: jest.fn(),
+          };
+        }
+        if (typeof token === 'function') {
+          const mockMetadata = moduleMocker.getMetadata(
+            token,
+          ) as MockFunctionMetadata<any, any>;
+          const Mock = moduleMocker.generateFromMetadata(mockMetadata);
+          return new Mock();
+        }
+      })
+      .compile();
 
-    controller = module.get<CommunityController>(CommunityController);
+    communityController =
+      moduleRef.get<CommunityController>(CommunityController);
+    communityService = moduleRef.get<CommunityService>(CommunityService);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
-    expect(controller).toBeDefined();
+    expect(communityController).toBeDefined();
+  });
+
+  describe('getAllCategories', () => {
+    it('SUCCESS : should return an array of categories', async () => {
+      const expectedResult = [
+        { id: 1, name: 'category1', mainCategoryId: 1 },
+        { id: 2, name: 'category2', mainCategoryId: 2 },
+      ];
+      communityService.getAllCategories = jest
+        .fn()
+        .mockResolvedValue(expectedResult);
+
+      const result = await communityController.getAllCategories();
+
+      expect(result).toEqual(expectedResult);
+    });
+  });
+
+  describe('saveImageToS3', () => {
+    const mockImage = {
+      fieldname: 'image',
+      originalname: 'test.jpg',
+      encoding: '7bit',
+      mimetype: 'image/jpeg',
+      buffer: Buffer.from('test'),
+    };
+    const mockReq = { user: 1 };
+
+    it('SUCCESS : should return the URL of the uploaded image', async () => {
+      const expectedResult =
+        'https://test.com/post_image/1_2023-02-20_14-58-01';
+      communityService.saveImageToS3 = jest
+        .fn()
+        .mockResolvedValue(expectedResult);
+
+      const result = await communityController.saveImageToS3(
+        mockImage as any,
+        mockReq,
+      );
+
+      expect(result).toEqual(expectedResult);
+    });
   });
 });

@@ -1,18 +1,12 @@
-import { RankerProfile } from 'src/entities/RankerProfile';
 import { RankerProfileRepository } from './../rank/rankerProfile.repository';
 import { SignUpDto } from './../auth/dto/auth.dto';
-import {
-  Injectable,
-  HttpException,
-  HttpStatus,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { User } from 'src/entities/User';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { User } from '../entities/User';
 import { UserRepository } from './user.repository';
 import { lastValueFrom, map } from 'rxjs';
 import * as dotenv from 'dotenv';
 import { HttpService } from '@nestjs/axios';
-import { CommunityRepository } from 'src/community/community.repository';
+import { CommunityRepository } from '../community/community.repository';
 import { MyPageDto, UpdateMyPageDto } from './dto/mypage.dto';
 import { AxiosRequestConfig } from 'axios';
 dotenv.config();
