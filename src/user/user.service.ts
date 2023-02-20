@@ -1,18 +1,12 @@
-import { RankerProfile } from 'src/entities/RankerProfile';
 import { RankerProfileRepository } from './../rank/rankerProfile.repository';
 import { SignUpDto } from './../auth/dto/auth.dto';
-import {
-  Injectable,
-  HttpException,
-  HttpStatus,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { User } from 'src/entities/User';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { User } from '../entities/User';
 import { UserRepository } from './user.repository';
 import { lastValueFrom, map } from 'rxjs';
 import * as dotenv from 'dotenv';
 import { HttpService } from '@nestjs/axios';
-import { CommunityRepository } from 'src/community/community.repository';
+import { CommunityRepository } from '../community/community.repository';
 import { MyPageDto, UpdateMyPageDto } from './dto/mypage.dto';
 import { AxiosRequestConfig } from 'axios';
 dotenv.config();
@@ -53,7 +47,7 @@ export class UserService {
           requestBody,
           config,
         )
-        .pipe(map((res) => res.data?.access_token)),
+        .pipe(map((res) => res.data.access_token)),
     );
 
     if (result === undefined) {
@@ -89,8 +83,9 @@ export class UserService {
 
   async getMyPage(userId: number) {
     // 유저네임, 프로필 텍스트, 이메일, 프로필 이미지 -> RankerProfile
-    const [user] = await this.rankerProfileRepository.getMyPage(userId);
-    const { name, profileText, profileImageUrl, email } = user;
+    const [ranker] = await this.rankerProfileRepository.getMyPage(userId);
+
+    const { name, profileText, profileImageUrl, email } = ranker;
     // 개발분야, 경력 -> User
 
     const { careerId, fieldId, isKorean } =

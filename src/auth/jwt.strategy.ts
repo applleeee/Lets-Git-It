@@ -1,4 +1,4 @@
-import { RankerProfileRepository } from 'src/rank/rankerProfile.repository';
+import { RankerProfileRepository } from '../rank/rankerProfile.repository';
 import { CommunityService } from './../community/community.service';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
@@ -20,16 +20,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any): Promise<AuthorizedUser> {
-    const userId: number = payload.userId;
-    const userNameInPayload: string = payload.userName;
+    const { userId, userNameInPayload } = payload;
 
     const userNameInDb = await this.rankerProfileRepository.getUserNameByUserId(
       userId,
     );
 
-    if (userNameInDb !== userNameInPayload) {
+    if (!userNameInDb)
+      throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
+
+    if (userNameInDb !== userNameInPayload)
       throw new HttpException('FORBIDDEN', HttpStatus.FORBIDDEN);
-    }
 
     const idsOfPostsCreatedByUser =
       await this.communityService.getIdsOfPostsCreatedByUser(userId);

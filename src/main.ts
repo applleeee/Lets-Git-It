@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  ValidationPipe,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { ValidationPipe, HttpException, HttpStatus } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './utiles/http-exception.filter';
