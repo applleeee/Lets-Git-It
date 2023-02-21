@@ -236,20 +236,27 @@ export class RankerProfileRepository {
   }
 
   async updateRankerProfile(
-    userName,
-    profileImageUrl,
-    homepageUrl,
-    email,
-    company,
-    region,
-    userId,
+    userName: string,
+    profileImageUrl: string,
+    homepageUrl: string,
+    email: string,
+    company: string,
+    region: string,
+    userId: number,
   ) {
-    return await this.rankerProfileRepository
-      .createQueryBuilder('ranker_profile')
-      .update(RankerProfile)
-      .set({ profileImageUrl, homepageUrl, email, company, region, userId })
-      .where('name = :name', { name: userName })
-      .execute();
+    try {
+      return await this.rankerProfileRepository
+        .createQueryBuilder('ranker_profile')
+        .update(RankerProfile)
+        .set({ profileImageUrl, homepageUrl, email, company, region, userId })
+        .where('name = :name', { name: userName })
+        .execute();
+    } catch (e) {
+      throw new HttpException(
+        'DATABASE SERVER CONNECTION ERROR',
+        HttpStatus.BAD_GATEWAY,
+      );
+    }
   }
 
   async getLatestRankerData(data: RankerProfile): Promise<void> {
