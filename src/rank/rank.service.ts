@@ -208,6 +208,7 @@ export class RankService {
 
       const reposLangArray = await Promise.all(reposLangPromises);
       for (const reposLang of reposLangArray) {
+        console.log(reposLang.data.headers);
         const languages: object = reposLang.data;
         for (const lang in languages) {
           if (programmingLang.hasOwnProperty(lang)) {

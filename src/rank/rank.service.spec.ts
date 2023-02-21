@@ -170,6 +170,7 @@ describe('RankService', () => {
       });
     });
   });
+
   describe('Get Top5', () => {
     it('Get Top 5', async () => {
       const testTop5 = [
@@ -188,10 +189,11 @@ describe('RankService', () => {
       expect(top5).toEqual(testTop5);
     });
   });
+
   describe('Get Top 100', () => {
     it('Get Top 100 for ALL Languages', async () => {
       const langFilter = 'All';
-      const top100 = [
+      const testTop100 = [
         {
           rankerName: 'serranoarevalo',
           mainLang: 'C',
@@ -223,7 +225,7 @@ describe('RankService', () => {
           tierImage: null,
         },
       ];
-      const top100Lang = [
+      const testTop100Lang = [
         { main_language: 'Jupyter Notebook' },
         { main_language: 'C' },
         { main_language: 'Python' },
@@ -232,10 +234,10 @@ describe('RankService', () => {
 
       jest
         .spyOn(rankerProfileRepository, 'getTop100')
-        .mockResolvedValue(top100);
+        .mockResolvedValue(testTop100);
       jest
         .spyOn(rankingRepository, 'getTop100Languages')
-        .mockResolvedValue(top100Lang);
+        .mockResolvedValue(testTop100Lang);
 
       const result = await service.getTop100(langFilter);
 
@@ -243,13 +245,13 @@ describe('RankService', () => {
         expect.any(String),
       );
       expect(rankingRepository.getTop100Languages).toHaveBeenCalled();
-      expect(result.top100).toEqual(top100);
+      expect(result.top100).toEqual(testTop100);
       expect(result.langCategory).toEqual(expectedLangCategory);
     });
 
     it('should filter the top 100 rankers by language', async () => {
       const langFilter = 'C';
-      const top100 = [
+      const testTop100 = [
         {
           rankerName: 'serranoarevalo',
           mainLang: 'C',
@@ -271,7 +273,7 @@ describe('RankService', () => {
           tierImage: null,
         },
       ];
-      const top100Lang = [
+      const testTop100Lang = [
         { main_language: 'Jupyter Notebook' },
         { main_language: 'C' },
         { main_language: 'Python' },
@@ -280,10 +282,10 @@ describe('RankService', () => {
 
       jest
         .spyOn(rankerProfileRepository, 'getTop100')
-        .mockResolvedValue(top100);
+        .mockResolvedValue(testTop100);
       jest
         .spyOn(rankingRepository, 'getTop100Languages')
-        .mockResolvedValue(top100Lang);
+        .mockResolvedValue(testTop100Lang);
 
       const result = await service.getTop100(langFilter);
 
@@ -291,13 +293,13 @@ describe('RankService', () => {
         expect.any(String),
       );
       expect(rankingRepository.getTop100Languages).toHaveBeenCalled();
-      expect(result.top100).toEqual(top100);
+      expect(result.top100).toEqual(testTop100);
       expect(result.langCategory).toEqual(expectedLangCategory);
     });
 
     it('should default to all languages if language filter is invalid', async () => {
       const langFilter = 123;
-      const top100 = [
+      const testTop100 = [
         {
           rankerName: 'serranoarevalo',
           mainLang: 'C',
@@ -329,7 +331,7 @@ describe('RankService', () => {
           tierImage: null,
         },
       ];
-      const top100Lang = [
+      const testTop100Lang = [
         { main_language: 'Jupyter Notebook' },
         { main_language: 'C' },
         { main_language: 'Python' },
@@ -338,10 +340,10 @@ describe('RankService', () => {
 
       jest
         .spyOn(rankerProfileRepository, 'getTop100')
-        .mockResolvedValue(top100);
+        .mockResolvedValue(testTop100);
       jest
         .spyOn(rankingRepository, 'getTop100Languages')
-        .mockResolvedValue(top100Lang);
+        .mockResolvedValue(testTop100Lang);
 
       const result = await service.getTop100(langFilter);
 
@@ -349,10 +351,11 @@ describe('RankService', () => {
         expect.any(String),
       );
       expect(rankingRepository.getTop100Languages).toHaveBeenCalled();
-      expect(result.top100).toEqual(top100);
+      expect(result.top100).toEqual(testTop100);
       expect(result.langCategory).toEqual(expectedLangCategory);
     });
   });
+
   describe('findRanker', () => {
     it('Finding a User', async () => {
       const userName = 'MatheGoD';
