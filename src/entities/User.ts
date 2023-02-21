@@ -15,7 +15,7 @@ import { PostLike } from './PostLike';
 import { RankerProfile } from './RankerProfile';
 import { Field } from './Field';
 import { Career } from './Career';
-import { BooleanTransformer } from 'src/utiles/boolean-transformer';
+import { BooleanTransformer } from '../utiles/boolean-transformer';
 
 @Index('field_id', ['fieldId'], {})
 @Unique(['githubId'])

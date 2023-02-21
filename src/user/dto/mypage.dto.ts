@@ -56,5 +56,11 @@ export class MyPageDto {
   @IsBoolean()
   readonly isKorean: boolean;
 
+  @IsString()
+  readonly tierName: string;
+
+  @IsString()
+  readonly tierImage: string;
+
   readonly posts: PostDto[];
 }

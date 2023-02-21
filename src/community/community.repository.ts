@@ -2,16 +2,16 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SubCategory } from '../entities/SubCategory';
-import { Post } from 'src/entities/Post';
-import { PostLike } from 'src/entities/PostLike';
-import { Comment } from 'src/entities/Comment';
+import { Post } from '../entities/Post';
+import { PostLike } from '../entities/PostLike';
+import { Comment } from '../entities/Comment';
 import {
   CreateCommentDto,
   CreateOrDeleteCommentLikesDto,
   DeleteCommentDto,
   UpdateCommentDto,
 } from './dto/comment.dto';
-import { CommentLike } from 'src/entities/CommentLike';
+import { CommentLike } from '../entities/CommentLike';
 import { DateEnum, SortEnum } from './dto/Post.dto';
 
 @Injectable()
@@ -29,7 +29,7 @@ export class CommunityRepository {
     private commentLikeRepository: Repository<CommentLike>,
   ) {}
 
-  private postList(offset: number, limit: number) {
+  private postList(offset?: number, limit?: number) {
     return this.postRepository
       .createQueryBuilder()
       .select([
@@ -121,26 +121,38 @@ export class CommunityRepository {
     offset: number,
     limit: number,
   ) {
-    const queryBuilder = this.postList(offset, limit);
-    queryBuilder.where('post.subCategoryId = :subCategoryId', {
+    const queryBuilderForCount = this.postList();
+    const queryBuilderForData = this.postList(offset, limit);
+
+    queryBuilderForCount.where('post.subCategoryId = :subCategoryId', {
       subCategoryId: subCategoryId,
     });
+    queryBuilderForData.where('post.subCategoryId = :subCategoryId', {
+      subCategoryId: subCategoryId,
+    });
+
     if (sort === 'latest') {
-      queryBuilder.orderBy('post.created_at', 'DESC');
+      queryBuilderForData.orderBy('post.created_at', 'DESC');
     }
+
     if (sort === 'mostLiked' && date !== undefined) {
       if (date !== 'all') {
-        queryBuilder
+        queryBuilderForData
           .orderBy('postLike', 'DESC')
           .andWhere(
             `DATE_FORMAT(post.created_at, "%Y-%m-%d") >= DATE_SUB(NOW(), INTERVAL 1 ${date})`,
           );
+        queryBuilderForCount.andWhere(
+          `DATE_FORMAT(post.created_at, "%Y-%m-%d") >= DATE_SUB(NOW(), INTERVAL 1 ${date})`,
+        );
       } else if (date === 'all') {
-        queryBuilder.orderBy('postLike', 'DESC');
+        queryBuilderForData.orderBy('postLike', 'DESC');
       }
     }
 
-    return await queryBuilder.getRawMany();
+    const total = await queryBuilderForCount.getCount();
+    const data = await queryBuilderForData.getRawMany();
+    return { postLists: data, total: total };
   }
 
   async getPostDatail(postId: number) {
@@ -238,7 +250,9 @@ export class CommunityRepository {
           keyword: `%${keyword}%`,
         });
     }
-    return await queryBuilder.getRawMany();
+    const data = await queryBuilder.getRawMany();
+    const total = await queryBuilder.getCount();
+    return { postLists: data, total: total };
   }
 
   async getPostsCreatedByUser(userId: number): Promise<Post[]> {

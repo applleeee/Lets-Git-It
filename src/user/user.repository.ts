@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from '../entities/User';
 import { SignUpDto } from '../auth/dto/auth.dto';
@@ -33,7 +33,19 @@ export class UserRepository {
 
   async createUser(signUpData: SignUpDto) {
     const user = this.userRepository.create(signUpData);
-    await this.userRepository.save(user);
+
+    try {
+      await this.userRepository.save(user);
+    } catch (error) {
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new HttpException('EXISTING_USERNAME', HttpStatus.CONFLICT);
+      } else {
+        throw new HttpException(
+          'INTERNAL_SERVER_ERROR',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
   }
 
   async updateMyPage(userId: number, partialEntity: UpdateMyPageDto) {

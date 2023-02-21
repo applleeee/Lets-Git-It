@@ -1,18 +1,12 @@
-import { RankerProfile } from 'src/entities/RankerProfile';
 import { RankerProfileRepository } from './../rank/rankerProfile.repository';
 import { SignUpDto } from './../auth/dto/auth.dto';
-import {
-  Injectable,
-  HttpException,
-  HttpStatus,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { User } from 'src/entities/User';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { User } from '../entities/User';
 import { UserRepository } from './user.repository';
 import { lastValueFrom, map } from 'rxjs';
 import * as dotenv from 'dotenv';
 import { HttpService } from '@nestjs/axios';
-import { CommunityRepository } from 'src/community/community.repository';
+import { CommunityRepository } from '../community/community.repository';
 import { MyPageDto, UpdateMyPageDto } from './dto/mypage.dto';
 import { AxiosRequestConfig } from 'axios';
 dotenv.config();
@@ -53,7 +47,7 @@ export class UserService {
           requestBody,
           config,
         )
-        .pipe(map((res) => res.data?.access_token)),
+        .pipe(map((res) => res.data.access_token)),
     );
 
     if (result === undefined) {
@@ -88,13 +82,16 @@ export class UserService {
   }
 
   async getMyPage(userId: number) {
-    // 유저네임, 프로필 텍스트, 이메일, 프로필 이미지 -> RankerProfile
-    const [user] = await this.rankerProfileRepository.getMyPage(userId);
-    const { name, profileText, profileImageUrl, email } = user;
-    // 개발분야, 경력 -> User
+    // 유저네임, 프로필 텍스트, 이메일, 프로필 이미지, 티어 이름 -> RankerProfile
+    const [ranker] = await this.rankerProfileRepository.getMyPage(userId);
+    const { name, profileText, profileImageUrl, email } = ranker;
+    const { tierName, tierImage } =
+      await this.rankerProfileRepository.getUserTier(name);
 
+    // 개발분야, 경력 -> User
     const { careerId, fieldId, isKorean } =
       await this.userRepository.getByUserId(userId);
+
     // 작성한 글 목록(제목, 카테고리, 날짜, id) -> Post
     const posts = await this.communityRepository.getPostsCreatedByUser(userId);
 
@@ -107,6 +104,8 @@ export class UserService {
       fieldId,
       isKorean,
       posts,
+      tierName,
+      tierImage,
     };
     return result;
   }
