@@ -26,9 +26,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       userId,
     );
 
-    if (!userNameInDb)
-      throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
-
     if (userNameInDb !== userName)
       throw new HttpException('FORBIDDEN', HttpStatus.FORBIDDEN);
 
