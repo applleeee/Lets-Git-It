@@ -1,3 +1,11 @@
+import { Comment } from './../entities/Comment';
+import {
+  CreateCommentBodyDto,
+  UpdateCommentBodyDto,
+  DeleteCommentDto,
+  CreateOrDeleteCommentLikesDto,
+  UpdateCommentDto,
+} from './dto/comment.dto';
 import { Test } from '@nestjs/testing';
 import { CommunityController } from './community.controller';
 import { CommunityService } from './community.service';
@@ -810,6 +818,209 @@ describe('CommunityController', () => {
 
       // Assert
       expect(result).toEqual(expectedResult);
+    });
+  });
+
+  describe('createComment()', () => {
+    const mockReq = {
+      user: {
+        id: 1,
+        idsOfPostsCreatedByUser: [],
+        idsOfPostLikedByUser: [],
+        idsOfCommentsCreatedByUser: [],
+        idsOfCommentLikedByUser: [],
+      },
+    };
+
+    const mockBody: CreateCommentBodyDto = {
+      content: 'test',
+      groupOrder: 1,
+      depth: 1,
+    };
+
+    const mockPostId = 1;
+
+    it('SUCCESS : Should return comment object', async () => {
+      const expectedResult = {
+        content: 'test',
+        userId: 1,
+        postId: 1,
+        groupOrder: 1,
+        depth: 1,
+        id: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      jest
+        .spyOn(communityService, 'createComment')
+        .mockResolvedValue(expectedResult as Comment);
+
+      const result = await communityController.createComment(
+        mockBody,
+        mockReq,
+        mockPostId,
+      );
+
+      expect(communityService.createComment).toHaveBeenCalledWith(
+        mockReq.user,
+        { postId: mockPostId, userId: mockReq.user.id, ...mockBody },
+      );
+      expect(result).toEqual(expectedResult);
+    });
+  });
+
+  describe('deleteComment()', () => {
+    const mockReq = {
+      user: {
+        id: 1,
+        idsOfPostsCreatedByUser: [],
+        idsOfPostLikedByUser: [],
+        idsOfCommentsCreatedByUser: [],
+        idsOfCommentLikedByUser: [],
+      },
+    };
+
+    const mockCommentId = 1;
+
+    const mockCriteria: DeleteCommentDto = {
+      user: mockReq.user,
+      id: mockCommentId,
+    };
+
+    it('SUCCESS : Should return nothing, because status code is 204 no_content ', async () => {
+      const expectedResult = undefined;
+      communityService.deleteComment = jest.fn();
+      const result = await communityController.deleteComment(
+        mockReq,
+        mockCommentId,
+      );
+
+      expect(communityService.deleteComment).toBeCalledWith(mockCriteria);
+      expect(result).toEqual(expectedResult);
+    });
+  });
+
+  describe('updateComment', () => {
+    const mockReq = {
+      user: {
+        id: 1,
+        idsOfPostsCreatedByUser: [],
+        idsOfPostLikedByUser: [],
+        idsOfCommentsCreatedByUser: [],
+        idsOfCommentLikedByUser: [],
+      },
+    };
+
+    const mockCommentId = 1;
+    const mockBody: UpdateCommentBodyDto = {
+      content: 'test',
+    };
+
+    const mockCriteria: UpdateCommentDto = {
+      user: mockReq.user,
+      id: mockCommentId,
+    };
+
+    it('SUCCESS : Should return object { message : COMMENT_UPDATED }', async () => {
+      const expectedResult = { message: 'COMMENT_UPDATED' };
+
+      communityService.updateComment = jest
+        .fn()
+        .mockResolvedValue(expectedResult);
+
+      const result = await communityController.updateComment(
+        mockReq,
+        mockCommentId,
+        mockBody,
+      );
+
+      expect(result).toEqual(expectedResult);
+      expect(communityService.updateComment).toHaveBeenCalledWith(
+        mockCriteria,
+        mockBody.content,
+      );
+    });
+  });
+
+  describe('getComments()', () => {
+    const mockReq = {
+      user: {
+        id: 1,
+        idsOfPostsCreatedByUser: [],
+        idsOfPostLikedByUser: [],
+        idsOfCommentsCreatedByUser: [],
+        idsOfCommentLikedByUser: [],
+      },
+    };
+    const mockPostId = 1;
+
+    it('SUCCESS : Should return comments object', async () => {
+      const expectedResult = [
+        {
+          commentId: 1,
+          content: 'text',
+          reComment: { reCommentId: 1, content: 'test' },
+        },
+      ];
+
+      communityService.getComments = jest
+        .fn()
+        .mockResolvedValue(expectedResult);
+
+      const result = await communityController.getComments(mockReq, mockPostId);
+
+      expect(result).toEqual(expectedResult);
+      expect(communityService.getComments).toHaveBeenCalledWith(
+        mockReq.user,
+        mockPostId,
+      );
+    });
+  });
+
+  describe('createOrDeleteCommentLike()', () => {
+    const mockReq = {
+      user: {
+        id: 1,
+        idsOfPostsCreatedByUser: [],
+        idsOfPostLikedByUser: [],
+        idsOfCommentsCreatedByUser: [],
+        idsOfCommentLikedByUser: [],
+      },
+    };
+
+    const mockCommentId = 1;
+
+    it('SUCCESS : Should return result either create or delete ', async () => {
+      const expectedResult = {
+        userId: 1,
+        commentId: 1,
+        updatedAt: new Date(),
+        id: 1,
+        createdAt: new Date(),
+      } || {
+        raw: [],
+        affected: 1,
+      };
+
+      const mockCriteria: CreateOrDeleteCommentLikesDto = {
+        userId: mockReq.user.id,
+        commentId: mockCommentId,
+      };
+
+      communityService.createOrDeleteCommentLikes = jest
+        .fn()
+        .mockResolvedValue(expectedResult);
+
+      const result = await communityController.createOrDeleteCommentLikes(
+        mockReq,
+        mockCommentId,
+      );
+
+      expect(result).toEqual(expectedResult);
+      expect(communityService.createOrDeleteCommentLikes).toHaveBeenCalledWith(
+        mockCriteria,
+      );
     });
   });
 });
