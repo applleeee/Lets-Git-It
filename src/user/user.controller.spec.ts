@@ -56,6 +56,8 @@ describe('UserController', () => {
         careerId: 1,
         fieldId: 1,
         isKorean: true,
+        tierName: 'gold',
+        tierImage: 'image',
         posts: [
           {
             title: 'tests',

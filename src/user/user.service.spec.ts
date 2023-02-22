@@ -20,6 +20,7 @@ class MockUserRepository {
 
 class MockRankerProfileRepository {
   getMyPage = jest.fn();
+  getUserTier = jest.fn();
 }
 
 class MockCommunityRepository {
@@ -289,6 +290,11 @@ describe('UserService', () => {
       { id: 1, title: 'test', subCategory: '자유', createdAt: new Date() },
     ];
 
+    const tier = {
+      tierName: 'gold',
+      tierImage: 'image',
+    };
+
     it('SUCCESS : should return the correct MyPageDto', async () => {
       const expectedMyPageDto = {
         userName: ranker.name,
@@ -299,6 +305,8 @@ describe('UserService', () => {
         posts: posts,
         profileImageUrl: ranker.profileImageUrl,
         profileText: ranker.profileText,
+        tierName: tier.tierName,
+        tierImage: tier.tierImage,
       };
 
       jest
@@ -306,10 +314,14 @@ describe('UserService', () => {
         .mockResolvedValueOnce([ranker]);
       jest
         .spyOn(userRepository, 'getByUserId')
-        .mockResolvedValueOnce(user as any);
+        .mockResolvedValueOnce(user as User);
       jest
         .spyOn(communityRepository, 'getPostsCreatedByUser')
         .mockResolvedValueOnce(posts as any);
+
+      jest
+        .spyOn(rankerProfileRepository, 'getUserTier')
+        .mockResolvedValueOnce(tier);
 
       const result = await userService.getMyPage(userId);
 
@@ -318,7 +330,9 @@ describe('UserService', () => {
       expect(communityRepository.getPostsCreatedByUser).toHaveBeenCalledWith(
         userId,
       );
-
+      expect(rankerProfileRepository.getUserTier).toHaveBeenCalledWith(
+        ranker.name,
+      );
       expect(result).toEqual(expectedMyPageDto);
     });
   });
