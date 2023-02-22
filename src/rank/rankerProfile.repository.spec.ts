@@ -1,3 +1,4 @@
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { RankerProfile } from 'src/entities/RankerProfile';
@@ -139,7 +140,17 @@ describe('RankerProfileRepository', () => {
         where: { userId: testUserId },
       });
     });
-    it.todo('Return an Error');
+    it('Return an Error', async () => {
+      const userId = 456;
+
+      jest.spyOn(rankerProfileRepo, 'findOne').mockResolvedValue(undefined);
+
+      await expect(
+        rankerProfileRepository.getUserNameByUserId(userId),
+      ).rejects.toThrowError(
+        new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED),
+      );
+    });
   });
 
   describe('getRankerId Function', () => {
