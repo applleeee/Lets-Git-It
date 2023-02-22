@@ -36,15 +36,11 @@ export class RankService {
 
   async getRankerDetail(userName: string) {
     try {
-      const users = axios
-        .get(`https://api.github.com/users/${userName}`, {
-          headers: {
-            Authorization: `Bearer ${TOKEN}`,
-          },
-        })
-        .catch((e) => {
-          throw new HttpException('INVALID USER', HttpStatus.NOT_FOUND);
-        });
+      const users = axios.get(`https://api.github.com/users/${userName}`, {
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+        },
+      });
 
       const stars = axios.get(
         `https://api.github.com/users/${userName}/starred?per_page=100`,
@@ -337,6 +333,9 @@ export class RankService {
       const avgValues = await this.rankingRepository.getAvgValues();
       return { rankerDetail, maxValues, avgValues };
     } catch (e) {
+      if (e.code === 'ERR_BAD_REQUEST') {
+        throw new HttpException('INVALID GITHUB USER', HttpStatus.NOT_FOUND);
+      }
       throw new HttpException(
         'GITHUB API IS OVERLOADED',
         HttpStatus.BAD_GATEWAY,
@@ -348,7 +347,7 @@ export class RankService {
     return await this.rankerProfileRepository.getTop5();
   }
 
-  async getTop100(langFilter: string): Promise<{
+  async getTop100(langFilter: unknown): Promise<{
     langCategory: unknown[];
     top100: Top100[];
   }> {

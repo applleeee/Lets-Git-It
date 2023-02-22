@@ -5,7 +5,7 @@ export class SearchOutput {
   readonly rankerName: string;
 
   @IsString()
-  readonly profileImage: string;
+  readonly profileImage?: string;
 
   @IsString()
   readonly tierImage?: string;
