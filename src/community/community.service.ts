@@ -43,7 +43,7 @@ export class CommunityService {
       return saveToS3.Location;
     } catch (err) {
       throw new HttpException(
-        'CANNOT_SAVE_IMAGE_TO_S3' + err,
+        'CANNOT_SAVE_IMAGE_TO_S3',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -52,7 +52,14 @@ export class CommunityService {
   async deleteImageInS3(toDeleteImageData: DeleteImageDto) {
     const { toDeleteImage } = toDeleteImageData;
     if (toDeleteImage.length !== 0) {
-      return await deleteS3Data(toDeleteImage);
+      try {
+        return await deleteS3Data(toDeleteImage);
+      } catch (err) {
+        throw new HttpException(
+          'CANNOT_DELETE_IMAGE_IN_S3',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
     return { message: 'No image to delete' };
   }
@@ -67,7 +74,7 @@ export class CommunityService {
       await uploadToS3(content as unknown as Buffer, contentUrl, mimetype);
     } catch (err) {
       throw new HttpException(
-        'CANNOT_UPLOAD_POST_TO_S3' + err,
+        'CANNOT_UPLOAD_POST_TO_S3',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -88,7 +95,7 @@ export class CommunityService {
       return postDetail;
     } catch (err) {
       throw new HttpException(
-        'CANNOT_GET_POST_FROM_S3' + err,
+        'CANNOT_GET_POST_FROM_S3',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -100,7 +107,7 @@ export class CommunityService {
       await deleteS3Data([originPost.contentUrl]);
     } catch (err) {
       throw new HttpException(
-        'CANNOT_DELETE_POST_IN_S3' + err,
+        'CANNOT_DELETE_POST_IN_S3',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -114,7 +121,7 @@ export class CommunityService {
       await uploadToS3(content as unknown as Buffer, contentUrl, mimetype);
     } catch (err) {
       throw new HttpException(
-        'CANNOT_UPLOAD_POST_TO_S3' + err,
+        'CANNOT_UPLOAD_POST_TO_S3',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -131,13 +138,13 @@ export class CommunityService {
     const originPost = await this.CommunityRepository.getPostById(postId);
     try {
       await deleteS3Data([originPost.contentUrl]);
-      return await this.CommunityRepository.deletePost(postId);
     } catch (err) {
       throw new HttpException(
-        'CANNOT_DELETE_POST_IN_S3' + err,
+        'CANNOT_DELETE_POST_IN_S3',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+    return await this.CommunityRepository.deletePost(postId);
   }
 
   async getPostList(subCategoryId: number, query: GetPostListDto) {
@@ -160,7 +167,7 @@ export class CommunityService {
       return postDetail;
     } catch (err) {
       throw new HttpException(
-        'CANNOT_GET_POST_FROM_S3' + err,
+        'CANNOT_GET_POST_FROM_S3',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

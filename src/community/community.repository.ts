@@ -64,8 +64,7 @@ export class CommunityRepository {
   }
 
   async getAllCategories() {
-    const categories = await this.subCategoryRepository.find();
-    return categories;
+    return await this.subCategoryRepository.find();
   }
 
   async createPost(
