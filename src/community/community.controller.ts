@@ -10,7 +10,6 @@ import {
   Req,
   Delete,
   Put,
-  NotFoundException,
   Query,
   HttpCode,
   HttpStatus,
@@ -111,15 +110,20 @@ export class CommunityController {
   @Delete('/posts/:postId')
   async deletePost(@Param('postId') postId: number, @Req() req) {
     const { idsOfPostsCreatedByUser } = req.user;
-    console.log(idsOfPostsCreatedByUser);
     if (idsOfPostsCreatedByUser.includes(postId)) {
       const result = await this.communityService.deletePost(postId);
       if (result.affected === 0) {
-        throw new NotFoundException(`Could not find a post with id ${postId}`);
+        throw new HttpException(
+          `COULD_NOT_FIND_A_POST_WITH_ID_${postId}`,
+          HttpStatus.NOT_FOUND,
+        );
       }
       return { message: 'post deleted' };
     } else {
-      throw new NotFoundException('This user has never written that post.');
+      throw new HttpException(
+        'THIS_USER_HAS_NEVER_WRITTEN_THAT_POST',
+        HttpStatus.FORBIDDEN,
+      );
     }
   }
 
