@@ -302,14 +302,14 @@ export class CommunityRepository {
     return await this.commentRepository.delete(criteria);
   }
 
-  async updateComment(criteria: UpdateCommentDto, toUpdateContent: string) {
+  async updateComment(criteria: UpdateCommentDto, content: string) {
     return await this.commentRepository
       .createQueryBuilder()
       .update(Comment)
       .set({
-        content: toUpdateContent,
+        content: content,
       })
-      .where(`id = ${criteria.id} AND user_id = ${criteria.userId}`)
+      .where(`id = ${criteria.id} AND user_id = ${criteria.user.id}`)
       .execute();
   }
 
@@ -317,7 +317,7 @@ export class CommunityRepository {
     return await this.commentRepository.exist({ where: { id: commentId } });
   }
 
-  async readComments(postId: number, depth: number) {
+  async getComments(postId: number) {
     return await this.commentRepository
       .createQueryBuilder('comment')
       .select([
@@ -350,9 +350,48 @@ export class CommunityRepository {
         'ranking.ranker_profile_id = ranker_profile.id',
       )
       .leftJoin('tier', 'tier', 'ranking.tier_id = tier.id')
-      .where('comment.post_id = :postId AND comment.depth = :depth', {
+      .where('comment.post_id = :postId AND comment.depth = 1', {
         postId: postId,
-        depth: depth,
+      })
+      .orderBy('comment.group_order', 'ASC')
+      .addOrderBy('comment.created_at', 'ASC')
+      .getRawMany();
+  }
+  async getReComments(postId: number) {
+    return await this.commentRepository
+      .createQueryBuilder('comment')
+      .select([
+        'comment.user_id as userId',
+        'comment.group_order as groupOrder',
+        'comment.id as commentId',
+        'ranker_profile.name as userName',
+        'ranker_profile.profile_image_url as profileImageUrl',
+        'comment.content as content',
+        'tier.name as tier',
+        'comment.depth as depth',
+        `DATE_FORMAT(comment.created_at, '%Y-%m-%d %H:%i:%s') as createdAt`,
+        `DATE_FORMAT(comment.updated_at, '%Y-%m-%d %H:%i:%s') as updatedAt`,
+      ])
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('COUNT(comment_like.id)', 'likeNumber')
+          .from(CommentLike, 'comment_like')
+          .where('comment.id = comment_like.comment_id');
+      }, 'likeNumber')
+      .leftJoin('user', 'user', 'comment.user_id = user.id')
+      .leftJoin(
+        'ranker_profile',
+        'ranker_profile',
+        'user.id = ranker_profile.user_id',
+      )
+      .leftJoin(
+        'ranking',
+        'ranking',
+        'ranking.ranker_profile_id = ranker_profile.id',
+      )
+      .leftJoin('tier', 'tier', 'ranking.tier_id = tier.id')
+      .where('comment.post_id = :postId AND comment.depth = 2', {
+        postId: postId,
       })
       .orderBy('comment.group_order', 'ASC')
       .addOrderBy('comment.created_at', 'ASC')

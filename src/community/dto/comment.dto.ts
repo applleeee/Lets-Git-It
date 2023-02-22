@@ -1,3 +1,4 @@
+import { AuthorizedUser } from './../../auth/dto/auth.dto';
 import { PickType } from '@nestjs/mapped-types';
 import { IsNotEmpty, IsNumber, IsString, IsEnum } from 'class-validator';
 
@@ -37,7 +38,7 @@ export class CreateCommentDto extends CreateCommentBodyDto {
 export class UpdateCommentDto {
   @IsNumber()
   @IsNotEmpty()
-  readonly userId: number;
+  readonly user: AuthorizedUser;
 
   @IsNumber()
   @IsNotEmpty()
