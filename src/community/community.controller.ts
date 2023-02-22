@@ -36,14 +36,13 @@ import {
   DeleteImageDto,
   PostLikeDto,
 } from './dto/Post.dto';
-import { SubCategoryOutput } from './dto/subCategory.dto';
 
 @Controller('/community')
 export class CommunityController {
   constructor(private communityService: CommunityService) {}
 
   @Get('/categories')
-  async getAllCategories(): Promise<SubCategoryOutput[]> {
+  async getAllCategories() {
     return await this.communityService.getAllCategories();
   }
 
@@ -235,7 +234,10 @@ export class CommunityController {
   @UseGuards(AuthGuard('jwt'))
   @Post('/comments/:comment_id/likes')
   @HttpCode(HttpStatus.CREATED)
-  async createCommentLikes(@Req() req, @Param('comment_id') commentId: number) {
+  async createOrDeleteCommentLikes(
+    @Req() req,
+    @Param('comment_id') commentId: number,
+  ) {
     const criteria: CreateOrDeleteCommentLikesDto = {
       userId: req.user.id,
       commentId,

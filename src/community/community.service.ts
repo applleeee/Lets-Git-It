@@ -1,7 +1,7 @@
 import { Comment } from './../entities/Comment';
 import { HttpException, Injectable, HttpStatus } from '@nestjs/common';
 import { CommunityRepository } from './community.repository';
-import { uploadToS3, getS3Data, deleteS3Data } from 'src/utiles/aws';
+import { uploadToS3, getS3Data, deleteS3Data } from '../utiles/aws';
 import {
   CreateCommentDto,
   CreateOrDeleteCommentLikesDto,
@@ -9,7 +9,7 @@ import {
   UpdateCommentDto,
   Depth,
 } from './dto/comment.dto';
-import { Post } from 'src/entities/Post';
+import { Post } from '../entities/Post';
 import {
   GetPostListDto,
   CreatePostDto,
@@ -38,8 +38,15 @@ export class CommunityService {
 
     const name = `post_images/${userId}_${now}`;
     const mimetype = image.mimetype;
-    const saveToS3 = await uploadToS3(image.buffer, name, mimetype);
-    return saveToS3.Location;
+    try {
+      const saveToS3 = await uploadToS3(image.buffer, name, mimetype);
+      return saveToS3.Location;
+    } catch (err) {
+      throw new HttpException(
+        'CANNOT_SAVE_IMAGE_TO_S3' + err,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async deleteImageInS3(toDeleteImageData: DeleteImageDto) {
@@ -193,7 +200,7 @@ export class CommunityService {
     const groupOrderArr = comments.map((comment) => comment.groupOrder);
 
     if (
-      groupOrderArr.indexOf(commentData.groupOrder) === -1 &&
+      groupOrderArr?.indexOf(commentData.groupOrder) === -1 &&
       commentData.depth === Depth.RE_COMMENT
     )
       throw new HttpException(
@@ -227,7 +234,7 @@ export class CommunityService {
     if (!isCommentExist)
       throw new HttpException('THE_COMMENT_NOT_EXIST', HttpStatus.NOT_FOUND);
 
-    if (commentIdsCreatedByUser.indexOf(criteria.id) === -1)
+    if (commentIdsCreatedByUser?.indexOf(criteria.id) === -1)
       throw new HttpException('NOT_CREATED_BY_USER', HttpStatus.FORBIDDEN);
 
     await this.CommunityRepository.deleteComment(criteria);
@@ -245,7 +252,7 @@ export class CommunityService {
     if (!isCommentExist)
       throw new HttpException('THE_COMMENT_IS_NOT_EXIST', HttpStatus.NOT_FOUND);
 
-    if (commentIdsCreatedByUser.indexOf(criteria.id) === -1)
+    if (commentIdsCreatedByUser?.indexOf(criteria.id) === -1)
       throw new HttpException('NOT_CREATED_BY_USER', HttpStatus.FORBIDDEN);
 
     await this.CommunityRepository.updateComment(criteria, toUpdateContent);
@@ -265,28 +272,28 @@ export class CommunityService {
 
     comments.map((comment) => {
       comment.isCreatedByUser =
-        user.idsOfCommentsCreatedByUser.indexOf(comment.commentId) >= 0
+        user.idsOfCommentsCreatedByUser?.indexOf(comment.commentId) >= 0
           ? true
           : false;
       comment.isLikedByUser =
-        user.idsOfCommentLikedByUser.indexOf(comment.commentId) >= 0
+        user.idsOfCommentLikedByUser?.indexOf(comment.commentId) >= 0
           ? true
           : false;
     });
 
     reComments.map((reComment) => {
       reComment.isCreatedByUser =
-        user.idsOfCommentsCreatedByUser.indexOf(reComment.commentId) >= 0
+        user.idsOfCommentsCreatedByUser?.indexOf(reComment.commentId) >= 0
           ? true
           : false;
       reComment.isLikedByUser =
-        user.idsOfCommentLikedByUser.indexOf(reComment.commentId) >= 0
+        user.idsOfCommentLikedByUser?.indexOf(reComment.commentId) >= 0
           ? true
           : false;
     });
 
     comments.map((comment) => {
-      return (comment.reComments = reComments.filter((reComment) => {
+      return (comment.reComments = reComments?.filter((reComment) => {
         return reComment['groupOrder'] === comment['groupOrder'];
       }));
     });

@@ -1,12 +1,12 @@
-import { RankerProfileRepository } from 'src/rank/rankerProfile.repository';
 import { UserRepository } from './../user/user.repository';
 import { RankService } from './../rank/rank.service';
 import { UserService } from './../user/user.service';
+import { RankerProfileRepository } from '../rank/rankerProfile.repository';
+import { AuthRepository } from './auth.repository';
 import { Injectable } from '@nestjs/common';
 import { GithubCodeDto, SignUpWithUserNameDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
-import { AuthRepository } from './auth.repository';
 dotenv.config();
 
 @Injectable()
@@ -32,7 +32,7 @@ export class AuthService {
     const userName = githubUserInfo.login;
     const user = await this.userService.getByGithubId(githubUserInfo.id);
 
-    if (user === undefined) {
+    if (!user) {
       return {
         isMember: false,
         userName: userName,
@@ -46,7 +46,7 @@ export class AuthService {
       secretOrPrivateKey: process.env.JWT_SECRET_KEY,
     });
 
-    return { isMemeber: true, userName: userName, accessToken: jwtToken };
+    return { isMember: true, userName: userName, accessToken: jwtToken };
   }
 
   async signUp(signUpDataWithUserName: SignUpWithUserNameDto) {
@@ -67,6 +67,7 @@ export class AuthService {
     const ranker = await this.rankerProfileRepository.getRankerProfile(
       userName,
     );
+
     const updateRankerProfileDto = {
       profileImageUrl: ranker.profileImage,
       homepageUrl: ranker.blog,

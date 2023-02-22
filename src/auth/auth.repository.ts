@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Career } from '../entities/Career';
-import { Field } from 'src/entities/Field';
+import { Field } from '../entities/Field';
 
 export class AuthRepository {
   constructor(
