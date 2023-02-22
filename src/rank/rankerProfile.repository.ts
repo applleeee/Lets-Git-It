@@ -30,10 +30,15 @@ export class RankerProfileRepository {
   }
 
   async getUserNameByUserId(userId: number) {
-    const user = await this.rankerProfileRepository.findOne({
-      where: { userId: userId },
-    });
-    return user.name;
+    try {
+      const user = await this.rankerProfileRepository.findOne({
+        where: { userId: userId },
+      });
+
+      return user.name;
+    } catch (e) {
+      throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
+    }
   }
 
   async getRankerId(name: string): Promise<number> {
