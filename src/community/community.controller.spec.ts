@@ -29,6 +29,11 @@ describe('CommunityController', () => {
             getPostDetail: jest.fn(),
             createOrDeletePostLike: jest.fn(),
             searchPost: jest.fn(),
+            createComment: jest.fn(),
+            deleteComment: jest.fn(),
+            updateComment: jest.fn(),
+            getComments: jest.fn(),
+            createOrDeleteCommentLikes: jest.fn(),
           };
         }
         if (typeof token === 'function') {
