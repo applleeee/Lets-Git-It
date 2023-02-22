@@ -14,7 +14,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
+      ignoreExpiration: true,
       secretOrKey: jwtConstants.secret,
     });
   }
@@ -25,9 +25,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const userNameInDb = await this.rankerProfileRepository.getUserNameByUserId(
       userId,
     );
-
-    if (!userNameInDb)
-      throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
 
     if (userNameInDb !== userName)
       throw new HttpException('FORBIDDEN', HttpStatus.FORBIDDEN);
