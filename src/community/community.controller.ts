@@ -234,7 +234,10 @@ export class CommunityController {
   @UseGuards(AuthGuard('jwt'))
   @Post('/comments/:comment_id/likes')
   @HttpCode(HttpStatus.CREATED)
-  async createCommentLikes(@Req() req, @Param('comment_id') commentId: number) {
+  async createOrDeleteCommentLikes(
+    @Req() req,
+    @Param('comment_id') commentId: number,
+  ) {
     const criteria: CreateOrDeleteCommentLikesDto = {
       userId: req.user.id,
       commentId,
