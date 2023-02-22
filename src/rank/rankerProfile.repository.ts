@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RankerProfile } from '../entities/RankerProfile';
@@ -56,15 +56,6 @@ export class RankerProfileRepository {
   }
 
   async getRankerProfile(name: string): Promise<RankerProfileOutput> {
-    const { id } = await this.rankerProfileRepository.findOne({
-      where: { name },
-    });
-    if (!id) {
-      throw new HttpException(
-        "RANKER DATA DOESN'T EXIST",
-        HttpStatus.NOT_FOUND,
-      );
-    }
     const rankerProfile: RankerProfileOutput =
       await this.rankerProfileRepository
         .createQueryBuilder()
@@ -101,7 +92,7 @@ export class RankerProfileRepository {
         ])
         .leftJoin(Ranking, `r`, 'RankerProfile.id = r.ranker_profile_id')
         .leftJoin(Tier, `t`, `t.id=r.tier_id`)
-        .where(`RankerProfile.id=:id`, { id })
+        .where(`RankerProfile.name='${name}'`)
         .getRawOne();
 
     return rankerProfile;

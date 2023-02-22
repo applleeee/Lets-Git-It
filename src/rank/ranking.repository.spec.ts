@@ -156,7 +156,7 @@ describe('RankingRepository', () => {
   });
 
   describe('checkRanking Function', () => {
-    it('Returns True if a ranker Exists', async () => {
+    it('Returns True if a ranking Exists', async () => {
       jest.spyOn(rankingRepo, 'exist').mockResolvedValue(true);
 
       const result = await rankingRepository.checkRanking(1);
@@ -166,7 +166,7 @@ describe('RankingRepository', () => {
       });
     });
 
-    it("Returns False if a ranker Doesn't Exists", async () => {
+    it("Returns False if a ranking Doesn't Exists", async () => {
       jest.spyOn(rankingRepo, 'exist').mockResolvedValue(false);
 
       const result = await rankingRepository.checkRanking(1);
