@@ -404,7 +404,7 @@ export class CommunityRepository {
 
   async createOrDeleteCommentLikes(criteria: CreateOrDeleteCommentLikesDto) {
     const isExist = await this.commentLikeRepository.exist({
-      where: { userId: criteria.userId, commentId: criteria.commentId },
+      where: { ...criteria },
     });
 
     if (!isExist) return await this.commentLikeRepository.save(criteria);
