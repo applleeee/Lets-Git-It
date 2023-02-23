@@ -43,7 +43,7 @@ export class CommunityService {
       return saveToS3.Location;
     } catch (err) {
       throw new HttpException(
-        'CANNOT_SAVE_IMAGE_TO_S3' + err,
+        'CANNOT_SAVE_IMAGE_TO_S3',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -52,7 +52,14 @@ export class CommunityService {
   async deleteImageInS3(toDeleteImageData: DeleteImageDto) {
     const { toDeleteImage } = toDeleteImageData;
     if (toDeleteImage.length !== 0) {
-      return await deleteS3Data(toDeleteImage);
+      try {
+        return await deleteS3Data(toDeleteImage);
+      } catch (err) {
+        throw new HttpException(
+          'CANNOT_DELETE_IMAGE_IN_S3',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
     return { message: 'No image to delete' };
   }
@@ -67,7 +74,7 @@ export class CommunityService {
       await uploadToS3(content as unknown as Buffer, contentUrl, mimetype);
     } catch (err) {
       throw new HttpException(
-        'CANNOT_UPLOAD_POST_TO_S3' + err,
+        'CANNOT_UPLOAD_POST_TO_S3',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -88,7 +95,7 @@ export class CommunityService {
       return postDetail;
     } catch (err) {
       throw new HttpException(
-        'CANNOT_GET_POST_FROM_S3' + err,
+        'CANNOT_GET_POST_FROM_S3',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -100,7 +107,7 @@ export class CommunityService {
       await deleteS3Data([originPost.contentUrl]);
     } catch (err) {
       throw new HttpException(
-        'CANNOT_DELETE_POST_IN_S3' + err,
+        'CANNOT_DELETE_POST_IN_S3',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -114,7 +121,7 @@ export class CommunityService {
       await uploadToS3(content as unknown as Buffer, contentUrl, mimetype);
     } catch (err) {
       throw new HttpException(
-        'CANNOT_UPLOAD_POST_TO_S3' + err,
+        'CANNOT_UPLOAD_POST_TO_S3',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -131,13 +138,13 @@ export class CommunityService {
     const originPost = await this.CommunityRepository.getPostById(postId);
     try {
       await deleteS3Data([originPost.contentUrl]);
-      return await this.CommunityRepository.deletePost(postId);
     } catch (err) {
       throw new HttpException(
-        'CANNOT_DELETE_POST_IN_S3' + err,
+        'CANNOT_DELETE_POST_IN_S3',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+    return await this.CommunityRepository.deletePost(postId);
   }
 
   async getPostList(subCategoryId: number, query: GetPostListDto) {
@@ -160,7 +167,7 @@ export class CommunityService {
       return postDetail;
     } catch (err) {
       throw new HttpException(
-        'CANNOT_GET_POST_FROM_S3' + err,
+        'CANNOT_GET_POST_FROM_S3',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -187,20 +194,20 @@ export class CommunityService {
 
   async getIdsOfPostsCreatedByUser(userId: number) {
     const data = await this.CommunityRepository.getPostsCreatedByUser(userId);
-    return data.map<Post>((item) => Object.values(item)[0]);
+    return data?.map<Post>((item) => Object.values(item)[0]);
   }
 
   async getIdsOfPostLikedByUser(userId: number) {
     const data = await this.CommunityRepository.getIdsOfPostLikedByUser(userId);
-    return data.map<Post['id']>((item) => Object.values(item)[0]);
+    return data?.map<Post['id']>((item) => Object.values(item)[0]);
   }
 
   async createComment(user, commentData: CreateCommentDto) {
-    const comments = await this.readComments(user, commentData.postId);
-    const groupOrderArr = comments.map((comment) => comment.groupOrder);
+    const comments = await this.getComments(user, commentData.postId);
+    const groupOrderArr = comments?.map((comment) => comment.groupOrder);
 
     if (
-      groupOrderArr?.indexOf(commentData.groupOrder) === -1 &&
+      groupOrderArr.indexOf(commentData.groupOrder) === -1 &&
       commentData.depth === Depth.RE_COMMENT
     )
       throw new HttpException(
@@ -209,30 +216,28 @@ export class CommunityService {
       );
 
     if (
-      commentData.groupOrder <= groupOrderArr[groupOrderArr.length - 1] &&
+      groupOrderArr.length > 0 &&
+      commentData.groupOrder <= groupOrderArr[groupOrderArr?.length - 1] &&
       commentData.depth === Depth.COMMENT
     )
       throw new HttpException(
-        'ALREADY_EXIST_COMMENT_IN_THE_GROUPORDER',
+        'ALREADY_EXIST_COMMENT_IN_THE_GROUP_ORDER',
         HttpStatus.BAD_REQUEST,
       );
 
-    const result = await this.CommunityRepository.createComment(commentData);
-
-    return result;
+    return await this.CommunityRepository.createComment(commentData);
   }
 
   async deleteComment(criteria: DeleteCommentDto) {
-    const commentIdsCreatedByUser = (await this.getIdsOfCommentCreatedByUser(
-      criteria.userId,
-    )) as unknown[];
-
     const isCommentExist = await this.CommunityRepository.isCommentExist(
       criteria.id,
     );
 
     if (!isCommentExist)
-      throw new HttpException('THE_COMMENT_NOT_EXIST', HttpStatus.NOT_FOUND);
+      throw new HttpException('THE_COMMENT_IS_NOT_EXIST', HttpStatus.NOT_FOUND);
+
+    const commentIdsCreatedByUser = criteria.user
+      .idsOfCommentsCreatedByUser as unknown[];
 
     if (commentIdsCreatedByUser?.indexOf(criteria.id) === -1)
       throw new HttpException('NOT_CREATED_BY_USER', HttpStatus.FORBIDDEN);
@@ -240,10 +245,9 @@ export class CommunityService {
     await this.CommunityRepository.deleteComment(criteria);
   }
 
-  async updateComment(criteria: UpdateCommentDto, toUpdateContent: string) {
-    const commentIdsCreatedByUser = (await this.getIdsOfCommentCreatedByUser(
-      criteria.userId,
-    )) as unknown[];
+  async updateComment(criteria: UpdateCommentDto, content: string) {
+    const commentIdsCreatedByUser = criteria.user
+      .idsOfCommentsCreatedByUser as unknown[];
 
     const isCommentExist = await this.CommunityRepository.isCommentExist(
       criteria.id,
@@ -255,42 +259,46 @@ export class CommunityService {
     if (commentIdsCreatedByUser?.indexOf(criteria.id) === -1)
       throw new HttpException('NOT_CREATED_BY_USER', HttpStatus.FORBIDDEN);
 
-    await this.CommunityRepository.updateComment(criteria, toUpdateContent);
+    await this.CommunityRepository.updateComment(criteria, content);
 
     return { message: 'COMMENT_UPDATED' };
   }
 
-  async readComments(user, postId: number) {
-    const comments = await this.CommunityRepository.readComments(
-      postId,
-      Depth.COMMENT,
-    );
-    const reComments = await this.CommunityRepository.readComments(
-      postId,
-      Depth.RE_COMMENT,
-    );
+  async getComments(user, postId: number) {
+    const comments = await this.CommunityRepository.getComments(postId);
 
-    comments.map((comment) => {
-      comment.isCreatedByUser =
-        user.idsOfCommentsCreatedByUser?.indexOf(comment.commentId) >= 0
-          ? true
-          : false;
-      comment.isLikedByUser =
-        user.idsOfCommentLikedByUser?.indexOf(comment.commentId) >= 0
-          ? true
-          : false;
-    });
+    if (comments === undefined) comments;
 
-    reComments.map((reComment) => {
-      reComment.isCreatedByUser =
-        user.idsOfCommentsCreatedByUser?.indexOf(reComment.commentId) >= 0
-          ? true
-          : false;
-      reComment.isLikedByUser =
-        user.idsOfCommentLikedByUser?.indexOf(reComment.commentId) >= 0
-          ? true
-          : false;
-    });
+    if (user !== false)
+      comments.map((comment) => {
+        comment.isCreatedByUser =
+          user?.idsOfCommentsCreatedByUser?.indexOf(comment.commentId) >= 0
+            ? true
+            : false;
+        comment.isLikedByUser =
+          user?.idsOfCommentLikedByUser?.indexOf(comment.commentId) >= 0
+            ? true
+            : false;
+      });
+
+    let reComments = await this.CommunityRepository.getReComments(postId);
+
+    if (reComments !== undefined && user.id !== undefined) {
+      reComments.map((reComment) => {
+        reComment.isCreatedByUser =
+          user?.idsOfCommentsCreatedByUser?.indexOf(reComment.commentId) >= 0
+            ? true
+            : false;
+        reComment.isLikedByUser =
+          user?.idsOfCommentLikedByUser?.indexOf(reComment.commentId) >= 0
+            ? true
+            : false;
+      });
+    }
+
+    if (reComments === undefined) {
+      reComments = [];
+    }
 
     comments.map((comment) => {
       return (comment.reComments = reComments?.filter((reComment) => {
@@ -316,13 +324,14 @@ export class CommunityService {
     const data = await this.CommunityRepository.getCommentsCreatedByUser(
       userId,
     );
-    return data.map<Comment>((item) => Object.values(item)[0]);
+    return data?.map<Comment>((item) => Object.values(item)[0]);
   }
 
   async getIdsOfCommentLikedByUser(userId: number) {
     const data = await this.CommunityRepository.getIdsOfCommentLikedByUser(
       userId,
     );
-    return data.map<Comment['id']>((item) => Object.values(item)[0]);
+    console.log('data: ', data);
+    return data?.map<Comment['id']>((item) => Object.values(item)[0]);
   }
 }

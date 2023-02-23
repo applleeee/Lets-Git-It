@@ -1,3 +1,4 @@
+import { AuthorizedUser } from './../auth/dto/auth.dto';
 import {
   Controller,
   Get,
@@ -10,7 +11,6 @@ import {
   Req,
   Delete,
   Put,
-  NotFoundException,
   Query,
   HttpCode,
   HttpStatus,
@@ -111,15 +111,20 @@ export class CommunityController {
   @Delete('/posts/:postId')
   async deletePost(@Param('postId') postId: number, @Req() req) {
     const { idsOfPostsCreatedByUser } = req.user;
-    console.log(idsOfPostsCreatedByUser);
     if (idsOfPostsCreatedByUser.includes(postId)) {
       const result = await this.communityService.deletePost(postId);
       if (result.affected === 0) {
-        throw new NotFoundException(`Could not find a post with id ${postId}`);
+        throw new HttpException(
+          `COULD_NOT_FIND_A_POST_WITH_ID_${postId}`,
+          HttpStatus.NOT_FOUND,
+        );
       }
       return { message: 'post deleted' };
     } else {
-      throw new NotFoundException('This user has never written that post.');
+      throw new HttpException(
+        'THIS_USER_HAS_NEVER_WRITTEN_THAT_POST',
+        HttpStatus.FORBIDDEN,
+      );
     }
   }
 
@@ -186,7 +191,7 @@ export class CommunityController {
     @Req() req,
     @Param('post_id') postId: number,
   ) {
-    const user = req.user;
+    const user: AuthorizedUser = req.user;
     const commentData: CreateCommentDto = {
       userId: user.id,
       postId,
@@ -200,7 +205,8 @@ export class CommunityController {
   @Delete('/comments/:comment_id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteComment(@Req() req, @Param('comment_id') commentId: number) {
-    const criteria: DeleteCommentDto = { userId: req.user.id, id: commentId };
+    const criteria: DeleteCommentDto = { user: req.user, id: commentId };
+
     return await this.communityService.deleteComment(criteria);
   }
 
@@ -213,12 +219,12 @@ export class CommunityController {
     @Param('comment_id') commentId: number,
     @Body() body: UpdateCommentBodyDto,
   ) {
-    const toUpdateContent: string = body.content;
+    const content: string = body.content;
     const criteria: UpdateCommentDto = {
-      userId: req.user.id,
+      user: req.user,
       id: commentId,
     };
-    return await this.communityService.updateComment(criteria, toUpdateContent);
+    return await this.communityService.updateComment(criteria, content);
   }
 
   // 댓글조회
@@ -226,8 +232,8 @@ export class CommunityController {
   @Get('/posts/:post_id/comments')
   @HttpCode(HttpStatus.OK)
   async getComments(@Req() req, @Param('post_id') postId: number) {
-    const user = req.user;
-    return await this.communityService.readComments(user, postId);
+    const user: AuthorizedUser = req.user;
+    return await this.communityService.getComments(user, postId);
   }
 
   // 댓글좋아요 생성/삭제
