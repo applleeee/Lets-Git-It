@@ -82,5 +82,12 @@ jobs:
           echo "S3_SECRET_ACEESS_KEY=$S3_SECRET_ACEESS_KEY" >> .env
       - name: Docker run
         run:
-          docker ps -q --filter "name=git_rank" | grep -q . && docker stop git_rank && docker rm -fv git_rank
+          docker ps -a --filter "name=git_rank" | grep -q . && docker stop git_rank && docker rm -fv git_rank
           docker run -d -p 3000:3000 --name git_rank --restart always ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
+  cleanup:
+    name: Clean up docker images
+    needs: [build, deploy]
+    runs-on: [self-hosted]
+    steps:
+      - name: Clean up docker images
+        run: docker rmi $(docker images --filter "before=${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}" --filter=reference="${{ env.DOCKER_IMAGE }}:*" -q)
