@@ -1,2 +1,9 @@
 node_modules
 npm-debug.log
+.git 
+.cache 
+**/*.class 
+*.md 
+!README*.md
+.svn
+.env
