@@ -4,10 +4,10 @@
 name: Node.js CI
 
 on:
-  push:
-        branches: [main]
-  # pull_request:
-  #   branches: ['develop']
+  # push:
+  #       branches: [main]
+  pull_request:
+    branches: ['main']
 
 env:
   DOCKER_IMAGE: ${{ secret.DOCKER_IMAGE }}
@@ -64,8 +64,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Setup ENV
-          run: |
-          echo "AUTH_ACCESS_TOKEN=$AUTH_ACCESS_TOKEN" >> .env
+          run: echo "AUTH_ACCESS_TOKEN=$AUTH_ACCESS_TOKEN" >> .env
           echo "AUTH_CLIENT_ID=$AUTH_CLIENT_ID" >> .env
           echo "AUTH_CLIENT_SECRETS=$AUTH_CLIENT_SECRETS" >> .env
           echo "DB_DATABASE=$DB_DATABASE" >> .env
