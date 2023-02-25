@@ -5,7 +5,7 @@ name: Node.js CI
 
 on:
   pull_request:
-    branches: ['main']
+    branches: ['develop']
 
 env:
   DOCKER_IMAGE: ${{ secret.DOCKER_IMAGE }}
