@@ -55,7 +55,7 @@ jobs:
 
   deploy:
     name: Deploy
-    needs: build
+    needs: docker-push
     runs-on: [self-hosted]
     steps:
       - name: Login to DockerHub
