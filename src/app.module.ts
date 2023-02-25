@@ -24,7 +24,6 @@ import { AllExceptionsFilter } from './utiles/http-exception.filter';
   controllers: [],
   providers: [
     {
-      // 의존성 주입이 가능하도록 module에도 설정해준다.
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
     },
