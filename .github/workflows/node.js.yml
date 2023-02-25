@@ -81,9 +81,7 @@ jobs:
           echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> .env
           echo "S3_SECRET_ACEESS_KEY=$S3_SECRET_ACEESS_KEY" >> .env
       - name: Docker run
-        run:
-          docker ps -a --filter "name=git_rank" | grep -q . && docker stop git_rank && docker rm -f git_rank \
-          docker run --detach -p 3000:3000 --name git_rank --restart always ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
+        run: docker ps -a --filter "name=git_rank" | grep -q . && docker stop git_rank && docker rm -f git_rank && docker run --detach -p 3000:3000 --name git_rank --restart always ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
   cleanup:
     name: Clean up docker images
     needs: [build, docker-push, deploy]
