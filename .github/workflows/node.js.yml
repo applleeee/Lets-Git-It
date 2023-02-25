@@ -86,7 +86,7 @@ jobs:
           docker run -d -p 3000:3000 --name git_rank --restart always ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
   cleanup:
     name: Clean up docker images
-    needs: [build, deploy]
+    needs: [build, docker-push, deploy]
     runs-on: [self-hosted]
     steps:
       - name: Clean up docker images
