@@ -15,7 +15,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       AUTH_ACCESS_TOKEN: ${{secrets.AUTH_ACCESS_TOKEN}}
       AUTH_CLIENT_ID: ${{secrets.AUTH_CLIENT_ID}}
@@ -55,7 +55,7 @@ jobs:
   docker-push:
     name: Docker build and push
     needs: build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
