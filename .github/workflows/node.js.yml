@@ -10,7 +10,7 @@ on:
     branches: ['main']
 
 env:
-  DOCKER_IMAGE: ${{ secret.DOCKER_IMAGE }}
+  DOCKER_IMAGE: ${{ secrets.DOCKER_IMAGE }}
   VERSION: ${{ github.sha }}
 
 jobs:
