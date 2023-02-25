@@ -14,7 +14,22 @@ env:
 jobs:
   build:
     runs-on: ubuntu-22.04
-
+    env:
+      AUTH_ACCESS_TOKEN: ${{secrets.AUTH_ACCESS_TOKEN}}
+      AUTH_CLIENT_ID: ${{secrets.AUTH_CLIENT_ID}}
+      AUTH_CLIENT_SECRETS: ${{secrets.AUTH_CLIENT_SECRETS}}
+      DB_DATABASE: ${{secrets.DB_DATABASE}}
+      DB_HOST: ${{secrets.DB_HOST}}
+      DB_PASSWORD: ${{secrets.DB_PASSWORD}}
+      DB_TYPE: ${{secrets.DB_TYPE}}
+      DOCKERHUB_TOKEN: ${{secrets.DOCKERHUB_TOKEN}}
+      DOCKERHUB_USERNAME: ${{secrets.DOCKERHUB_USERNAME}}
+      JWT_EXPIRES_IN: ${{secrets.JWT_EXPIRES_IN}}
+      JWT_SECRET_KEY: ${{secrets.JWT_SECRET_KEY}}
+      PORT: ${{secrets.PORT}}
+      S3_ACCESS_KEY_ID: ${{secrets.S3_ACCESS_KEY_ID}}
+      S3_BUCKET_NAME: ${{secrets.S3_BUCKET_NAME}}
+      S3_SECRET_ACEESS_KEY: ${{secrets.S3_SECRET_ACEESS_KEY}}
     strategy:
       matrix:
         node-version: [16.x]
@@ -26,10 +41,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run build --if-present
-      - run: npm test
+          cache: 'npm'\
+      - name: Install dependencies
+        run: npm ci
+      - name: Unit test
+        run: npm test
+      - name: Build
+        run: npm run build --if-present
 
   docker-push:
     name: docker build and push
@@ -61,23 +79,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Setup ENV
-        run: |
-          echo "AUTH_ACCESS_TOKEN=$AUTH_ACCESS_TOKEN" >> .env
-          echo "AUTH_CLIENT_ID=$AUTH_CLIENT_ID" >> .env
-          echo "AUTH_CLIENT_SECRETS=$AUTH_CLIENT_SECRETS" >> .env
-          echo "DB_DATABASE=$DB_DATABASE" >> .env
-          echo "DB_HOST=$DB_HOST" >> .env
-          echo "DB_PASSWORD=$DB_PASSWORD" >> .env
-          echo "DB_TYPE=$DB_TYPE" >> .env
-          echo "DOCKERHUB_TOKEN=$DOCKERHUB_TOKEN" >> .env
-          echo "DOCKERHUB_USERNAME=$DOCKERHUB_USERNAME" >> .env
-          echo "JWT_EXPIRES_IN=$JWT_EXPIRES_IN" >> .env
-          echo "JWT_SECRET_KEY=$JWT_SECRET_KEY" >> .env
-          echo "PORT=$PORT" >> .env
-          echo "S3_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID" >> .env
-          echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> .env
-          echo "S3_SECRET_ACEESS_KEY=$S3_SECRET_ACEESS_KEY" >> .env
       - name: Docker run
         run: docker ps -a --filter "name=git_rank" | grep -q . && docker stop git_rank && docker rm -f git_rank && docker run --detach -p 3000:3000 --name git_rank --restart always ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
   cleanup:
