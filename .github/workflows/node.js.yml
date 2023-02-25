@@ -84,7 +84,7 @@ jobs:
         run: docker ps -a --filter "name=git_rank" | grep -q . && docker stop git_rank && docker rm -f git_rank && docker run --detach -p 3000:3000 --name git_rank --restart always ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
   cleanup:
     name: Clean up docker images
-    needs: [build, docker-push, deploy]
+    needs: [build, deploy]
     runs-on: [self-hosted, prod]
     steps:
       - name: Clean up docker images
