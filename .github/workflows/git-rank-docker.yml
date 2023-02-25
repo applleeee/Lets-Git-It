@@ -1,0 +1,91 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Node.js CI
+
+on:
+  # push:
+  #       branches: [main]
+  pull_request:
+    branches: ['main']
+
+env:
+  DOCKER_IMAGE: ${{ secrets.DOCKER_IMAGE }}
+  VERSION: ${{ github.sha }}
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm test
+
+  docker-push:
+    name: docker build and push
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
+
+  deploy:
+    name: Deploy
+    needs: docker-push
+    runs-on: [self-hosted, prod]
+    steps:
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Setup ENV
+        run: |
+          echo "AUTH_ACCESS_TOKEN=$AUTH_ACCESS_TOKEN" >> .env
+          echo "AUTH_CLIENT_ID=$AUTH_CLIENT_ID" >> .env
+          echo "AUTH_CLIENT_SECRETS=$AUTH_CLIENT_SECRETS" >> .env
+          echo "DB_DATABASE=$DB_DATABASE" >> .env
+          echo "DB_HOST=$DB_HOST" >> .env
+          echo "DB_PASSWORD=$DB_PASSWORD" >> .env
+          echo "DB_TYPE=$DB_TYPE" >> .env
+          echo "DOCKERHUB_TOKEN=$DOCKERHUB_TOKEN" >> .env
+          echo "DOCKERHUB_USERNAME=$DOCKERHUB_USERNAME" >> .env
+          echo "JWT_EXPIRES_IN=$JWT_EXPIRES_IN" >> .env
+          echo "JWT_SECRET_KEY=$JWT_SECRET_KEY" >> .env
+          echo "PORT=$PORT" >> .env
+          echo "S3_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID" >> .env
+          echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> .env
+          echo "S3_SECRET_ACEESS_KEY=$S3_SECRET_ACEESS_KEY" >> .env
+      - name: Docker run
+        run: docker ps -a --filter "name=git_rank" | grep -q . && docker stop git_rank && docker rm -f git_rank && docker run --detach -p 3000:3000 --name git_rank --restart always ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
+  cleanup:
+    name: Clean up docker images
+    needs: [build, deploy]
+    runs-on: [self-hosted, prod]
+    steps:
+      - name: Clean up docker images
+        run: docker rmi $(docker images --filter "before=${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}" --filter=reference="${{ env.DOCKER_IMAGE }}:*" -q)
