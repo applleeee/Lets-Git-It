@@ -22,4 +22,4 @@ ENV PORT=${PORT} \
     GITHUB_CLIENT_SECRETS=${GITHUB_CLIENT_SECRETS} \
     GITHUB_ACCESS_TOKEN=${GITHUB_ACCESS_TOKEN}
 EXPOSE $PORT
-CMD [ “npm”, “run”, “start:prod”  ]
+CMD ["npm", "run", "start:prod"]
