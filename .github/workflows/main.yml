@@ -51,7 +51,8 @@ jobs:
           port: ${{ secrets.EC2_PORT }}
           script: |
             touch test.txt
-            sudo docker pull ghcr.io/applleeee/lets-git-it:${{ env.VERSION | lower }}
+            sudo docker pull ghcr.io/applleeee/lets-git-it:${{ env.VERSION }}
+            sudo docker images
             sudo docker run -d --name lets-git-it -p 3000:3000 \
             -e PORT=$(grep PORT .env | xargs) \
             -e DB_TYPE=$(grep DB_TYPE .env | xargs) \
@@ -68,4 +69,4 @@ jobs:
             -e GITHUB_CLIENT_ID=$(grep GITHUB_CLIENT_ID .env | xargs) \
             -e GITHUB_CLIENT_SECRETS=$(grep GITHUB_CLIENT_SECRETS .env | xargs) \
             -e GITHUB_ACCESS_TOKEN=$(grep GITHUB_ACCESS_TOKEN .env | xargs) \
-            ghcr.io/applleeee/lets-git-it:${{ env.VERSION | lower }}
+            ghcr.io/applleeee/lets-git-it:${{ env.VERSION }}
