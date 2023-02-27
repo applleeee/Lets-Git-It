@@ -55,3 +55,4 @@ jobs:
             sudo docker rmi $(sudo docker images -q)
             sudo docker pull ghcr.io/applleeee/lets-git-it:${{ env.VERSION }}
             sudo docker run -d --name lets-git-it -p 3000:3000 --env-file ./.env ghcr.io/applleeee/lets-git-it:${{ env.VERSION }}
+
