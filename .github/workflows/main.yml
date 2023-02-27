@@ -42,6 +42,14 @@ jobs:
     needs: build
     runs-on: ubuntu-20.04
     steps:
+      - name: Delete existing container
+        run: |
+          docker stop lets-git-it || true
+          docker rm lets-git-it || true
+
+      - name: Delete existing image
+        run: docker rmi ghcr.io/applleeee/lets-git-it:${{ env.VERSION }} || true
+
       - name: SSH into EC2
         uses: appleboy/ssh-action@master
         with:
