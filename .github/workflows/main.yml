@@ -3,7 +3,7 @@ on:
   push:
     branches: [main]
 env:
-  DOCKER_IMAGE: ghcr.io/applleeee/Lets-Git-It
+  DOCKER_IMAGE: ghcr.io/applleeee/lets-git-it
   VERSION: ${{ github.sha }}
 jobs:
   build:
