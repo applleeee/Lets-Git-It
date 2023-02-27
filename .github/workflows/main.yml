@@ -36,7 +36,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           builder: ${{ steps.buildx.outputs.name }}
-          push: ${{ github.event_name != 'pull_request' }}
+          # push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
   deploy:
     needs: build
