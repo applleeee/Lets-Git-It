@@ -53,20 +53,20 @@ jobs:
             touch test.txt
             sudo docker pull ghcr.io/applleeee/lets-git-it:${{ env.VERSION }}
             sudo docker images
-            sudo docker run -d --name lets-git-it -p 3000:3000 \
-            -e PORT=$(grep PORT .env | xargs) \
-            -e DB_TYPE=$(grep DB_TYPE .env | xargs) \
-            -e DB_HOST=$(grep DB_HOST .env | xargs) \
-            -e DB_PORT=$(grep DB_PORT .env | xargs) \
-            -e DB_USERNAME=$(grep DB_USERNAME .env | xargs) \
-            -e DB_PASSWORD=$(grep DB_PASSWORD .env | xargs) \
-            -e DB_DATABASE=$(grep DB_DATABASE .env | xargs) \
-            -e S3_ACCESS_KEY_ID=$(grep S3_ACCESS_KEY_ID .env | xargs) \
-            -e S3_SECRET_ACEESS_KEY=$(grep S3_SECRET_ACEESS_KEY .env | xargs) \
-            -e S3_BUCKET_NAME=$(grep S3_BUCKET_NAME .env | xargs) \
-            -e JWT_SECRET_KEY=$(grep JWT_SECRET_KEY .env | xargs) \
-            -e JWT_EXPIRES_IN=$(grep JWT_EXPIRES_IN .env | xargs) \
-            -e GITHUB_CLIENT_ID=$(grep GITHUB_CLIENT_ID .env | xargs) \
-            -e GITHUB_CLIENT_SECRETS=$(grep GITHUB_CLIENT_SECRETS .env | xargs) \
-            -e GITHUB_ACCESS_TOKEN=$(grep GITHUB_ACCESS_TOKEN .env | xargs) \
+            sudo docker run -d --name lets-git-it -p 3000:3000\
+            -e PORT=$(grep PORT .env | xargs)\
+            -e DB_TYPE=$(grep DB_TYPE .env | xargs)\
+            -e DB_HOST=$(grep DB_HOST .env | xargs)\
+            -e DB_PORT=$(grep DB_PORT .env | xargs)\
+            -e DB_USERNAME=$(grep DB_USERNAME .env | xargs)\
+            -e DB_PASSWORD=$(grep DB_PASSWORD .env | xargs)\
+            -e DB_DATABASE=$(grep DB_DATABASE .env | xargs)\
+            -e S3_ACCESS_KEY_ID=$(grep S3_ACCESS_KEY_ID .env | xargs)\
+            -e S3_SECRET_ACEESS_KEY=$(grep S3_SECRET_ACEESS_KEY .env | xargs)\
+            -e S3_BUCKET_NAME=$(grep S3_BUCKET_NAME .env | xargs)\
+            -e JWT_SECRET_KEY=$(grep JWT_SECRET_KEY .env | xargs)\
+            -e JWT_EXPIRES_IN=$(grep JWT_EXPIRES_IN .env | xargs)\
+            -e GITHUB_CLIENT_ID=$(grep GITHUB_CLIENT_ID .env | xargs)\
+            -e GITHUB_CLIENT_SECRETS=$(grep GITHUB_CLIENT_SECRETS .env | xargs)\
+            -e GITHUB_ACCESS_TOKEN=$(grep GITHUB_ACCESS_TOKEN .env | xargs)\
             ghcr.io/applleeee/lets-git-it:${{ env.VERSION }}
