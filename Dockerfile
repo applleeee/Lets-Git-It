@@ -32,14 +32,6 @@ ENV AUTH_ACCESS_TOKEN=${AUTH_ACCESS_TOKEN} \
     AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
     AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 
-ENV PATH="/root/.local/bin:$PATH"
-RUN npm i aws-cli && \
-    aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID} && \
-    aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY} && \
-    aws configure set region ap-northeast-2 && \
-    aws configure set format json
-
-
 EXPOSE 3000
 
 CMD [ "npm", "run", "start:prod"  ]
