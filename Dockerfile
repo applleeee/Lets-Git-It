@@ -28,7 +28,16 @@ ENV AUTH_ACCESS_TOKEN=${AUTH_ACCESS_TOKEN} \
     PORT=${PORT} \
     S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID} \
     S3_BUCKET_NAME=${S3_BUCKET_NAME} \
-    S3_SECRET_ACEESS_KEY=${S3_SECRET_ACEESS_KEY}
+    S3_SECRET_ACEESS_KEY=${S3_SECRET_ACEESS_KEY} \
+    AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+    AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+
+RUN npm i aws-cli
+    
+RUN aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID} && \
+    aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY} && \
+    aws configure set region ap-northeast-2 && \
+    aws configure set format json
 
 EXPOSE 3000
 
