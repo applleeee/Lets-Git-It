@@ -50,8 +50,8 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           port: ${{ secrets.EC2_PORT }}
           run: |
-            docker pull ghcr.io/applleeee/lets-git-it:${{ env.VERSION }}
-            docker run -d --name lets-git-it -p 3000:3000 \
+            sudo docker pull ghcr.io/applleeee/lets-git-it:${{ env.VERSION }}
+            sudo docker run -d --name lets-git-it -p 3000:3000 \
             -e PORT=$(grep PORT .env | xargs) \
             -e DB_TYPE=$(grep DB_TYPE .env | xargs) \
             -e DB_HOST=$(grep DB_HOST .env | xargs) \
