@@ -53,7 +53,7 @@ jobs:
             touch test.txt
             sudo docker pull ghcr.io/applleeee/lets-git-it:${{ env.VERSION }}
             sudo docker images
-            sudo docker run -d --name lets-git-it -p 3000:3000\
+            sudo docker run -d --name lets-git-it -p 3000:3000 \
             -e PORT=$(grep PORT .env | xargs)\
             -e DB_TYPE=$(grep DB_TYPE .env | xargs)\
             -e DB_HOST=$(grep DB_HOST .env | xargs)\
