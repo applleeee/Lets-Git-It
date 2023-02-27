@@ -40,7 +40,7 @@ jobs:
           tags: ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
   deploy:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: SSH into EC2
         uses: appleboy/ssh-action@master
@@ -50,8 +50,8 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           port: ${{ secrets.EC2_PORT }}
           run: |
-            docker pull ghcr.io/applleeee/Lets-Git-It:${{ env.VERSION }}
-            docker run -d --name Lets-git-it -p 3000:3000 \
+            docker pull ghcr.io/applleeee/lets-git-it:${{ env.VERSION }}
+            docker run -d --name lets-git-it -p 3000:3000 \
             -e PORT=$(grep PORT .env | xargs) \
             -e DB_TYPE=$(grep DB_TYPE .env | xargs) \
             -e DB_HOST=$(grep DB_HOST .env | xargs) \
@@ -67,4 +67,4 @@ jobs:
             -e GITHUB_CLIENT_ID=$(grep GITHUB_CLIENT_ID .env | xargs) \
             -e GITHUB_CLIENT_SECRETS=$(grep GITHUB_CLIENT_SECRETS .env | xargs) \
             -e GITHUB_ACCESS_TOKEN=$(grep GITHUB_ACCESS_TOKEN .env | xargs) \
-            ghcr.io/applleeee/Lets-Git-It:${{ env.VERSION }}
+            ghcr.io/applleeee/lets-git-it:${{ env.VERSION }}
