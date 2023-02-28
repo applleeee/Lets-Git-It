@@ -8,7 +8,7 @@ import { SearchOutput, Top100, Top5 } from './dto/rankerProfile.dto';
 
 dotenv.config();
 
-const TOKEN = process.env.GITHUB_ACCESS_TOKEN;
+const TOKEN = process.env.PERSONAL_ACCESS_TOKEN;
 
 @Injectable()
 export class RankService {
