@@ -5,6 +5,7 @@ import * as dotenv from 'dotenv';
 import { TierRepository } from './tier.repository';
 import { RankingRepository } from './ranking.repository';
 import { SearchOutput, Top100, Top5 } from './dto/rankerProfile.dto';
+import cheerio from 'cheerio';
 
 dotenv.config();
 
@@ -148,18 +149,27 @@ export class RankService {
 
       const reviewCount = reviews.length;
 
-      const sponsors = await axios.get(
-        `https://ghs.vercel.app/count/${userName}`,
-      );
-
       let sponsorsCount = 0;
 
-      if (!Boolean(sponsors.data)) {
-        const sponsorsList = await axios.get(
-          `https://ghs.vercel.app/sponsors/${userName}`,
+      let pg = 1;
+      let rawHTMLString;
+      do {
+        const sponsors = await axios.get(
+          `https://github.com/sponsors/${userName}/sponsors_partial?page=${pg}`,
         );
-        sponsorsCount = sponsorsList.data.sponsors.length;
-      }
+
+        const html = sponsors.data;
+
+        rawHTMLString = cheerio.load(html);
+
+        if (rawHTMLString.root()[0]['x-mode'] === 'no-quirks') {
+          break;
+        }
+        sponsorsCount += rawHTMLString('div').length;
+        pg++;
+      } while (rawHTMLString('div').length > 0);
+
+      console.log(sponsorsCount);
 
       const scoreBasisPromise = axios.get(
         `https://api.github.com/users/${userName}/repos?per_page=100`,
@@ -333,7 +343,6 @@ export class RankService {
       const avgValues = await this.rankingRepository.getAvgValues();
       return { rankerDetail, maxValues, avgValues };
     } catch (e) {
-      console.log(e);
       if (e.response.status === 404) {
         throw new HttpException('INVALID GITHUB USER', HttpStatus.NOT_FOUND);
       }
