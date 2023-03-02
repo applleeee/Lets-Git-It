@@ -45,6 +45,13 @@ export class Post {
   @UpdateDateColumn({ name: 'updated_at', nullable: true })
   updatedAt: Date | null;
 
+  @Column('tinyint', {
+    name: 'fixed_category_id',
+    nullable: true,
+    unsigned: true,
+  })
+  fixedCategoryId: number | null;
+
   @OneToMany(() => Comment, (comment) => comment.post)
   comments: Comment[];
 
