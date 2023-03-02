@@ -331,7 +331,6 @@ export class CommunityService {
     const data = await this.CommunityRepository.getIdsOfCommentLikedByUser(
       userId,
     );
-    console.log('data: ', data);
     return data?.map<Comment['id']>((item) => Object.values(item)[0]);
   }
 }
