@@ -23,6 +23,7 @@ import {
   CreateCommentBodyDto,
   CreateCommentDto,
   CreateOrDeleteCommentLikesDto,
+  DeleteCommentBodyDto,
   DeleteCommentDto,
   UpdateCommentBodyDto,
   UpdateCommentDto,
@@ -202,10 +203,20 @@ export class CommunityController {
 
   // 댓글삭제
   @UseGuards(AuthGuard('jwt'))
-  @Delete('/comments/:comment_id')
+  @Post('/comments/:comment_id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteComment(@Req() req, @Param('comment_id') commentId: number) {
-    const criteria: DeleteCommentDto = { user: req.user, id: commentId };
+  async deleteComment(
+    @Req() req,
+    @Param('comment_id') commentId: number,
+    @Body() body: DeleteCommentBodyDto,
+  ) {
+    const criteria: DeleteCommentDto = {
+      user: req.user,
+      id: commentId,
+      groupOrder: body.groupOrder,
+      depth: body.depth,
+      postId: body.postId,
+    };
 
     return await this.communityService.deleteComment(criteria);
   }
