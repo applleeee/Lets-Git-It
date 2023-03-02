@@ -156,6 +156,11 @@ export class RankService {
       do {
         const sponsors = await axios.get(
           `https://github.com/sponsors/${userName}/sponsors_partial?page=${pg}`,
+          {
+            headers: {
+              Authorization: `Bearer ${TOKEN}`,
+            },
+          },
         );
 
         const html = sponsors.data;
