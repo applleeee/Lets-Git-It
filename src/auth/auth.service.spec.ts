@@ -176,11 +176,13 @@ describe('AuthService', () => {
     it('Should call the JwtService method with the correct parameters', async () => {
       await authService.signIn(githubCode);
 
-      expect(jwtService.sign).toHaveBeenCalledWith({
-        userId: 123,
-        userName: githubUserInfo.login,
-        secretOrPrivateKey: process.env.JWT_SECRET_KEY,
-      });
+      expect(jwtService.sign).toHaveBeenCalledWith(
+        {
+          userId: 123,
+          userName: githubUserInfo.login,
+        },
+        { secret: process.env.JWT_SECRET_KEY },
+      );
     });
   });
 
@@ -233,11 +235,13 @@ describe('AuthService', () => {
     it('Should call the JwtService methods with the correct parameters', async () => {
       await authService.signUp(signUpDataWithUserName);
 
-      expect(jwtService.sign).toHaveBeenCalledWith({
-        userId: user.id,
-        userName: userName,
-        secretOrPrivateKey: process.env.JWT_SECRET_KEY,
-      });
+      expect(jwtService.sign).toHaveBeenCalledWith(
+        {
+          userId: user.id,
+          userName: userName,
+        },
+        { secret: process.env.JWT_SECRET_KEY },
+      );
     });
 
     it('Should call the RankService methods with the correct parameters', async () => {

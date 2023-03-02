@@ -40,11 +40,13 @@ export class AuthService {
       };
     }
 
-    const jwtToken = this.jwtService.sign({
-      userId: user.id,
-      userName: userName,
-      secretOrPrivateKey: process.env.JWT_SECRET_KEY,
-    });
+    const jwtToken = this.jwtService.sign(
+      {
+        userId: user.id,
+        userName: userName,
+      },
+      { secret: process.env.JWT_SECRET_KEY },
+    );
 
     return { isMember: true, userName: userName, accessToken: jwtToken };
   }
@@ -55,11 +57,13 @@ export class AuthService {
 
     const user = await this.userService.getByGithubId(signUpData.githubId);
 
-    const jwtToken = this.jwtService.sign({
-      userId: user.id,
-      userName: userName,
-      secretOrPrivateKey: process.env.JWT_SECRET_KEY,
-    });
+    const jwtToken = this.jwtService.sign(
+      {
+        userId: user.id,
+        userName: userName,
+      },
+      { secret: process.env.JWT_SECRET_KEY },
+    );
 
     await this.rankService.checkRanker(userName);
     const userId = await this.userRepository.getUserIdByGithubId(user.githubId);
