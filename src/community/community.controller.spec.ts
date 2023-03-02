@@ -881,11 +881,18 @@ describe('CommunityController', () => {
       },
     };
 
+    const mockBody = {
+      groupOrder: 1,
+      postId: 1,
+      depth: 1,
+    };
+
     const mockCommentId = 1;
 
     const mockCriteria: DeleteCommentDto = {
       user: mockReq.user,
       id: mockCommentId,
+      ...mockBody,
     };
 
     it('SUCCESS : Should return nothing, because status code is 204 no_content ', async () => {
@@ -894,6 +901,7 @@ describe('CommunityController', () => {
       const result = await communityController.deleteComment(
         mockReq,
         mockCommentId,
+        mockBody,
       );
 
       expect(communityService.deleteComment).toBeCalledWith(mockCriteria);

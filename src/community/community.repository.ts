@@ -298,7 +298,11 @@ export class CommunityRepository {
     return await this.commentRepository.save(data);
   }
 
-  async deleteComment(criteria: DeleteCommentDto) {
+  async deleteComment(criteria) {
+    return await this.commentRepository.delete(criteria);
+  }
+
+  async deleteReComment(criteria: DeleteCommentDto) {
     return await this.commentRepository.delete(criteria);
   }
 
