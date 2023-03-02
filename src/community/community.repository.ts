@@ -120,8 +120,13 @@ export class CommunityRepository {
     offset: number,
     limit: number,
   ) {
+    const queryBuilderForFixed = this.postList();
     const queryBuilderForCount = this.postList();
     const queryBuilderForData = this.postList(offset, limit);
+
+    queryBuilderForFixed.where('post.fixedCategoryId = :subCategoryId', {
+      subCategoryId: subCategoryId,
+    });
 
     queryBuilderForCount.where('post.subCategoryId = :subCategoryId', {
       subCategoryId: subCategoryId,
@@ -149,9 +154,10 @@ export class CommunityRepository {
       }
     }
 
+    const fixed = await queryBuilderForFixed.getRawMany();
     const total = await queryBuilderForCount.getCount();
     const data = await queryBuilderForData.getRawMany();
-    return { postLists: data, total: total };
+    return { fixed: fixed, postLists: data, total: total };
   }
 
   async getPostDatail(postId: number) {
