@@ -30,7 +30,7 @@ async function bootstrap() {
   app.enableCors();
 
   const PORT = process.env.PORT;
-  console.log(`listening to localhost:${PORT}~`);
+  console.log(`Server Listening to localhost:${PORT}~`);
   await app.listen(PORT);
 }
 bootstrap();
