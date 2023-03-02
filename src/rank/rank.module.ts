@@ -8,29 +8,9 @@ import { RankerProfileRepository } from './rankerProfile.repository';
 import { RankService } from './rank.service';
 import { RankingRepository } from './ranking.repository';
 import { TierRepository } from './tier.repository';
-import { User } from '../entities/User';
-import { Comment } from '../entities/Comment';
-import { CommentLike } from '../entities/CommentLike';
-import { Post } from '../entities/Post';
-import { PostLike } from '../entities/PostLike';
-import { Field } from '../entities/Field';
-import { Career } from '../entities/Career';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      RankerProfile,
-      Ranking,
-      Tier,
-      User,
-      Comment,
-      CommentLike,
-      Post,
-      PostLike,
-      Field,
-      Career,
-    ]),
-  ],
+  imports: [TypeOrmModule.forFeature([RankerProfile, Ranking, Tier])],
   controllers: [RankController],
   providers: [
     RankService,
@@ -38,6 +18,11 @@ import { Career } from '../entities/Career';
     RankingRepository,
     TierRepository,
   ],
-  exports: [RankerProfileRepository],
+  exports: [
+    RankerProfileRepository,
+    RankingRepository,
+    TierRepository,
+    RankService,
+  ],
 })
 export class RankModule {}

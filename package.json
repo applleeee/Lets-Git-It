@@ -30,6 +30,7 @@
     "@nestjs/mapped-types": "^1.2.2",
     "@nestjs/passport": "^9.0.2",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/schedule": "^2.2.0",
     "@nestjs/typeorm": "^9.0.1",
     "@types/axios": "^0.14.0",
     "aws-sdk": "^2.1309.0",

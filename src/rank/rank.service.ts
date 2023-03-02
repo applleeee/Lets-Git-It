@@ -8,10 +8,11 @@ import { SearchOutput, Top100, Top5 } from './dto/rankerProfile.dto';
 
 dotenv.config();
 
-const TOKEN = process.env.GITHUB_ACCESS_TOKEN;
-
 @Injectable()
 export class RankService {
+  private TOKENS = process.env.GITHUB_ACCESS_TOKEN.split(',');
+  private currentTOKEN = 0;
+
   constructor(
     private rankerProfileRepository: RankerProfileRepository,
     private rankingRepository: RankingRepository,
@@ -36,12 +37,12 @@ export class RankService {
 
   async getRankerDetail(userName: string) {
     try {
+      const TOKEN = this.getNextToken();
       const users = axios.get(`https://api.github.com/users/${userName}`, {
         headers: {
           Authorization: `Bearer ${TOKEN}`,
         },
       });
-
       const stars = axios.get(
         `https://api.github.com/users/${userName}/starred?per_page=100`,
         {
@@ -50,7 +51,6 @@ export class RankService {
           },
         },
       );
-
       const issues = axios.get(
         `https://api.github.com/search/issues?q=author:${userName}`,
         {
@@ -333,14 +333,28 @@ export class RankService {
       const avgValues = await this.rankingRepository.getAvgValues();
       return { rankerDetail, maxValues, avgValues };
     } catch (e) {
-      if (e.code === 'ERR_BAD_REQUEST') {
+      console.log(e);
+      if (e.response.status === 404) {
         throw new HttpException('INVALID GITHUB USER', HttpStatus.NOT_FOUND);
       }
-      throw new HttpException(
-        'GITHUB API IS OVERLOADED',
-        HttpStatus.BAD_GATEWAY,
-      );
+
+      if (e.response.status === 403) {
+        throw new HttpException(
+          'GITHUB API IS OVERLOADED',
+          HttpStatus.BAD_GATEWAY,
+        );
+      }
+
+      if (e.response.status === 401) {
+        throw new HttpException('PROBLEM WITH TOKEN', HttpStatus.BAD_REQUEST);
+      }
     }
+  }
+
+  private getNextToken() {
+    const token = this.TOKENS[this.currentTOKEN];
+    this.currentTOKEN = (this.currentTOKEN + 1) % this.TOKENS.length;
+    return token;
   }
 
   async getTop5(): Promise<Top5[]> {

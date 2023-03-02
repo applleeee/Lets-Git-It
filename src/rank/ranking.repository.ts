@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Ranking } from '../entities/Ranking';
@@ -203,6 +203,15 @@ export class RankingRepository {
         abilityContributeRepositoryStarNumber: contributingRepoStarsCount,
         tierId,
       })
+      .where(`ranker_profile_id=:rankerId`, { rankerId: rankerProfileId })
+      .execute();
+  }
+
+  async updateRankerTier(rankerProfileId: number, tierId: number) {
+    await this.rankingRepository
+      .createQueryBuilder()
+      .update(Ranking)
+      .set({ tierId })
       .where(`ranker_profile_id=:rankerId`, { rankerId: rankerProfileId })
       .execute();
   }
