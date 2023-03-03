@@ -11,7 +11,7 @@ dotenv.config();
 
 @Injectable()
 export class RankService {
-  private TOKENS = process.env.GITHUB_ACCESS_TOKEN.split(',');
+  private TOKENS = process.env.PERSONAL_ACCESS_TOKEN.split(',');
   private currentTOKEN = 0;
 
   constructor(
