@@ -45,7 +45,25 @@ export class UpdateCommentDto {
   readonly id: number;
 }
 
-export class DeleteCommentDto extends UpdateCommentDto {}
+export class DeleteCommentDto extends UpdateCommentDto {
+  @IsNumber()
+  @IsNotEmpty()
+  readonly groupOrder: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  readonly postId: number;
+
+  @IsEnum(Depth)
+  @IsNotEmpty()
+  readonly depth: Depth;
+}
+
+export class DeleteCommentBodyDto extends PickType(DeleteCommentDto, [
+  'groupOrder',
+  'depth',
+  'postId',
+] as const) {}
 
 export class CreateOrDeleteCommentLikesDto {
   @IsNumber()

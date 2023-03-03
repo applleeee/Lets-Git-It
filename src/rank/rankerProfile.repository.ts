@@ -126,6 +126,7 @@ export class RankerProfileRepository {
     const top100: Top100[] = await this.rankerProfileRepository
       .createQueryBuilder()
       .select([
+        'RankerProfile.id as rankerProfileId',
         'RankerProfile.name as rankerName',
         'r.main_language as mainLang',
         'r.fame_follower_number as followerNumber',

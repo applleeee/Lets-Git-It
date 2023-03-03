@@ -195,6 +195,7 @@ describe('RankService', () => {
       const langFilter = 'All';
       const testTop100 = [
         {
+          rankerProfileId: 1,
           rankerName: 'serranoarevalo',
           mainLang: 'C',
           followerNumber: 3834,
@@ -205,6 +206,7 @@ describe('RankService', () => {
           tierImage: null,
         },
         {
+          rankerProfileId: 2,
           rankerName: 'Hesh0629',
           mainLang: 'Jupyter Notebook',
           followerNumber: 15,
@@ -215,6 +217,7 @@ describe('RankService', () => {
           tierImage: null,
         },
         {
+          rankerProfileId: 3,
           rankerName: 'dahyen0o',
           mainLang: 'Python',
           followerNumber: 12,
@@ -253,6 +256,7 @@ describe('RankService', () => {
       const langFilter = 'C';
       const testTop100 = [
         {
+          rankerProfileId: 1,
           rankerName: 'serranoarevalo',
           mainLang: 'C',
           followerNumber: 3834,
@@ -263,6 +267,7 @@ describe('RankService', () => {
           tierImage: null,
         },
         {
+          rankerProfileId: 4,
           rankerName: 'sieuneee',
           mainLang: 'C',
           followerNumber: 10,
@@ -301,6 +306,7 @@ describe('RankService', () => {
       const langFilter = 123;
       const testTop100 = [
         {
+          rankerProfileId: 1,
           rankerName: 'serranoarevalo',
           mainLang: 'C',
           followerNumber: 3834,
@@ -311,6 +317,7 @@ describe('RankService', () => {
           tierImage: null,
         },
         {
+          rankerProfileId: 2,
           rankerName: 'Hesh0629',
           mainLang: 'Jupyter Notebook',
           followerNumber: 15,
@@ -321,6 +328,7 @@ describe('RankService', () => {
           tierImage: null,
         },
         {
+          rankerProfileId: 3,
           rankerName: 'dahyen0o',
           mainLang: 'Python',
           followerNumber: 12,

@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
@@ -68,7 +69,7 @@ export class User {
   @OneToMany(() => PostLike, (postLike) => postLike.user)
   postLikes: PostLike[];
 
-  @OneToMany(() => RankerProfile, (rankerProfile) => rankerProfile.user)
+  @OneToOne(() => RankerProfile, (rankerProfile) => rankerProfile.user)
   rankerProfiles: RankerProfile[];
 
   @ManyToOne(() => Field, (field) => field.users, {

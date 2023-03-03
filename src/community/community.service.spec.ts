@@ -26,6 +26,7 @@ class MockCommunityRepository {
   getIdsOfPostLikedByUser = jest.fn();
   createComment = jest.fn();
   deleteComment = jest.fn();
+  deleteReComment = jest.fn();
   updateComment = jest.fn();
   isCommentExist = jest.fn();
   getComments = jest.fn();
@@ -663,16 +664,17 @@ describe('CommunityService', () => {
         );
       });
     });
+
     describe(' - When create reComment (depth = 2)', () => {
-      const mockCommentData: CreateCommentDto = {
-        postId: 1,
-        userId: mockUser.id,
-        content: 'test',
-        groupOrder: 1,
-        depth: 2,
-      };
       // groupOrder가 존재하는데 depth가 2일때
       it('SUCCESS : Should return object of comment created by user, when groupOrder exist', async () => {
+        const mockCommentData: CreateCommentDto = {
+          postId: 1,
+          userId: mockUser.id,
+          content: 'test',
+          groupOrder: 1,
+          depth: 2,
+        };
         const existComment = [
           { postId: 1, userId: 2, content: 'test', groupOrder: 1, depth: 1 },
         ];
@@ -700,6 +702,13 @@ describe('CommunityService', () => {
       });
       // failure : groupOrder가 존재하지 않는데 depth가 2일 때
       it('FAILURE : Should return HttpException BAD_REQUEST, if the comment with the same groupOrder not exist', async () => {
+        const mockCommentData: CreateCommentDto = {
+          postId: 1,
+          userId: mockUser.id,
+          content: 'test',
+          groupOrder: 2,
+          depth: 2,
+        };
         const existComments = [
           {
             commentId: 1,
@@ -738,6 +747,11 @@ describe('CommunityService', () => {
       idsOfCommentsCreatedByUser: [1] as any,
       idsOfCommentLikedByUser: [],
     };
+    const mockBody = {
+      groupOrder: 1,
+      postId: 1,
+      depth: 1,
+    };
 
     it('SUCCESS : Comment is deleted', async () => {
       const expectedResult = undefined;
@@ -747,6 +761,7 @@ describe('CommunityService', () => {
       const mockCriteria: DeleteCommentDto = {
         user: mockUser,
         id: mockCommentId,
+        ...mockBody,
       };
 
       const mockDeleteResult = { raw: [], affected: 1 };
@@ -762,16 +777,50 @@ describe('CommunityService', () => {
       expect(communityRepository.isCommentExist).toHaveBeenCalledWith(
         mockCriteria.id,
       );
-      expect(communityRepository.deleteComment).toHaveBeenCalledWith(
+      expect(communityRepository.deleteComment).toHaveBeenCalledWith({
+        groupOrder: mockCriteria.groupOrder,
+        postId: mockCriteria.postId,
+      });
+    });
+
+    it('SUCCESS : ReComment is deleted', async () => {
+      const expectedResult = undefined;
+
+      const mockCommentId = 1;
+
+      mockBody.depth = 2;
+
+      const mockCriteria: DeleteCommentDto = {
+        user: mockUser,
+        id: mockCommentId,
+        ...mockBody,
+      };
+
+      const mockDeleteResult = { raw: [], affected: 1 };
+
+      communityRepository.isCommentExist = jest.fn().mockResolvedValue(true);
+      communityRepository.deleteReComment = jest
+        .fn()
+        .mockResolvedValue(mockDeleteResult);
+
+      const result = await communityService.deleteComment(mockCriteria);
+
+      expect(result).toEqual(expectedResult);
+      expect(communityRepository.isCommentExist).toHaveBeenCalledWith(
+        mockCriteria.id,
+      );
+      expect(communityRepository.deleteReComment).toHaveBeenCalledWith(
         mockCriteria,
       );
     });
+
     it('FAILURE : Should return HttpException NOT_FOUND, if commentId is not exist', async () => {
       const mockCommentId = 1;
 
       const mockCriteria: DeleteCommentDto = {
         user: mockUser,
         id: mockCommentId,
+        ...mockBody,
       };
 
       communityRepository.isCommentExist = jest.fn().mockResolvedValue(false);
@@ -793,6 +842,7 @@ describe('CommunityService', () => {
       const mockCriteria: DeleteCommentDto = {
         user: mockUser,
         id: mockCommentId,
+        ...mockBody,
       };
 
       communityRepository.isCommentExist = jest.fn().mockResolvedValue(true);
@@ -855,7 +905,7 @@ describe('CommunityService', () => {
     it('FAILURE : Should return HttpException NOT_FOUND, if commentId is not exist', async () => {
       const mockCommentId = 1;
 
-      const mockCriteria: DeleteCommentDto = {
+      const mockCriteria: UpdateCommentDto = {
         user: mockUser,
         id: mockCommentId,
       };
@@ -877,7 +927,7 @@ describe('CommunityService', () => {
     it('FAILURE : Should return HttpException FORBIDDEN, if comment is not created by user', async () => {
       const mockCommentId = 2;
 
-      const mockCriteria: DeleteCommentDto = {
+      const mockCriteria: UpdateCommentDto = {
         user: mockUser,
         id: mockCommentId,
       };

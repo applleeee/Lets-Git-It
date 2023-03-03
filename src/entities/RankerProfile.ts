@@ -3,11 +3,10 @@ import {
   Entity,
   Index,
   JoinColumn,
-  ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
 } from 'typeorm';
 import { User } from './User';
 import { Ranking } from './Ranking';
@@ -52,13 +51,13 @@ export class RankerProfile {
   @UpdateDateColumn({ name: 'updated_at', nullable: true })
   updatedAt: Date | null;
 
-  @ManyToOne(() => User, (user) => user.rankerProfiles, {
-    onDelete: 'NO ACTION',
+  @OneToOne(() => User, (user) => user.rankerProfiles, {
+    onDelete: 'CASCADE',
     onUpdate: 'NO ACTION',
   })
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
   user: User;
 
-  @OneToMany(() => Ranking, (ranking) => ranking.rankerProfile)
+  @OneToOne(() => Ranking, (ranking) => ranking.rankerProfile)
   rankings: Ranking[];
 }

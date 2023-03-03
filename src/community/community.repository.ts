@@ -120,8 +120,13 @@ export class CommunityRepository {
     offset: number,
     limit: number,
   ) {
+    const queryBuilderForFixed = this.postList();
     const queryBuilderForCount = this.postList();
     const queryBuilderForData = this.postList(offset, limit);
+
+    queryBuilderForFixed.where('post.fixedCategoryId = :subCategoryId', {
+      subCategoryId: subCategoryId,
+    });
 
     queryBuilderForCount.where('post.subCategoryId = :subCategoryId', {
       subCategoryId: subCategoryId,
@@ -149,9 +154,10 @@ export class CommunityRepository {
       }
     }
 
+    const fixed = await queryBuilderForFixed.getRawMany();
     const total = await queryBuilderForCount.getCount();
     const data = await queryBuilderForData.getRawMany();
-    return { postLists: data, total: total };
+    return { fixed: fixed, postLists: data, total: total };
   }
 
   async getPostDatail(postId: number) {
@@ -215,6 +221,7 @@ export class CommunityRepository {
         postLike.userId = userId;
         return await this.postLikeRepository.save(postLike);
       } catch (err) {
+        console.log('createOrDeletePostLike db error: ', err);
         throw new HttpException(
           'Error: invaild postId',
           HttpStatus.BAD_REQUEST,
@@ -298,7 +305,11 @@ export class CommunityRepository {
     return await this.commentRepository.save(data);
   }
 
-  async deleteComment(criteria: DeleteCommentDto) {
+  async deleteComment(criteria) {
+    return await this.commentRepository.delete(criteria);
+  }
+
+  async deleteReComment(criteria: DeleteCommentDto) {
     return await this.commentRepository.delete(criteria);
   }
 
@@ -400,7 +411,7 @@ export class CommunityRepository {
 
   async createOrDeleteCommentLikes(criteria: CreateOrDeleteCommentLikesDto) {
     const isExist = await this.commentLikeRepository.exist({
-      where: { userId: criteria.userId, commentId: criteria.commentId },
+      where: { ...criteria },
     });
 
     if (!isExist) return await this.commentLikeRepository.save(criteria);

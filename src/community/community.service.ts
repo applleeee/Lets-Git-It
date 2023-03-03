@@ -242,7 +242,17 @@ export class CommunityService {
     if (commentIdsCreatedByUser?.indexOf(criteria.id) === -1)
       throw new HttpException('NOT_CREATED_BY_USER', HttpStatus.FORBIDDEN);
 
-    await this.CommunityRepository.deleteComment(criteria);
+    // 대댓글인 경우 해당 댓글만 삭제
+    if (criteria.depth === 2) {
+      await this.CommunityRepository.deleteReComment(criteria);
+    }
+
+    // 댓글인 경우 해당 groupOrder에 있는 depth 2인 댓글 전체 삭제
+    if (criteria.depth === 1)
+      await this.CommunityRepository.deleteComment({
+        groupOrder: criteria.groupOrder,
+        postId: criteria.postId,
+      });
   }
 
   async updateComment(criteria: UpdateCommentDto, content: string) {
@@ -331,7 +341,6 @@ export class CommunityService {
     const data = await this.CommunityRepository.getIdsOfCommentLikedByUser(
       userId,
     );
-    console.log('data: ', data);
     return data?.map<Comment['id']>((item) => Object.values(item)[0]);
   }
 }
