@@ -174,8 +174,6 @@ export class RankService {
         pg++;
       } while (rawHTMLString('div').length > 0);
 
-      console.log(sponsorsCount);
-
       const scoreBasisPromise = axios.get(
         `https://api.github.com/users/${userName}/repos?per_page=100`,
         {
