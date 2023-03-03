@@ -17,6 +17,9 @@ export class Top5 extends SearchOutput {
 }
 
 export class Top100 extends Top5 {
+  @IsNumber()
+  rankerProfileId: number;
+
   @IsString()
   mainLang: string;
 
