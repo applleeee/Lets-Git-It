@@ -51,6 +51,10 @@ export class RankerProfile {
   @UpdateDateColumn({ name: 'updated_at', nullable: true })
   updatedAt: Date | null;
 
+  @OneToOne(() => User, (user) => user.rankerProfiles, {
+    onDelete: 'CASCADE',
+    onUpdate: 'NO ACTION',
+  })
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
   user: User;
 

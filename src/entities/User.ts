@@ -69,10 +69,6 @@ export class User {
   @OneToMany(() => PostLike, (postLike) => postLike.user)
   postLikes: PostLike[];
 
-  @OneToOne(() => User, (user) => user.rankerProfiles, {
-    onDelete: 'CASCADE',
-    onUpdate: 'NO ACTION',
-  })
   @OneToOne(() => RankerProfile, (rankerProfile) => rankerProfile.user)
   rankerProfiles: RankerProfile[];
 

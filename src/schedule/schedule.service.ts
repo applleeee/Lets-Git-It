@@ -38,6 +38,6 @@ export class SchedulerService {
       }
       this.rankingRepository.updateRankerTier(el.rankerProfileId, tierId);
     });
-    console.log('Try and Try');
+    console.log('티어 갱신');
   }
 }
