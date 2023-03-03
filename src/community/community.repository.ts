@@ -221,6 +221,7 @@ export class CommunityRepository {
         postLike.userId = userId;
         return await this.postLikeRepository.save(postLike);
       } catch (err) {
+        console.log('createOrDeletePostLike db error: ', err);
         throw new HttpException(
           'Error: invaild postId',
           HttpStatus.BAD_REQUEST,
