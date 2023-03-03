@@ -37,8 +37,8 @@ export class UserRepository {
     try {
       await this.userRepository.save(user);
     } catch (error) {
+      console.log('createUser error: ', error);
       if (error.code === 'ER_DUP_ENTRY') {
-        console.log('error: ', error);
         throw new HttpException('EXISTING_USERNAME', HttpStatus.CONFLICT);
       } else {
         throw new HttpException(

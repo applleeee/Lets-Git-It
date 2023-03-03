@@ -7,4 +7,12 @@ npm-debug.log
 !README*.md
 .svn
 .env
+coverage
+.prettierrc
+.idea
+.gitignore
+Dockerfile
+*.sh
+*.yml
+scripts
 dist
