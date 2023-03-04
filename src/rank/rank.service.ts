@@ -275,6 +275,7 @@ export class RankService {
         ((ranking.indexOf(totalScore) + 1) / ranking.length) * 100;
 
       let tierId = 0;
+
       for (const t of tierData) {
         if (
           percentile > parseFloat(t.endPercent) &&
@@ -283,6 +284,7 @@ export class RankService {
           tierId = t.id;
         }
       }
+
       const rankerProfileId = await this.rankerProfileRepository.getRankerId(
         userName,
       );
