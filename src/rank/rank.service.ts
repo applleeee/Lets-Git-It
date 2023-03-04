@@ -369,6 +369,7 @@ export class RankService {
   private getNextToken() {
     const token = this.TOKENS[this.currentTOKEN];
     this.currentTOKEN = (this.currentTOKEN + 1) % this.TOKENS.length;
+    console.log(this.TOKENS.length);
     console.log(this.currentTOKEN);
     return token;
   }
