@@ -58,7 +58,6 @@ export class CommunityController {
     return await this.communityService.saveImageToS3(image, userId);
   }
 
-  // 타입 확인(동섭님)
   @UseGuards(AuthGuard('jwt'))
   @Delete('/post/image')
   async deleteImageInS3(@Body() toDeleteImageData: DeleteImageDto) {

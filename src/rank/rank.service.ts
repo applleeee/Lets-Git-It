@@ -39,11 +39,13 @@ export class RankService {
   async getRankerDetail(userName: string) {
     try {
       const TOKEN = this.getNextToken();
+
       const users = axios.get(`https://api.github.com/users/${userName}`, {
         headers: {
           Authorization: `Bearer ${TOKEN}`,
         },
       });
+
       const stars = axios.get(
         `https://api.github.com/users/${userName}/starred?per_page=100`,
         {
@@ -52,6 +54,7 @@ export class RankService {
           },
         },
       );
+
       const issues = axios.get(
         `https://api.github.com/search/issues?q=author:${userName}`,
         {
@@ -272,6 +275,7 @@ export class RankService {
         ((ranking.indexOf(totalScore) + 1) / ranking.length) * 100;
 
       let tierId = 0;
+
       for (const t of tierData) {
         if (
           percentile > parseFloat(t.endPercent) &&
@@ -280,6 +284,7 @@ export class RankService {
           tierId = t.id;
         }
       }
+
       const rankerProfileId = await this.rankerProfileRepository.getRankerId(
         userName,
       );
@@ -366,6 +371,8 @@ export class RankService {
   private getNextToken() {
     const token = this.TOKENS[this.currentTOKEN];
     this.currentTOKEN = (this.currentTOKEN + 1) % this.TOKENS.length;
+    console.log(this.TOKENS.length);
+    console.log(this.currentTOKEN);
     return token;
   }
 

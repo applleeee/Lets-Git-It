@@ -13,7 +13,7 @@ export class SchedulerService {
   ) {}
 
   @Cron(CronExpression.EVERY_30_MINUTES)
-  async letsTrying() {
+  async refreshTier() {
     const top100 = await this.rankerProfileRepository.getTop100(`IS NOT NULL`);
     const tierData = await this.tierRepository.getTierData();
     const scores = await this.rankingRepository.getAllScores();
