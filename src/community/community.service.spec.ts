@@ -237,6 +237,8 @@ describe('CommunityService', () => {
     });
   });
 
+  describe('updatePost', () => {});
+
   describe('getIdsOfPostsCreatedByUser()', () => {
     const mockUserId = 1;
 
