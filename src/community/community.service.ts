@@ -86,21 +86,6 @@ export class CommunityService {
     );
   }
 
-  async getPostToUpdate(postId: number) {
-    const postDetail = await this.CommunityRepository.getPostById(postId);
-    try {
-      const postContent = await getS3Data(postDetail.contentUrl);
-      postDetail['content'] = postContent;
-      delete postDetail.contentUrl;
-      return postDetail;
-    } catch (err) {
-      throw new HttpException(
-        'CANNOT_GET_POST_FROM_S3',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
   async updatePost(postId: number, updatedData: CreatePostDto, userId: number) {
     const originPost = await this.CommunityRepository.getPostById(postId);
     try {

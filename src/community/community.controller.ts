@@ -73,20 +73,6 @@ export class CommunityController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get('/posts/update/:postId')
-  async getPostToUpdate(@Param('postId') postId: number, @Req() req) {
-    const { idsOfPostsCreatedByUser } = req.user;
-    if (idsOfPostsCreatedByUser.includes(postId)) {
-      return await this.communityService.getPostToUpdate(postId);
-    } else {
-      throw new HttpException(
-        'THIS_USER_HAS_NEVER_WRITTEN_THAT_POST',
-        HttpStatus.FORBIDDEN,
-      );
-    }
-  }
-
-  @UseGuards(AuthGuard('jwt'))
   @Put('/posts/update/:postId')
   async updatePost(
     @Param('postId') postId: number,

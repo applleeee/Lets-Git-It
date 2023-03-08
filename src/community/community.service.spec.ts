@@ -237,33 +237,6 @@ describe('CommunityService', () => {
     });
   });
 
-  describe('getPostToUpdate', () => {
-    it('SUCCESS : should get detail data about the post from s3 and return it', async () => {
-      // Arrange
-      const mockPostId = 1;
-      const mockPostData = {
-        contentUrl: 'test/filepath',
-      };
-
-      const mockS3Data = '<p>test</p>';
-
-      communityRepository.getPostById = jest
-        .fn()
-        .mockResolvedValue(mockPostData);
-      (aws.getS3Data as jest.Mock).mockResolvedValue(mockS3Data);
-
-      const expectedPostData = {
-        content: mockS3Data,
-      };
-
-      // Act
-      const result = await communityService.getPostToUpdate(mockPostId);
-
-      // Assert
-      expect(result).toEqual(expectedPostData);
-    });
-  });
-
   describe('getIdsOfPostsCreatedByUser()', () => {
     const mockUserId = 1;
 
