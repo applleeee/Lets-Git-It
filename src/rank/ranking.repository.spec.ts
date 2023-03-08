@@ -2,12 +2,7 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Ranking } from 'src/entities/Ranking';
 import { Repository } from 'typeorm';
-import {
-  AvgValuesOutput,
-  LangOutput,
-  MaxValuesOutput,
-  TotalScoresOutput,
-} from './dto/ranking.dto';
+import { LangOutput, TotalScoresOutput } from './dto/ranking.dto';
 import { RankingRepository } from './ranking.repository';
 
 const mockRepository = () => ({
@@ -115,30 +110,6 @@ describe('RankingRepository', () => {
         ranking.rankerProfileId,
         ranking.tierId,
       );
-    });
-  });
-
-  describe('getMaxValues Function', () => {
-    it('Successfully Get Max Values', async () => {
-      const expectedMaxValuesOutput = new MaxValuesOutput();
-      jest
-        .spyOn(rankingRepo.createQueryBuilder(), 'getRawOne')
-        .mockResolvedValue(expectedMaxValuesOutput);
-      const result = await rankingRepository.getMaxValues();
-
-      expect(result).toEqual(expectedMaxValuesOutput);
-    });
-  });
-
-  describe('getAvgValues Function', () => {
-    it('Successfully Get Average Values', async () => {
-      const expectedAvgValuesOutput = new AvgValuesOutput();
-      jest
-        .spyOn(rankingRepo.createQueryBuilder(), 'getRawOne')
-        .mockResolvedValue(expectedAvgValuesOutput);
-      const result = await rankingRepository.getAvgValues();
-
-      expect(result).toEqual(expectedAvgValuesOutput);
     });
   });
 

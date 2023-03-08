@@ -8,7 +8,6 @@ describe('RankService', () => {
   let service: RankService;
   let rankerProfileRepository: RankerProfileRepository;
   let rankingRepository: RankingRepository;
-  let tierRepository: TierRepository;
 
   const testRankerDetail = {
     rankerId: 1,
@@ -40,48 +39,6 @@ describe('RankService', () => {
     myStarNumber: 1,
     tier: '',
     tierImage: '',
-  };
-  const testMaxValues = {
-    maxCuriosityScore: '',
-    maxPassionScore: '',
-    maxFameScore: '',
-    maxAbilityScore: '',
-    maxTotalScore: '',
-    maxIssueNumber: 0,
-    maxForkingNumber: 0,
-    maxStarringNumber: 0,
-    maxFollowingNumber: 0,
-    maxCommitNumber: 0,
-    maxPRNumber: 0,
-    maxReviewNumber: 0,
-    maxPersonalRepoNumber: 0,
-    maxFollowerNumber: 0,
-    maxForkedNumber: 0,
-    maxWatchedNumber: 0,
-    maxSponsorNumber: 0,
-    maxContributingRepoStarNumber: 0,
-    maxMyStartNumber: 0,
-  };
-  const testAvgValues = {
-    avgCuriosityScore: '',
-    avgPassionScore: '',
-    avgFameScore: '',
-    avgAbilityScore: '',
-    avgTotalScore: '',
-    avgIssueNumber: '',
-    avgForkingNumber: '',
-    avgStarringNumber: '',
-    avgFollowingNumber: '',
-    avgCommitNumber: '',
-    avgPRNumber: '',
-    avgReviewNumber: '',
-    avgPersonalRepoNumber: '',
-    avgFollowerNumber: '',
-    avgForkedNumber: '',
-    avgWatchedNumber: '',
-    avgSponsorNumber: '',
-    avgContributingRepoStarNumber: '',
-    avgMyStartNumber: '',
   };
 
   beforeEach(async () => {
@@ -117,7 +74,6 @@ describe('RankService', () => {
     service = moduleRef.get<RankService>(RankService);
     rankerProfileRepository = moduleRef.get(RankerProfileRepository);
     rankingRepository = moduleRef.get(RankingRepository);
-    tierRepository = moduleRef.get(TierRepository);
   });
 
   it('should be defined', () => {
@@ -134,19 +90,11 @@ describe('RankService', () => {
       jest
         .spyOn(rankerProfileRepository, 'getRankerProfile')
         .mockResolvedValue(testRankerDetail);
-      jest
-        .spyOn(rankingRepository, 'getMaxValues')
-        .mockResolvedValue(testMaxValues);
-      jest
-        .spyOn(rankingRepository, 'getAvgValues')
-        .mockResolvedValue(testAvgValues);
 
       const result = await service.checkRanker(userName);
 
       expect(result).toEqual({
         rankerDetail: testRankerDetail,
-        maxValues: testMaxValues,
-        avgValues: testAvgValues,
       });
     });
     it('Ranker Not Found, Continue to Next Fn', async () => {
@@ -157,16 +105,12 @@ describe('RankService', () => {
 
       jest.spyOn(service, 'getRankerDetail').mockResolvedValue({
         rankerDetail: testRankerDetail,
-        maxValues: testMaxValues,
-        avgValues: testAvgValues,
       });
 
       const rankerInfo = await service.checkRanker(userName);
 
       expect(rankerInfo).toEqual({
         rankerDetail: testRankerDetail,
-        maxValues: testMaxValues,
-        avgValues: testAvgValues,
       });
     });
   });

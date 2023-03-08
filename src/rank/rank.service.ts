@@ -28,9 +28,7 @@ export class RankService {
         userName,
       );
       rankerDetail['blank'] = null;
-      const maxValues = await this.rankingRepository.getMaxValues();
-      const avgValues = await this.rankingRepository.getAvgValues();
-      return { rankerDetail, maxValues, avgValues };
+      return { rankerDetail };
     }
 
     return this.getRankerDetail(userName);
@@ -347,9 +345,7 @@ export class RankService {
       const rankerDetail = await this.rankerProfileRepository.getRankerProfile(
         userName,
       );
-      const maxValues = await this.rankingRepository.getMaxValues();
-      const avgValues = await this.rankingRepository.getAvgValues();
-      return { rankerDetail, maxValues, avgValues };
+      return { rankerDetail };
     } catch (e) {
       if (e.response.status === 404) {
         throw new HttpException('INVALID GITHUB USER', HttpStatus.NOT_FOUND);
@@ -371,8 +367,6 @@ export class RankService {
   private getNextToken() {
     const token = this.TOKENS[this.currentTOKEN];
     this.currentTOKEN = (this.currentTOKEN + 1) % this.TOKENS.length;
-    console.log(this.TOKENS.length);
-    console.log(this.currentTOKEN);
     return token;
   }
 

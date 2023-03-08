@@ -5,7 +5,6 @@ import {
   Top100,
   Top5,
 } from './dto/rankerProfile.dto';
-import { AvgValuesOutput, MaxValuesOutput } from './dto/ranking.dto';
 import { RankService } from './rank.service';
 
 @Controller('/ranks')
@@ -29,8 +28,6 @@ export class RankController {
   @Get('/:userName')
   async getRankerDetail(@Param('userName') userName: string): Promise<{
     rankerDetail: RankerProfileOutput;
-    maxValues: MaxValuesOutput;
-    avgValues: AvgValuesOutput;
   }> {
     return await this.rankService.checkRanker(userName);
   }
