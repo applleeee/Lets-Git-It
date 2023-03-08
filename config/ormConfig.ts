@@ -37,6 +37,10 @@ const config: TypeOrmModuleOptions = {
     Tier,
     User,
   ],
+  charset: 'utf8mb4',
+  extra: {
+    charset: 'utf8mb4_general_ci',
+  },
 };
 
 export = config;
