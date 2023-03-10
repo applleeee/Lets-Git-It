@@ -172,7 +172,7 @@ describe('UserService', () => {
         }
       } catch (error) {
         expect(error).toBeInstanceOf(HttpException);
-        expect(error.status).toBe(HttpStatus.UNAUTHORIZED);
+        expect(error.status).toBe(HttpStatus.BAD_REQUEST);
         expect(error.message).toBe('WRONG_GITHUB_CODE');
       }
 

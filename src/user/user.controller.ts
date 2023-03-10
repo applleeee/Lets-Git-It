@@ -1,3 +1,4 @@
+import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import {
   Body,
@@ -12,6 +13,7 @@ import {
 import { UserService } from './user.service';
 import { UpdateMyPageDto } from './dto/mypage.dto';
 
+@ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}

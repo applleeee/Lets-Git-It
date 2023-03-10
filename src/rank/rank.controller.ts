@@ -1,3 +1,4 @@
+import { ApiTags } from '@nestjs/swagger';
 import { Controller, Get, Param, Patch, Query } from '@nestjs/common';
 import {
   RankerProfileOutput,
@@ -8,6 +9,7 @@ import {
 import { AvgValuesOutput, MaxValuesOutput } from './dto/ranking.dto';
 import { RankService } from './rank.service';
 
+@ApiTags('Ranks')
 @Controller('/ranks')
 export class RankController {
   constructor(private rankService: RankService) {}
