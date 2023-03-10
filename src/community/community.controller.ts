@@ -1,3 +1,4 @@
+import { ApiTags } from '@nestjs/swagger';
 import { AuthorizedUser } from './../auth/dto/auth.dto';
 import {
   Controller,
@@ -38,6 +39,7 @@ import {
   PostLikeDto,
 } from './dto/Post.dto';
 
+@ApiTags('Community')
 @Controller('/community')
 export class CommunityController {
   constructor(private communityService: CommunityService) {}
