@@ -144,7 +144,7 @@ export class CommunityService {
   }
 
   async getPostDetail(postId: number) {
-    const postDetail = await this.CommunityRepository.getPostDatail(postId);
+    const postDetail = await this.CommunityRepository.getPostDetail(postId);
 
     try {
       const postContent = await getS3Data(postDetail.content);

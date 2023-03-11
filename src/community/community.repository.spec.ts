@@ -7,7 +7,8 @@ import { Comment } from './../entities/Comment';
 import { PostLike } from './../entities/PostLike';
 import { Post } from './../entities/Post';
 import { SubCategory } from './../entities/SubCategory';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, SelectQueryBuilder } from 'typeorm';
+import { OptionEnum, SortEnum } from './dto/Post.dto';
 
 class MockRepository {
   createQueryBuilder = jest.fn().mockReturnValue({
@@ -31,6 +32,7 @@ class MockRepository {
   exist = jest.fn().mockReturnThis();
   findOne = jest.fn().mockReturnThis();
   findBy = jest.fn().mockReturnThis();
+  find = jest.fn().mockReturnThis();
   create = jest.fn();
   save = jest.fn();
   delete = jest.fn();
@@ -76,6 +78,379 @@ describe('CommunityRepository', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('getAllCategories', () => {
+    it('SUCCESS : should return all categories', async () => {
+      // Arrange
+      const expectedResult: SubCategory[] = [new SubCategory()];
+
+      jest
+        .spyOn(subCategoryRepository, 'find')
+        .mockResolvedValue(expectedResult);
+
+      // Act
+      const result = await communityRepository.getAllCategories();
+
+      // Assert
+      expect(result).toEqual(expectedResult);
+    });
+  });
+
+  describe('createPost', () => {
+    it('SUCCESS : should save new post and return result', async () => {
+      // Arrange
+      const mockTitle = 'test';
+      const mockUserId = 1;
+      const mockSubCategoryId = 1;
+      const mockContentUrl = 'post/test';
+
+      const mockExecute = jest.fn().mockResolvedValue({ affected: 1 });
+      const mockCreateQueryBuilder = jest
+        .spyOn(postRepository, 'createQueryBuilder')
+        .mockReturnValue({
+          insert: jest.fn().mockReturnThis(),
+          into: jest.fn().mockReturnThis(),
+          values: jest.fn().mockReturnThis(),
+          execute: mockExecute,
+        } as unknown as SelectQueryBuilder<Post>);
+
+      // Act
+      const result = await communityRepository.createPost(
+        mockTitle,
+        mockUserId,
+        mockSubCategoryId,
+        mockContentUrl,
+      );
+
+      // Assert
+      expect(result).toEqual({ affected: 1 });
+      expect(mockCreateQueryBuilder).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getPostById', () => {
+    it('SUCCESS : should return post searched by id', async () => {
+      // Arrange
+      const mockPostId = 1;
+      const expectedResult: Post = new Post();
+
+      jest.spyOn(postRepository, 'findOne').mockResolvedValue(expectedResult);
+
+      // Act
+      const result = await communityRepository.getPostById(mockPostId);
+
+      // Assert
+      expect(result).toEqual(expectedResult);
+    });
+  });
+
+  describe('updatePost', () => {
+    it('SUCCESS : should update post with certain id and return result', async () => {
+      // Arrange
+      const mockPostId = 1;
+      const mockTitle = 'test';
+      const mockSubCategoryId = 1;
+      const mockContentUrl = 'post/test';
+
+      const mockExecute = jest.fn().mockResolvedValue({ affected: 1 });
+      const mockCreateQueryBuilder = jest
+        .spyOn(postRepository, 'createQueryBuilder')
+        .mockReturnValue({
+          update: jest.fn().mockReturnThis(),
+          set: jest.fn().mockReturnThis(),
+          where: jest.fn().mockReturnThis(),
+          execute: mockExecute,
+        } as unknown as SelectQueryBuilder<Post>);
+
+      // Act
+      const result = await communityRepository.updatePost(
+        mockPostId,
+        mockTitle,
+        mockSubCategoryId,
+        mockContentUrl,
+      );
+
+      // Assert
+      expect(result).toEqual({ affected: 1 });
+      expect(mockCreateQueryBuilder).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('deletePost', () => {
+    it('SUCCESS : should delete post with certain id and return result', async () => {
+      // Arrange
+      const mockPostId = 1;
+      const expectedResult = { raw: 1 };
+
+      jest.spyOn(postRepository, 'delete').mockResolvedValue(expectedResult);
+
+      // Act
+      const result = await communityRepository.deletePost(mockPostId);
+
+      // Assert
+      expect(result).toEqual(expectedResult);
+    });
+  });
+
+  describe('getPostList', () => {
+    it('SUCCESS : should return list of fixed posts, noraml posts and number of total data which are satisfing conditions', async () => {
+      // Arrange
+      const mockSubCategoryId = 1;
+      const mockSort = SortEnum.latest;
+      const mockDate = undefined;
+      const mockOffset = 0;
+      const mockLimit = 10;
+
+      const mockPostList = jest.fn().mockReturnThis();
+      const mockRawMany = jest.fn().mockResolvedValue([
+        {
+          post_title: '공지',
+          post_view: 0,
+          postId: 20,
+          createdAt: '2023-03-03 01:57:05',
+          userId: 1,
+          userName: 'apple',
+          postLike: '0',
+          comment: '0',
+          tierName: 'gold',
+          tierId: 3,
+          subCategoryName: '공지사항',
+        },
+      ]);
+      const mockGetCount = jest.fn().mockResolvedValue(1);
+
+      jest.spyOn(postRepository, 'createQueryBuilder').mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        from: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        addGroupBy: jest.fn().mockReturnThis(),
+        offset: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        getRawMany: mockRawMany,
+        getCount: mockGetCount,
+        where: mockPostList,
+        andWhere: mockPostList,
+        orderBy: mockPostList,
+      } as unknown as SelectQueryBuilder<Post>);
+
+      mockPostList.mockImplementation(() => ({
+        getRawMany: mockRawMany,
+        getCount: mockGetCount,
+      }));
+
+      // Act
+      const result = await communityRepository.getPostList(
+        mockSubCategoryId,
+        mockSort,
+        mockDate,
+        mockOffset,
+        mockLimit,
+      );
+
+      // Assert
+      expect(result).toEqual({
+        fixed: [
+          {
+            post_title: '공지',
+            post_view: 0,
+            postId: 20,
+            createdAt: '2023-03-03 01:57:05',
+            userId: 1,
+            userName: 'apple',
+            postLike: '0',
+            comment: '0',
+            tierName: 'gold',
+            tierId: 3,
+            subCategoryName: '공지사항',
+          },
+        ],
+        postLists: [
+          {
+            post_title: '공지',
+            post_view: 0,
+            postId: 20,
+            createdAt: '2023-03-03 01:57:05',
+            userId: 1,
+            userName: 'apple',
+            postLike: '0',
+            comment: '0',
+            tierName: 'gold',
+            tierId: 3,
+            subCategoryName: '공지사항',
+          },
+        ],
+        total: 1,
+      });
+    });
+  });
+
+  describe('getPostDetail', () => {
+    it('SUCCESS : should return detail info of certain post', async () => {
+      // Arrange
+      const mockPostId = 1;
+
+      const postDetail = {
+        postId: 1,
+        postTitle: 'test',
+        userId: 1,
+        content: 'tset1',
+        userName: 'apple',
+        userProfileImage: 'http://test.com/image.png',
+        tierId: 1,
+        tierName: 'test',
+        subCategoryId: 1,
+        subCategoryName: 'test',
+        createdAt: '2022-01-01 12:00:00',
+        likes: JSON.stringify([
+          { likeId: 1, userId: 1, createdAt: '2022-01-01 12:01:00' },
+          { likeId: 2, userId: 2, createdAt: '2022-01-01 12:02:00' },
+        ]),
+      };
+
+      jest.spyOn(postRepository, 'createQueryBuilder').mockReturnValue({
+        leftJoin: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        addSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        getRawOne: jest.fn().mockResolvedValue(postDetail),
+      } as any);
+
+      // Act
+      const result = await communityRepository.getPostDetail(mockPostId);
+
+      // Assert
+      expect(result).toEqual(postDetail);
+    });
+  });
+
+  describe('createOrDeletePostLike', () => {
+    const mockPostId = 1;
+    const mockUserId = 1;
+    it('SUCCESS : should create new like when the user have not add like', async () => {
+      // Arrange
+      jest.spyOn(postLikeRepository, 'findOne').mockResolvedValue(null);
+      jest
+        .spyOn(postLikeRepository, 'save')
+        .mockResolvedValue('created' as unknown as PostLike);
+
+      // Act
+      const result = await communityRepository.createOrDeletePostLike(
+        mockPostId,
+        mockUserId,
+      );
+
+      // Assert
+      expect(postLikeRepository.findOne).toHaveBeenCalledWith({
+        where: { postId: mockPostId, userId: mockUserId },
+      });
+      expect(postLikeRepository.save).toHaveBeenCalled();
+      expect(result).toEqual('created');
+    });
+
+    it('SUCCESS : should delete like when the user already add like in same post', async () => {
+      // Arrange
+      const mockSearchedPost = new PostLike();
+      mockSearchedPost.id = 1;
+      mockSearchedPost.postId = mockPostId;
+      mockSearchedPost.userId = mockUserId;
+
+      jest
+        .spyOn(postLikeRepository, 'findOne')
+        .mockResolvedValue(mockSearchedPost);
+      jest
+        .spyOn(postLikeRepository, 'delete')
+        .mockResolvedValue('deleted' as unknown as DeleteResult);
+
+      // Act
+      const result = await communityRepository.createOrDeletePostLike(
+        mockPostId,
+        mockUserId,
+      );
+
+      // Assert
+      expect(postLikeRepository.findOne).toHaveBeenCalledWith({
+        where: { postId: mockPostId, userId: mockUserId },
+      });
+      expect(postLikeRepository.delete).toHaveBeenCalledWith({ id: 1 });
+      expect(result).toEqual('deleted');
+    });
+  });
+
+  describe('searchPost', () => {
+    it('SUCCESS : should return a list of searched post and number of total posts', async () => {
+      const mockOption = OptionEnum.title;
+      const mockKeyword = 'test';
+      const mockOffset = 0;
+      const mockLimit = 10;
+
+      const mockPostList = jest.fn().mockReturnThis();
+      const mockRawMany = jest.fn().mockResolvedValue([
+        {
+          post_title: 'test',
+          post_view: 0,
+          postId: 1,
+          createdAt: '2023-03-03 01:57:05',
+          userId: 1,
+          userName: 'apple',
+          postLike: '0',
+          comment: '0',
+          tierName: 'gold',
+          tierId: 3,
+          subCategoryName: '공지사항',
+        },
+      ]);
+      const mockGetCount = jest.fn().mockResolvedValue(1);
+
+      jest.spyOn(postRepository, 'createQueryBuilder').mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        from: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        addGroupBy: jest.fn().mockReturnThis(),
+        offset: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        getRawMany: mockRawMany,
+        getCount: mockGetCount,
+        where: mockPostList,
+        andWhere: mockPostList,
+        orderBy: mockPostList,
+      } as unknown as SelectQueryBuilder<Post>);
+
+      mockPostList.mockImplementation(() => ({
+        getRawMany: mockRawMany,
+        getCount: mockGetCount,
+      }));
+
+      // Act
+      const result = await communityRepository.searchPost(
+        mockOption,
+        mockKeyword,
+        mockOffset,
+        mockLimit,
+      );
+
+      // Assert
+      expect(result).toEqual({
+        postLists: [
+          {
+            post_title: 'test',
+            post_view: 0,
+            postId: 1,
+            createdAt: '2023-03-03 01:57:05',
+            userId: 1,
+            userName: 'apple',
+            postLike: '0',
+            comment: '0',
+            tierName: 'gold',
+            tierId: 3,
+            subCategoryName: '공지사항',
+          },
+        ],
+        total: 1,
+      });
+    });
   });
 
   const mockUserId = 1;

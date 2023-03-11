@@ -417,6 +417,21 @@ describe('CommunityController', () => {
         limit: 10,
       };
       const expectedResult = {
+        fixed: [
+          {
+            post_title: '공지사항1',
+            post_view: 0,
+            postId: 7,
+            createdAt: '2023-02-18',
+            userId: 1,
+            userName: 'apple',
+            postLike: '0',
+            comment: '0',
+            tierName: 'bronze',
+            tierId: 1,
+            subCategoryName: '자유',
+          },
+        ],
         postLists: [
           {
             post_title: 'test1',

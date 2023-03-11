@@ -10,7 +10,16 @@ import { CommunityRepository } from './community.repository';
 import { CommunityService } from './community.service';
 import * as aws from '../utiles/aws';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { CreatePostDto, DeleteImageDto } from './dto/Post.dto';
+import {
+  CreatePostDto,
+  DeleteImageDto,
+  GetPostListDto,
+  SortEnum,
+  DateEnum,
+  PostLikeDto,
+  SearchPostDto,
+  OptionEnum,
+} from './dto/Post.dto';
 
 class MockCommunityRepository {
   getAllCategories = jest.fn();
@@ -237,7 +246,366 @@ describe('CommunityService', () => {
     });
   });
 
-  describe('updatePost', () => {});
+  describe('updatePost', () => {
+    const mockPostId: number = 1;
+
+    const mockData: CreatePostDto = {
+      title: 'test1',
+      subCategoryId: 1,
+      content: '<p>test<p/>',
+    };
+
+    const mockUserId: number = 1;
+
+    const now = new Date(+new Date() + 3240 * 10000)
+      .toISOString()
+      .replace('T', '_')
+      .replace(/\..*/, '')
+      .replace(/\:/g, '-');
+
+    const { title, subCategoryId, content } = mockData;
+
+    const mockContentUrl = `post/${mockUserId}_${title}_${now}`;
+    const mockMimetype = 'string';
+
+    it('SUCCESS : should delete old post and upload updated post in S3', async () => {
+      // Arrange
+      const mockOriginPost = (communityRepository.getPostById = jest
+        .fn()
+        .mockResolvedValue({
+          id: 1,
+          title: 'test',
+          contentUrl: 'post/1_test',
+          view: 0,
+          userId: 1,
+          subCategoryId: 1,
+          createdAt: '2023-03-08 20:00:00',
+          updatedAt: '2023-03-09 20:00:00',
+          fixedCategoryId: null,
+        }));
+
+      const mockDeletePostS3 = (
+        aws.deleteS3Data as jest.Mock
+      ).mockResolvedValue('post deleted');
+
+      (aws.uploadToS3 as jest.Mock).mockResolvedValue('post uploaded');
+
+      const mockUpdatePost = (communityRepository.updatePost = jest
+        .fn()
+        .mockResolvedValue('post updated'));
+
+      // Act
+      await communityService.updatePost(mockPostId, mockData, mockUserId);
+
+      // Assert
+      expect(mockUpdatePost).toHaveBeenCalledWith(
+        mockPostId,
+        title,
+        subCategoryId,
+        mockContentUrl,
+      );
+    });
+
+    it('FAILURE : should return internal server error when fail to delete post in s3', async () => {
+      // Arrange
+      const mockError = new Error();
+      (aws.deleteS3Data as jest.Mock).mockRejectedValue(mockError);
+
+      try {
+        // Act
+        await communityService.updatePost(mockPostId, mockData, mockUserId);
+      } catch (err) {
+        // Assert
+        expect(err.status).toEqual(500);
+        expect(err.message).toEqual('CANNOT_DELETE_POST_IN_S3');
+      }
+    });
+
+    it('FAILURE : should return internal server error when fail to upload post to s3', async () => {
+      // Arrange
+      communityRepository.getPostById = jest.fn().mockResolvedValue({
+        id: 1,
+        title: 'test',
+        contentUrl: 'post/1_test',
+        view: 0,
+        userId: 1,
+        subCategoryId: 1,
+        createdAt: '2023-03-08 20:00:00',
+        updatedAt: '2023-03-09 20:00:00',
+        fixedCategoryId: null,
+      });
+      (aws.deleteS3Data as jest.Mock).mockResolvedValue('post deleted');
+      const mockError = new Error();
+      (aws.uploadToS3 as jest.Mock).mockRejectedValue(mockError);
+
+      try {
+        // Act
+        await communityService.updatePost(mockPostId, mockData, mockUserId);
+      } catch (err) {
+        // Assert
+        expect(err.status).toEqual(500);
+        expect(err.message).toEqual('CANNOT_UPLOAD_POST_TO_S3');
+      }
+    });
+  });
+
+  describe('deletePost', () => {
+    const mockPostId: number = 1;
+
+    it('SUCCESS : should return result of deleting post in DB', async () => {
+      // Arrange
+      communityRepository.getPostById = jest.fn().mockResolvedValue({
+        id: 1,
+        title: 'test',
+        contentUrl: 'post/1_test',
+        view: 0,
+        userId: 1,
+        subCategoryId: 1,
+        createdAt: '2023-03-08 20:00:00',
+        updatedAt: '2023-03-09 20:00:00',
+        fixedCategoryId: null,
+      });
+
+      (aws.deleteS3Data as jest.Mock).mockResolvedValue('post deleted');
+      communityRepository.deletePost = jest
+        .fn()
+        .mockResolvedValue({ affected: 1 });
+
+      const expectedResult = { affected: 1 };
+
+      // Act
+      const result = await communityService.deletePost(mockPostId);
+
+      // Assert
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('FAILURE : should return interal server error when fail to delete post in s3', async () => {
+      // Arrange
+      const mockError = new Error();
+      (aws.deleteS3Data as jest.Mock).mockRejectedValue(mockError);
+
+      try {
+        // Act
+        await communityService.deletePost(mockPostId);
+      } catch (err) {
+        expect(err.status).toEqual(500);
+        expect(err.message).toEqual('CANNOT_DELETE_POST_IN_S3');
+      }
+    });
+  });
+
+  describe('getPostList', () => {
+    it('SUCCESS : should return post list', async () => {
+      // Arrange
+      const mockSubCategoryId: number = 1;
+      const mockQuery: GetPostListDto = {
+        sort: SortEnum.latest,
+        date: DateEnum.all,
+        offset: 0,
+        limit: 10,
+      };
+      const expectedResult = {
+        fixed: [
+          {
+            post_title: '공지사항1',
+            post_view: 0,
+            postId: 7,
+            createdAt: '2023-02-18',
+            userId: 1,
+            userName: 'apple',
+            postLike: '0',
+            comment: '0',
+            tierName: 'bronze',
+            tierId: 1,
+            subCategoryName: '자유',
+          },
+        ],
+        postLists: [
+          {
+            post_title: 'test1',
+            post_view: 0,
+            postId: 1,
+            createdAt: '2023-02-21',
+            userId: 1,
+            userName: 'apple',
+            postLike: '0',
+            comment: '0',
+            tierName: 'bronze',
+            tierId: 1,
+            subCategoryName: '자유',
+          },
+          {
+            post_title: 'test2',
+            post_view: 0,
+            postId: 2,
+            createdAt: '2023-02-22',
+            userId: 3,
+            userName: 'banana',
+            postLike: '0',
+            comment: '0',
+            tierName: 'bronze',
+            tierId: 1,
+            subCategoryName: '자유',
+          },
+        ],
+        total: 2,
+      };
+
+      communityRepository.getPostList = jest
+        .fn()
+        .mockResolvedValue(expectedResult);
+
+      // Act
+      const result = await communityService.getPostList(
+        mockSubCategoryId,
+        mockQuery,
+      );
+
+      // Assert
+      expect(result).toEqual(expectedResult);
+    });
+  });
+
+  describe('getPostDetail', () => {
+    const mockPostId: number = 1;
+
+    const expectedResult = {
+      postId: 1,
+      title: 'test',
+      userId: 1,
+      userName: 'user1',
+      subCategory: '자유',
+      createdAt: '2023-03-02',
+      likes: [
+        {
+          likeId: 1,
+          userId: 1,
+          createdAt: '2023-02-02',
+        },
+      ],
+    };
+
+    it('SUCCESS : should return post detail', async () => {
+      // Arrange
+      communityRepository.getPostDetail = jest
+        .fn()
+        .mockResolvedValue(expectedResult);
+      const mockPostContent = (aws.getS3Data as jest.Mock).mockResolvedValue(
+        '<p>test1</p>',
+      );
+      expectedResult['content'] = mockPostContent;
+      // Act
+      const result = await communityService.getPostDetail(mockPostId);
+
+      // Assert
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('FAILURE : should return internal server error when fail to get post data from s3', async () => {
+      // Arrange
+      communityRepository.getPostDetail = jest
+        .fn()
+        .mockResolvedValue(expectedResult);
+
+      const mockError = new Error();
+      (aws.getS3Data as jest.Mock).mockRejectedValue(mockError);
+
+      try {
+        // Act
+        await communityService.getPostDetail(mockPostId);
+      } catch (err) {
+        expect(err.status).toEqual(500);
+        expect(err.message).toEqual('CANNOT_GET_POST_FROM_S3');
+      }
+    });
+  });
+
+  describe('createOrDeletePostLike', () => {
+    const mockData: PostLikeDto = {
+      postId: 1,
+    };
+    const mockUserId: number = 1;
+
+    it('SUCCESS : should return like create result', async () => {
+      // Arrange
+      const expectedResult = {
+        message: 'like created',
+      };
+      communityRepository.createOrDeletePostLike = jest
+        .fn()
+        .mockResolvedValue(expectedResult);
+
+      // Act
+      const result = await communityService.createOrDeletePostLike(
+        mockData,
+        mockUserId,
+      );
+
+      // Assert
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('SUCCESS : should return like delete result', async () => {
+      // Arrange
+      const expectedResult = {
+        raw: 1,
+      };
+      communityRepository.createOrDeletePostLike = jest
+        .fn()
+        .mockResolvedValue(expectedResult);
+
+      // Act
+      const result = await communityService.createOrDeletePostLike(
+        mockData,
+        mockUserId,
+      );
+
+      // Assert
+      expect(result).toEqual(expectedResult);
+    });
+  });
+
+  describe('searchPost', () => {
+    const mockQuery: SearchPostDto = {
+      option: OptionEnum.title,
+      keyword: 'test',
+      offset: 0,
+      limit: 10,
+    };
+
+    it('SUCCESS : should return searched post list', async () => {
+      // Arrange
+      const expectedResult = {
+        searchedPosts: [
+          {
+            post_title: '테스트2월18일123',
+            post_view: 0,
+            postId: 8,
+            createdAt: '2023-02-18',
+            userId: 3,
+            userName: 'testname',
+            postLike: '0',
+            comment: '0',
+            tierName: 'bronze',
+            tierId: 1,
+            subCategoryName: '자유',
+          },
+        ],
+        total: 1,
+      };
+
+      communityRepository.searchPost = jest
+        .fn()
+        .mockResolvedValue(expectedResult);
+
+      // Act
+      const result = await communityService.searchPost(mockQuery);
+
+      // Assert
+      expect(result).toEqual(expectedResult);
+    });
+  });
 
   describe('getIdsOfPostsCreatedByUser()', () => {
     const mockUserId = 1;
