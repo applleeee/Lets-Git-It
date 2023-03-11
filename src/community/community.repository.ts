@@ -116,7 +116,7 @@ export class CommunityRepository {
   async getPostList(
     subCategoryId: number,
     sort: SortEnum,
-    date: DateEnum,
+    date: DateEnum | undefined,
     offset: number,
     limit: number,
   ) {
@@ -160,13 +160,7 @@ export class CommunityRepository {
     return { fixed: fixed, postLists: data, total: total };
   }
 
-  async getPostDatail(postId: number) {
-    const postContent = await this.postRepository
-      .createQueryBuilder('post')
-      .select('post.content_url AS contentUrl')
-      .where('post.id = :postId', { postId: postId })
-      .getRawOne();
-
+  async getPostDetail(postId: number) {
     const postDetail = await this.postRepository
       .createQueryBuilder('post')
       .leftJoin('user', 'user', 'user.id = post.user_id')
@@ -191,6 +185,7 @@ export class CommunityRepository {
         'post.title AS postTitle',
         'post.id AS postId',
         'post.user_id AS userId',
+        'post.content_url AS content',
         'ranker_profile.name AS userName',
         'ranker_profile.profile_image_url AS userProfileImage',
         'tier.id AS tierId',
@@ -205,7 +200,7 @@ export class CommunityRepository {
       )
       .where('post.id = :id', { id: postId })
       .getRawOne();
-    postDetail.content = postContent.contentUrl;
+
     return postDetail;
   }
 
