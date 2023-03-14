@@ -1,10 +1,5 @@
 import { Controller, Get, Param, Patch, Query } from '@nestjs/common';
-import {
-  RankerProfileOutput,
-  SearchOutput,
-  Top100,
-  Top5,
-} from './dto/rankerProfile.dto';
+import { SearchOutput, Top100, Top5 } from './dto/rankerProfile.dto';
 import { RankService } from './rank.service';
 
 @Controller('/ranks')
@@ -26,9 +21,7 @@ export class RankController {
   }
 
   @Get('/:userName')
-  async getRankerDetail(@Param('userName') userName: string): Promise<{
-    rankerDetail: RankerProfileOutput;
-  }> {
+  async getRankerDetail(@Param('userName') userName: string) {
     return await this.rankService.checkRanker(userName);
   }
 

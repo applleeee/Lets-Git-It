@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 
 export class LangOutput {
   @IsString()
@@ -8,4 +8,12 @@ export class LangOutput {
 export class TotalScoresOutput {
   @IsString()
   total_score: string;
+}
+
+export class UserRankOutput {
+  @IsString()
+  rank: string;
+
+  @IsNumber()
+  ranker_profile_id: number;
 }

@@ -2,13 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Ranking } from '../entities/Ranking';
-import { LangOutput, TotalScoresOutput } from './dto/ranking.dto';
+import {
+  LangOutput,
+  TotalScoresOutput,
+  UserRankOutput,
+} from './dto/ranking.dto';
+import { RankerProfileRepository } from './rankerProfile.repository';
 
 @Injectable()
 export class RankingRepository {
   constructor(
     @InjectRepository(Ranking)
     private rankingRepository: Repository<Ranking>,
+    private rankerProfileRepository: RankerProfileRepository,
   ) {}
 
   async getAllScores(): Promise<TotalScoresOutput[]> {
@@ -151,5 +157,18 @@ export class RankingRepository {
       .set({ tierId })
       .where(`ranker_profile_id=:rankerId`, { rankerId: rankerProfileId })
       .execute();
+  }
+
+  async getAUserRanking(userName: string): Promise<UserRankOutput[]> {
+    const id = await this.rankerProfileRepository.getRankerId(userName);
+
+    const rank: UserRankOutput[] = await this.rankingRepository
+      .createQueryBuilder('ranking')
+      .select('RANK() OVER (ORDER BY ranking.total_score DESC)', 'rank')
+      .addSelect('ranking.ranker_profile_id', 'ranker_profile_id')
+      .getRawMany();
+
+    const userRanking = rank.filter((el) => el.ranker_profile_id === id);
+    return userRanking;
   }
 }

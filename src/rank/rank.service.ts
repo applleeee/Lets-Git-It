@@ -27,8 +27,10 @@ export class RankService {
       const rankerDetail = await this.rankerProfileRepository.getRankerProfile(
         userName,
       );
+      const userRank = await this.rankingRepository.getAUserRanking(userName);
+
       rankerDetail['blank'] = null;
-      return { rankerDetail };
+      return { rankerDetail, userRank };
     }
 
     return this.getRankerDetail(userName);
@@ -345,7 +347,8 @@ export class RankService {
       const rankerDetail = await this.rankerProfileRepository.getRankerProfile(
         userName,
       );
-      return { rankerDetail };
+      const userRank = await this.rankingRepository.getAUserRanking(userName);
+      return { rankerDetail, userRank };
     } catch (e) {
       if (e.response.status === 404) {
         throw new HttpException('INVALID GITHUB USER', HttpStatus.NOT_FOUND);
