@@ -8,7 +8,7 @@ import {
 import { Test, TestingModule } from '@nestjs/testing';
 import { CommunityRepository } from './community.repository';
 import { CommunityService } from './community.service';
-import * as aws from '../utiles/aws';
+import * as aws from '../utils/aws';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { CreatePostDto, DeleteImageDto } from './dto/Post.dto';
 
