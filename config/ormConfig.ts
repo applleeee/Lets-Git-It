@@ -17,7 +17,10 @@ dotenv.config();
 const config: TypeOrmModuleOptions = {
   type: 'mysql',
   port: +process.env.DB_PORT,
-  username: process.env.DB_USERNAME,
+  username:
+    process.env.DB_USERNAME_LOCAL ||
+    process.env.DB_USERNAME_DEV ||
+    process.env.DB_USERNAME_PROD,
   host:
     process.env.DB_HOST_LOCAL ||
     process.env.DB_HOST_DEV ||
