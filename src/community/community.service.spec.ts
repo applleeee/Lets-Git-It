@@ -36,7 +36,7 @@ class MockCommunityRepository {
   getIdsOfCommentLikedByUser = jest.fn();
 }
 
-jest.mock('../utiles/aws', () => ({
+jest.mock('../utils/aws', () => ({
   getS3Data: jest.fn(),
   uploadToS3: jest.fn(),
   deleteS3Data: jest.fn(),
