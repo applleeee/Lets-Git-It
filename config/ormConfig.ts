@@ -16,13 +16,28 @@ dotenv.config();
 
 const config: TypeOrmModuleOptions = {
   type: 'mysql',
-  host: process.env.DB_HOST,
   port: +process.env.DB_PORT,
   username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_DATABASE,
-  synchronize: false,
-  logging: false,
+  host:
+    process.env.DB_HOST_LOCAL ||
+    process.env.DB_HOST_PROD ||
+    process.env.DB_HOST_DEV,
+  password:
+    process.env.DB_PASSWORD_LOCAL ||
+    process.env.DB_PASSWORD_PROD ||
+    process.env.DB_PASSWORD_DEV,
+  database:
+    process.env.DB_DATABASE_LOCAL ||
+    process.env.DB_DATABASE_PROD ||
+    process.env.DB_DATABASE_DEV,
+  synchronize:
+    process.env.DB_SYNCHRONIZE_LOCAL === 'true' ||
+    process.env.DB_SYNCHRONIZE_PROD === 'true' ||
+    process.env.DB_SYNCHRONIZE_DEV === '',
+  logging:
+    process.env.DB_LOGGING_LOCAL === 'true' ||
+    process.env.DB_LOGGING_PROD === 'true' ||
+    process.env.DB_LOGGING_DEV === '',
   entities: [
     Career,
     Comment,

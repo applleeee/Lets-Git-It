@@ -1,7 +1,7 @@
 import { ValidationPipe, HttpException, HttpStatus } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { AllExceptionsFilter } from './utiles/http-exception.filter';
+import { AllExceptionsFilter } from './utils/http-exception.filter';
 
 import * as morgan from 'morgan';
 import { ValidationError } from 'class-validator';
