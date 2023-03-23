@@ -11,6 +11,7 @@ import { Injectable } from '@nestjs/common';
 import { GithubCodeDto, SignUpWithUserNameDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
+import { jwtConstants, cookieConstants } from './constants';
 dotenv.config();
 
 @Injectable()
@@ -41,22 +42,17 @@ export class AuthService {
         isMember: false,
         userName: userName,
         githubId: githubUserInfo.id,
-      } as AuthSignInUnauthorizedResDto;
+      };
     }
 
-    const jwtToken = this.jwtService.sign(
-      {
-        userId: user.id,
-        userName: userName,
-      },
-      { secret: process.env.JWT_SECRET_KEY },
-    );
+    const jwtToken = await this.getJwtAccessToken(user.id, userName);
 
     return {
       isMember: true,
       userName: userName,
       accessToken: jwtToken,
-    } as AuthSignInOkResDto;
+      userId: user.id,
+    };
   }
 
   async signUp(signUpDataWithUserName: SignUpWithUserNameDto) {
@@ -65,13 +61,7 @@ export class AuthService {
 
     const user = await this.userService.getByGithubId(signUpData.githubId);
 
-    const jwtToken = this.jwtService.sign(
-      {
-        userId: user.id,
-        userName: userName,
-      },
-      { secret: process.env.JWT_SECRET_KEY },
-    );
+    const jwtToken = await this.getJwtAccessToken(user.id, userName);
 
     await this.rankService.checkRanker(userName);
     const userId = await this.userRepository.getUserIdByGithubId(user.githubId);
@@ -98,10 +88,33 @@ export class AuthService {
       updateRankerProfileDto.userId,
     );
 
-    return { accessToken: jwtToken };
+    return { accessToken: jwtToken, userId: user.id };
   }
 
   async getAuthCategory() {
     return await this.authRepository.getAuthCategory();
+  }
+
+  async getJwtAccessToken(userId: number, userName: string) {
+    const payload = { userId, userName };
+    return this.jwtService.sign(payload, {
+      secret: jwtConstants.jwtSecret,
+      expiresIn: `${jwtConstants.jwtExpiresIn}s`,
+    });
+  }
+
+  async getCookiesWithJwtRefreshToken(userId: number) {
+    const payload = { userId };
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: jwtConstants.jwtRefreshSecret,
+      expiresIn: `${jwtConstants.jwtRefreshExpiresIn}s`,
+    });
+
+    return { refreshToken, ...cookieConstants };
+  }
+
+  async getCookiesForLogOut() {
+    const { maxAge, ...refreshOptions } = cookieConstants;
+    return refreshOptions;
   }
 }

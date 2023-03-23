@@ -1,3 +1,4 @@
+import { jwtConstants } from './constants';
 import { GithubCodeDto, SignUpWithUserNameDto } from './dto/auth.dto';
 import { RankerProfile } from './../entities/RankerProfile';
 import { Field } from './../entities/Field';
@@ -141,6 +142,7 @@ describe('AuthService', () => {
         isMember: true,
         userName: githubUserInfo.login,
         accessToken: jwtToken,
+        userId: 123,
       };
 
       const result = await authService.signIn(githubCode);
@@ -181,7 +183,10 @@ describe('AuthService', () => {
           userId: 123,
           userName: githubUserInfo.login,
         },
-        { secret: process.env.JWT_SECRET_KEY },
+        {
+          expiresIn: `${jwtConstants.jwtExpiresIn}s`,
+          secret: jwtConstants.jwtSecret,
+        },
       );
     });
   });
@@ -220,7 +225,7 @@ describe('AuthService', () => {
 
     it('SUCCESS : should create a new user, sign a JWT token, and update the ranker profile and return an object { accessToken: jwtToken }', async () => {
       const result = await authService.signUp(signUpDataWithUserName);
-      expect(result).toEqual({ accessToken: jwtToken });
+      expect(result).toEqual({ accessToken: jwtToken, userId: 1 });
     });
 
     it('Should call the UserService methods with the correct parameters', async () => {
@@ -240,7 +245,10 @@ describe('AuthService', () => {
           userId: user.id,
           userName: userName,
         },
-        { secret: process.env.JWT_SECRET_KEY },
+        {
+          expiresIn: `${jwtConstants.jwtExpiresIn}s`,
+          secret: jwtConstants.jwtSecret,
+        },
       );
     });
 
