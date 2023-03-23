@@ -51,7 +51,7 @@ export class UserService {
     );
 
     if (result === undefined) {
-      throw new HttpException('WRONG_GITHUB_CODE', HttpStatus.UNAUTHORIZED);
+      throw new HttpException('WRONG_GITHUB_CODE', HttpStatus.BAD_REQUEST);
     }
     return result;
   }
