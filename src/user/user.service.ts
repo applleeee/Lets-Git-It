@@ -1,3 +1,4 @@
+import { promisify } from 'util';
 import { RankerProfileRepository } from './../rank/rankerProfile.repository';
 import { SignUpDto } from './../auth/dto/auth.dto';
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
@@ -9,6 +10,7 @@ import { HttpService } from '@nestjs/axios';
 import { CommunityRepository } from '../community/community.repository';
 import { MyPageDto, UpdateMyPageDto } from './dto/mypage.dto';
 import { AxiosRequestConfig } from 'axios';
+import { pbkdf2 } from 'crypto';
 dotenv.config();
 
 @Injectable()
@@ -112,5 +114,64 @@ export class UserService {
 
   async updateMyPage(userId: number, partialEntity: UpdateMyPageDto) {
     await this.userRepository.updateMyPage(userId, partialEntity);
+  }
+
+  async setRefreshToken(refreshToken: string, userId: number) {
+    const salt = process.env.REFRESH_SALT;
+    const iterations = +process.env.REFRESH_ITERATIONS;
+    const keylen = +process.env.REFRESH_KEYLEN;
+    const digest = process.env.REFRESH_DIGEST;
+    const pbkdf2Promise = promisify(pbkdf2);
+    const key = await pbkdf2Promise(
+      refreshToken,
+      salt,
+      iterations,
+      keylen,
+      digest,
+    );
+
+    const hashedRefreshToken = key.toString('base64');
+
+    await this.userRepository.updateUser(userId, hashedRefreshToken);
+  }
+
+  async getUserIfRefreshTokenMatches(refreshToken: string, id: number) {
+    const user = await this.getById(id);
+
+    const isRefreshTokenMatching = await this.verifyRefreshToken(
+      user.hashedRefreshToken,
+      refreshToken,
+    );
+
+    if (isRefreshTokenMatching) {
+      return user;
+    }
+  }
+
+  async verifyRefreshToken(
+    hashedRefreshToken: string,
+    currentRefreshToken: string,
+  ) {
+    const salt = process.env.REFRESH_SALT;
+    const iterations = +process.env.REFRESH_ITERATIONS;
+    const keylen = +process.env.REFRESH_KEYLEN;
+    const digest = process.env.REFRESH_DIGEST;
+    const pbkdf2Promise = promisify(pbkdf2);
+    const key = await pbkdf2Promise(
+      currentRefreshToken,
+      salt,
+      iterations,
+      keylen,
+      digest,
+    );
+    const currentHashedRefreshToken = key.toString('base64');
+
+    if (currentHashedRefreshToken === hashedRefreshToken) return true;
+
+    return false;
+  }
+
+  async deleteRefreshToken(id: number) {
+    return this.userRepository.updateUser(id, null);
   }
 }

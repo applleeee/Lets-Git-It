@@ -52,4 +52,8 @@ export class UserRepository {
   async updateMyPage(userId: number, partialEntity: UpdateMyPageDto) {
     await this.userRepository.update({ id: userId }, partialEntity);
   }
+
+  async updateUser(id: number, hashedRefreshToken: string) {
+    this.userRepository.update(id, { hashedRefreshToken });
+  }
 }

@@ -1,21 +1,20 @@
-import { RankerProfileRepository } from '../rank/rankerProfile.repository';
-import { CommunityService } from './../community/community.service';
+import { RankerProfileRepository } from '../../rank/rankerProfile.repository';
+import { CommunityService } from '../../community/community.service';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { jwtConstants } from './constants';
-import { AuthorizedUser } from './dto/auth.dto';
+import { jwtConstants } from '../constants';
+import { AuthorizedUser } from '../dto/auth.dto';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     private readonly communityService: CommunityService,
     private readonly rankerProfileRepository: RankerProfileRepository,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: true,
-      secretOrKey: jwtConstants.secret,
+      secretOrKey: jwtConstants.jwtSecret,
     });
   }
 

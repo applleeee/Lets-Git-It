@@ -113,7 +113,7 @@ describe('UserService', () => {
     const requestBody = {
       code,
       client_id: 'test',
-      client_secret: 'process.env.GITHUB_CLIENT_SECRETS',
+      client_secret: 'GITHUB_CLIENT_SECRETS',
     };
 
     const config: AxiosRequestConfig = {
