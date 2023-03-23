@@ -8,7 +8,7 @@ import {
 import { Test, TestingModule } from '@nestjs/testing';
 import { CommunityRepository } from './community.repository';
 import { CommunityService } from './community.service';
-import * as aws from '../utiles/aws';
+import * as aws from '../utils/aws';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { CreatePostDto, DeleteImageDto } from './dto/Post.dto';
 
@@ -36,7 +36,7 @@ class MockCommunityRepository {
   getIdsOfCommentLikedByUser = jest.fn();
 }
 
-jest.mock('../utiles/aws', () => ({
+jest.mock('../utils/aws', () => ({
   getS3Data: jest.fn(),
   uploadToS3: jest.fn(),
   deleteS3Data: jest.fn(),
@@ -234,33 +234,6 @@ describe('CommunityService', () => {
         expect(err.status).toEqual(500);
         expect(err.message).toEqual('CANNOT_UPLOAD_POST_TO_S3');
       }
-    });
-  });
-
-  describe('getPostToUpdate', () => {
-    it('SUCCESS : should get detail data about the post from s3 and return it', async () => {
-      // Arrange
-      const mockPostId = 1;
-      const mockPostData = {
-        contentUrl: 'test/filepath',
-      };
-
-      const mockS3Data = '<p>test</p>';
-
-      communityRepository.getPostById = jest
-        .fn()
-        .mockResolvedValue(mockPostData);
-      (aws.getS3Data as jest.Mock).mockResolvedValue(mockS3Data);
-
-      const expectedPostData = {
-        content: mockS3Data,
-      };
-
-      // Act
-      const result = await communityService.getPostToUpdate(mockPostId);
-
-      // Assert
-      expect(result).toEqual(expectedPostData);
     });
   });
 

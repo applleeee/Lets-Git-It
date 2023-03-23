@@ -16,7 +16,7 @@ import { PostLike } from './PostLike';
 import { RankerProfile } from './RankerProfile';
 import { Field } from './Field';
 import { Career } from './Career';
-import { BooleanTransformer } from '../utiles/boolean-transformer';
+import { BooleanTransformer } from '../utils/boolean-transformer';
 
 @Index('field_id', ['fieldId'], {})
 @Unique(['githubId'])
@@ -50,6 +50,12 @@ export class User {
     default: () => "'0'",
   })
   isAdmin: boolean | null;
+
+  @Column('varchar', {
+    name: 'refresh_token',
+    nullable: true,
+  })
+  refreshToken: string | null;
 
   @Column('timestamp', { name: 'created_at', default: () => "'now()'" })
   createdAt: Date;
