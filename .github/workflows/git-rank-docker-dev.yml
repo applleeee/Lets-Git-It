@@ -49,7 +49,7 @@ jobs:
           push: true
           tags: ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=max,ref=refs/pull/${{ github.event.pull_request.number }}/merge
 
   deploy:
     name: Deploy

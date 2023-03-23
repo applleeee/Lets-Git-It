@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { MockFunctionMetadata, ModuleMocker } from 'jest-mock';
 import { RankController } from './rank.controller';
 import { RankService } from './rank.service';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -74,8 +75,14 @@ describe('RankController', () => {
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
+      imports: [
+        ThrottlerModule.forRoot({
+          ttl: 60,
+          limit: 20,
+        }),
+      ],
       controllers: [RankController],
-      providers: [RankService],
+      providers: [RankService, ThrottlerGuard],
     })
       .useMocker((token) => {
         if (token === RankService) {
