@@ -8,7 +8,7 @@ import {
 import { Test, TestingModule } from '@nestjs/testing';
 import { CommunityRepository } from './community.repository';
 import { CommunityService } from './community.service';
-import * as aws from '../utiles/aws';
+import * as aws from '../utils/aws';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { CreatePostDto, DeleteImageDto } from './dto/Post.dto';
 
@@ -36,7 +36,7 @@ class MockCommunityRepository {
   getIdsOfCommentLikedByUser = jest.fn();
 }
 
-jest.mock('../utiles/aws', () => ({
+jest.mock('../utils/aws', () => ({
   getS3Data: jest.fn(),
   uploadToS3: jest.fn(),
   deleteS3Data: jest.fn(),

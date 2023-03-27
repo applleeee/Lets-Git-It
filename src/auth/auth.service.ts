@@ -1,3 +1,7 @@
+import {
+  AuthSignInOkResDto,
+  AuthSignInUnauthorizedResDto,
+} from './dto/auth-res.dto';
 import { UserRepository } from './../user/user.repository';
 import { RankService } from './../rank/rank.service';
 import { UserService } from './../user/user.service';
@@ -37,7 +41,7 @@ export class AuthService {
         isMember: false,
         userName: userName,
         githubId: githubUserInfo.id,
-      };
+      } as AuthSignInUnauthorizedResDto;
     }
 
     const jwtToken = this.jwtService.sign(
@@ -48,7 +52,11 @@ export class AuthService {
       { secret: process.env.JWT_SECRET_KEY },
     );
 
-    return { isMember: true, userName: userName, accessToken: jwtToken };
+    return {
+      isMember: true,
+      userName: userName,
+      accessToken: jwtToken,
+    } as AuthSignInOkResDto;
   }
 
   async signUp(signUpDataWithUserName: SignUpWithUserNameDto) {

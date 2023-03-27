@@ -8,7 +8,7 @@ import { UserModule } from './user/user.module';
 
 import * as ormConfig from '../config/ormConfig';
 import { APP_FILTER } from '@nestjs/core';
-import { AllExceptionsFilter } from './utiles/http-exception.filter';
+import { AllExceptionsFilter } from './utils/http-exception.filter';
 import { SchedulerModule } from './schedule/schedule.module';
 
 @Module({
