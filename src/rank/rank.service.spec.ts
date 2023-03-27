@@ -37,8 +37,30 @@ describe('RankService', () => {
     sponsorNumber: 1,
     contributingRepoStarNumber: 1,
     myStarNumber: 1,
+    tierId: 1,
     tier: '',
     tierImage: '',
+    userRank: '1',
+  };
+
+  const rankerPosition = {
+    rankerPosCuriosityScore: 20,
+    rankerPosPassionScore: 13,
+    rankerPosFameScore: 11,
+    rankerPosAbilityScore: 0,
+    rankerPosTotalScore: 8,
+    rankerPosIssueNumber: 50,
+    rankerPosForkingNumber: 23,
+    rankerPosStarringNumber: 10,
+    rankerPosFollowingNumber: 13,
+    rankerPosCommitNumber: 12,
+    rankerPosReviewNumber: 0,
+    rankerPosPersonalRepoNumber: 33,
+    rankerPosFollowerNumber: 12,
+    rankerPosForkedNumber: 0,
+    rankerPosWatchedNumber: 1,
+    rankerPosSponsorNumber: NaN,
+    rankerPosContributingRepoStarNumber: 0,
   };
 
   beforeEach(async () => {
@@ -97,6 +119,7 @@ describe('RankService', () => {
         rankerDetail: testRankerDetail,
       });
     });
+
     it('Ranker Not Found, Continue to Next Fn', async () => {
       const userName = 'TopBackDev';
       jest
@@ -105,12 +128,14 @@ describe('RankService', () => {
 
       jest.spyOn(service, 'getRankerDetail').mockResolvedValue({
         rankerDetail: testRankerDetail,
+        rankerPosition,
       });
 
       const rankerInfo = await service.checkRanker(userName);
 
       expect(rankerInfo).toEqual({
         rankerDetail: testRankerDetail,
+        rankerPosition,
       });
     });
   });
@@ -145,7 +170,7 @@ describe('RankService', () => {
           followerNumber: 3834,
           myStarNumber: 380,
           commitNumber: 12991,
-          totalScore: '191302.0000',
+          totalScore: '191302',
           tier: 'gold',
           tierImage: null,
         },
@@ -156,7 +181,7 @@ describe('RankService', () => {
           followerNumber: 15,
           myStarNumber: 2,
           commitNumber: 971,
-          totalScore: '1020.0000',
+          totalScore: '1020',
           tier: 'silver',
           tierImage: null,
         },
@@ -167,7 +192,7 @@ describe('RankService', () => {
           followerNumber: 12,
           myStarNumber: 3,
           commitNumber: 351,
-          totalScore: '473.0000',
+          totalScore: '473',
           tier: 'silver',
           tierImage: null,
         },
@@ -206,7 +231,7 @@ describe('RankService', () => {
           followerNumber: 3834,
           myStarNumber: 380,
           commitNumber: 12991,
-          totalScore: '191302.0000',
+          totalScore: '191302',
           tier: 'gold',
           tierImage: null,
         },
@@ -217,7 +242,7 @@ describe('RankService', () => {
           followerNumber: 10,
           myStarNumber: 2,
           commitNumber: 189,
-          totalScore: '277.0000',
+          totalScore: '277',
           tier: 'bronze',
           tierImage: null,
         },
@@ -256,7 +281,7 @@ describe('RankService', () => {
           followerNumber: 3834,
           myStarNumber: 380,
           commitNumber: 12991,
-          totalScore: '191302.0000',
+          totalScore: '191302',
           tier: 'gold',
           tierImage: null,
         },
@@ -267,7 +292,7 @@ describe('RankService', () => {
           followerNumber: 15,
           myStarNumber: 2,
           commitNumber: 971,
-          totalScore: '1020.0000',
+          totalScore: '1020',
           tier: 'silver',
           tierImage: null,
         },
@@ -278,7 +303,7 @@ describe('RankService', () => {
           followerNumber: 12,
           myStarNumber: 3,
           commitNumber: 351,
-          totalScore: '473.0000',
+          totalScore: '473',
           tier: 'silver',
           tierImage: null,
         },

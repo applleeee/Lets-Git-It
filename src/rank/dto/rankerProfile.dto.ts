@@ -121,9 +121,15 @@ export class RankerProfileOutput {
   @IsNumber()
   myStarNumber: number;
 
+  @IsNumber()
+  tierId: number;
+
   @IsString()
   tier: string;
 
   @IsString()
   tierImage: string;
+
+  @IsString()
+  userRank: string;
 }

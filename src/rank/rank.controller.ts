@@ -1,4 +1,13 @@
-import { Controller, Get, Param, Patch, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { OptionalAuthGuard } from 'src/community/guard/optionalGuard';
 import { SearchOutput, Top100, Top5 } from './dto/rankerProfile.dto';
 import { RankService } from './rank.service';
 
@@ -30,12 +39,19 @@ export class RankController {
     return await this.rankService.getTop5();
   }
 
+  @UseGuards(OptionalAuthGuard)
   @Get('/ranking/top100')
-  async getTop100(@Query('langFilter') langFilter: string): Promise<{
+  async getTop100(
+    @Query('langFilter') langFilter: string,
+    @Req() req,
+  ): Promise<{
     langCategory: unknown[];
     top100: Top100[];
   }> {
-    return await this.rankService.getTop100(langFilter);
+    if (!req.user) {
+      return await this.rankService.getTop100(langFilter);
+    } else {
+    }
   }
 
   @Patch('/latest/:userName')

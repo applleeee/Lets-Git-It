@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Ranking } from '../entities/Ranking';
 import {
   LangOutput,
+  MaxValuesOutput,
   TotalScoresOutput,
   UserRankOutput,
 } from './dto/ranking.dto';
@@ -170,5 +171,35 @@ export class RankingRepository {
 
     const userRanking = rank.filter((el) => el.ranker_profile_id === id);
     return userRanking;
+  }
+
+  async getTierMaxValues(tierId: number): Promise<MaxValuesOutput> {
+    const tierMaxValues: MaxValuesOutput = await this.rankingRepository
+      .createQueryBuilder()
+      .select([
+        'MAX(ROUND(curiosity_score)) as maxCuriosityScore',
+        'MAX(ROUND(passion_score)) as maxPassionScore',
+        'MAX(ROUND(fame_score)) as maxFameScore',
+        'MAX(ROUND(ability_score)) as maxAbilityScore',
+        'MAX(ROUND(total_score)) as maxTotalScore',
+        'MAX(curiosity_raise_issue_number) as maxIssueNumber',
+        'MAX(curiosity_fork_repository_number) as maxForkingNumber',
+        'MAX(curiosity_give_star_repository_number) as maxStarringNumber',
+        'MAX(curiosity_following_number) as maxFollowingNumber',
+        'MAX(passion_commit_number) as maxCommitNumber',
+        'MAX(passion_pr_number) as maxPRNumber',
+        'MAX(passion_review_number) as maxReviewNumber',
+        'MAX(passion_create_repository_number) as maxPersonalRepoNumber',
+        'MAX(fame_follower_number) as maxFollowerNumber',
+        'MAX(fame_repository_forked_number) as maxForkedNumber',
+        'MAX(fame_repository_watched_number) as maxWatchedNumber',
+        'MAX(ability_sponsered_number) as maxSponsorNumber',
+        'MAX(ability_contribute_repository_star_number) as maxContributingRepoStarNumber',
+        'MAX(ability_public_repository_star_number) as maxMyStartNumber',
+      ])
+      .where(`tier_id=:tierId`, { tierId })
+      .getRawOne();
+
+    return tierMaxValues;
   }
 }
