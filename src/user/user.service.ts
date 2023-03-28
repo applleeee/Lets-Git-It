@@ -1,6 +1,6 @@
 import { promisify } from 'util';
 import { RankerProfileRepository } from './../rank/rankerProfile.repository';
-import { SignUpDto } from './../auth/dto/auth.dto';
+import { SignUpDto } from './dto/createUser.dto';
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { User } from '../entities/User';
 import { UserRepository } from './user.repository';
@@ -8,7 +8,7 @@ import { lastValueFrom, map } from 'rxjs';
 import * as dotenv from 'dotenv';
 import { HttpService } from '@nestjs/axios';
 import { CommunityRepository } from '../community/community.repository';
-import { MyPageDto, UpdateMyPageDto } from './dto/mypage.dto';
+import { MyPageDto, UpdateMyPageDto } from './dto/myPage.dto';
 import { AxiosRequestConfig } from 'axios';
 import { pbkdf2 } from 'crypto';
 dotenv.config();
@@ -113,10 +113,10 @@ export class UserService {
   }
 
   async updateMyPage(userId: number, partialEntity: UpdateMyPageDto) {
-    await this.userRepository.updateMyPage(userId, partialEntity);
+    return await this.userRepository.updateMyPage(userId, partialEntity);
   }
 
-  async setRefreshToken(refreshToken: string, userId: number) {
+  async saveRefreshToken(refreshToken: string, userId: number) {
     const salt = process.env.REFRESH_SALT;
     const iterations = +process.env.REFRESH_ITERATIONS;
     const keylen = +process.env.REFRESH_KEYLEN;
@@ -132,19 +132,26 @@ export class UserService {
 
     const hashedRefreshToken = key.toString('base64');
 
-    await this.userRepository.updateUser(userId, hashedRefreshToken);
+    return await this.userRepository.updateUserRefreshToken(
+      userId,
+      hashedRefreshToken,
+    );
   }
 
   async getUserIfRefreshTokenMatches(refreshToken: string, id: number) {
     const user = await this.getById(id);
 
-    const isRefreshTokenMatching = await this.verifyRefreshToken(
+    const isRefreshTokenMatching: Boolean = await this.verifyRefreshToken(
       user.hashedRefreshToken,
       refreshToken,
     );
 
     if (isRefreshTokenMatching) {
-      return user;
+      const userName = await this.rankerProfileRepository.getUserNameByUserId(
+        id,
+      );
+
+      return { id, userName };
     }
   }
 
@@ -166,12 +173,13 @@ export class UserService {
     );
     const currentHashedRefreshToken = key.toString('base64');
 
-    if (currentHashedRefreshToken === hashedRefreshToken) return true;
+    if (currentHashedRefreshToken !== hashedRefreshToken)
+      throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
 
-    return false;
+    return true;
   }
 
   async deleteRefreshToken(id: number) {
-    return this.userRepository.updateUser(id, null);
+    return await this.userRepository.updateUserRefreshToken(id, null);
   }
 }

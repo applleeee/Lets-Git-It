@@ -43,17 +43,11 @@ import { TierRepository } from '../rank/tier.repository';
     AuthModule,
     UserModule,
     RankModule,
-    JwtModule.register({
-      secret: jwtConstants.jwtSecret,
-      signOptions: { expiresIn: jwtConstants.jwtExpiresIn },
-    }),
   ],
   controllers: [CommunityController],
   providers: [
     CommunityService,
     CommunityRepository,
-    AuthService,
-    JwtService,
     JwtStrategy,
     JwtRefreshStrategy,
     RankService,

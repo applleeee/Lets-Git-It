@@ -1,3 +1,4 @@
+import { RankerProfileRepository } from './../../rank/rankerProfile.repository';
 import { jwtConstants } from './../constants';
 import { UserService } from './../../user/user.service';
 import { Strategy, ExtractJwt } from 'passport-jwt';
@@ -28,6 +29,11 @@ export class JwtRefreshStrategy extends PassportStrategy(
       throw new HttpException('FORBIDDEN', HttpStatus.FORBIDDEN);
 
     const { userId } = payload;
-    return this.userService.getUserIfRefreshTokenMatches(refreshToken, userId);
+
+    const user = this.userService.getUserIfRefreshTokenMatches(
+      refreshToken,
+      userId,
+    );
+    return user;
   }
 }

@@ -1,7 +1,3 @@
-import {
-  AuthSignInOkResDto,
-  AuthSignInUnauthorizedResDto,
-} from './dto/auth-res.dto';
 import { UserRepository } from './../user/user.repository';
 import { RankService } from './../rank/rank.service';
 import { UserService } from './../user/user.service';
@@ -64,28 +60,21 @@ export class AuthService {
     const jwtToken = await this.getJwtAccessToken(user.id, userName);
 
     await this.rankService.checkRanker(userName);
+
     const userId = await this.userRepository.getUserIdByGithubId(user.githubId);
 
     const ranker = await this.rankerProfileRepository.getRankerProfile(
       userName,
     );
 
-    const updateRankerProfileDto = {
-      profileImageUrl: ranker.profileImage,
-      homepageUrl: ranker.blog,
-      email: ranker.email,
-      company: ranker.company,
-      region: ranker.region,
-      userId: userId,
-    };
     await this.rankerProfileRepository.updateRankerProfile(
       userName,
-      updateRankerProfileDto.profileImageUrl,
-      updateRankerProfileDto.homepageUrl,
-      updateRankerProfileDto.email,
-      updateRankerProfileDto.company,
-      updateRankerProfileDto.region,
-      updateRankerProfileDto.userId,
+      ranker.profileImage,
+      ranker.blog,
+      ranker.email,
+      ranker.company,
+      ranker.region,
+      userId,
     );
 
     return { accessToken: jwtToken, userId: user.id };
@@ -111,6 +100,17 @@ export class AuthService {
     });
 
     return { refreshToken, ...cookieConstants };
+  }
+
+  async isRefreshTokenExpirationDateHalfPast(
+    refreshToken: string,
+  ): Promise<Boolean> {
+    const payload = this.jwtService.verify(refreshToken, {
+      secret: jwtConstants.jwtSecret,
+    });
+    return (
+      payload.exp - Date.now() < (+jwtConstants.jwtRefreshExpiresIn * 1000) / 2
+    );
   }
 
   async getCookiesForLogOut() {
