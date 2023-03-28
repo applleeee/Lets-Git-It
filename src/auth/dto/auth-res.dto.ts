@@ -3,6 +3,13 @@ import { ApiProperty, PickType } from '@nestjs/swagger';
 import { Career } from './../../entities/Career';
 import { Field } from './../../entities/Field';
 
+/**
+ * @author MyeongSeok
+ * @description 로그인 성공 시 응답 객체의 DTO입니다.
+ * @param isMember 회원 유무
+ * @param userName github user name
+ * @param accessToken jwt
+ */
 export class AuthSignInOkResDto {
   /**
    * 로그인 요청한 유저가 회원인지 아닌지를 나타냅니다.
@@ -40,6 +47,13 @@ export class AuthSignInOkResDto {
   readonly accessToken: string;
 }
 
+/**
+ * @author MyeongSeok
+ * @description 회원이 아닌 유저가 로그인을 시도했을 때 실패 응답 객체의 DTO입니다.
+ * @param isMember 회원 유무
+ * @param userName github user name
+ * @param githubId github user id
+ */
 export class AuthSignInUnauthorizedResDto extends PickType(AuthSignInOkResDto, [
   'userName',
 ] as const) {
@@ -66,6 +80,10 @@ export class AuthSignInUnauthorizedResDto extends PickType(AuthSignInOkResDto, [
   readonly githubId: number;
 }
 
+/**
+ * @author MyeongSeok
+ * @description 잘못된 깃허브 코드 사용으로 인한 로그인 실패 시 응답 객체의 DTO입니다.
+ */
 export class AuthSignInWrongCodeDto {
   /**
    * @example 400
@@ -110,10 +128,18 @@ export class AuthSignInWrongCodeDto {
   readonly path: string;
 }
 
+/**
+ * @author MyeongSeok
+ * @description 회원가입 성공 시 응답 객체의 DTO입니다.
+ */
 export class AuthSignUpCreatedDto extends PickType(AuthSignInOkResDto, [
   'accessToken',
 ] as const) {}
 
+/**
+ * @author MyeongSeok
+ * @description 회원가입 시 유저에게 받아야 하는 정보의 카테고리를 반환하는 응답객체의 DTO입니다.
+ */
 export class AuthCategoryOkDto {
   /**
    * 유저의 개발분야를 나타냅니다.
@@ -159,3 +185,26 @@ export class AuthCategoryOkDto {
   })
   readonly career: Career[];
 }
+
+/**
+ * @author MyeongSeok
+ * @description 로그아웃 성공 시 응답 객체의 DTO입니다.
+ */
+export class SignOutOkDto {
+  /**
+   * 로그아웃 성공 메시지입니다.
+   * @example LOG_OUT_COMPLETED
+   */
+  @ApiProperty({
+    description: '로그아웃 성공 메시지입니다.',
+    example: 'LOG_OUT_COMPLETED',
+    required: true,
+  })
+  readonly message: string;
+}
+
+/**
+ * @author MyeongSeok
+ * @description 엑세스 토큰 재발급 성공 시 응답 객체의 DTO입니다.
+ */
+export class RefreshOkDto extends AuthSignUpCreatedDto {}

@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from '../entities/User';
-import { SignUpDto } from '../auth/dto/auth.dto';
+import { SignUpDto } from './dto/createUser.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UpdateMyPageDto } from './dto/mypage.dto';
+import { UpdateMyPageDto } from './dto/myPage.dto';
 
 @Injectable()
 export class UserRepository {
@@ -35,7 +35,7 @@ export class UserRepository {
     const user = this.userRepository.create(signUpData);
 
     try {
-      await this.userRepository.save(user);
+      return await this.userRepository.save(user);
     } catch (error) {
       console.log('createUser error: ', error);
       if (error.code === 'ER_DUP_ENTRY') {
@@ -50,10 +50,11 @@ export class UserRepository {
   }
 
   async updateMyPage(userId: number, partialEntity: UpdateMyPageDto) {
-    await this.userRepository.update({ id: userId }, partialEntity);
+    return await this.userRepository.update({ id: userId }, partialEntity);
   }
 
-  async updateUser(id: number, hashedRefreshToken: string) {
-    this.userRepository.update(id, { hashedRefreshToken });
+  // todo Add test code from this line
+  async updateUserRefreshToken(id: number, hashedRefreshToken: string) {
+    return await this.userRepository.update(id, { hashedRefreshToken });
   }
 }

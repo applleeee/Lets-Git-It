@@ -73,6 +73,6 @@ import { RankerProfileRepository } from '../rank/rankerProfile.repository';
     UserRepository,
     RankerProfileRepository,
   ],
-  exports: [AuthService, AuthRepository],
+  exports: [AuthService, AuthRepository, JwtStrategy, JwtRefreshStrategy],
 })
 export class AuthModule {}

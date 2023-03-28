@@ -4,6 +4,8 @@ import {
   AuthSignUpCreatedDto,
   AuthSignInUnauthorizedResDto,
   AuthCategoryOkDto,
+  SignOutOkDto,
+  RefreshOkDto,
 } from './dto/auth-res.dto';
 import { JwtRefreshGuard } from './guard/jwt-refresh.guard';
 import { UserService } from './../user/user.service';
@@ -37,7 +39,6 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly userService: UserService,
   ) {}
-
   /**
    * @author MyeongSeok
    * @description 로그인
@@ -73,24 +74,24 @@ export class AuthController {
       res
         .status(HttpStatus.UNAUTHORIZED)
         .json(userInfo as AuthSignInUnauthorizedResDto);
+    } else {
+      const { userId, ...accessTokenWithUserInfo } = userInfo;
+
+      const { refreshToken, ...cookieOptions } =
+        await this.authService.getCookiesWithJwtRefreshToken(userId);
+
+      await this.userService.saveRefreshToken(refreshToken, userId);
+
+      res
+        .cookie('Refresh', refreshToken, cookieOptions)
+        .json(accessTokenWithUserInfo as AuthSignInOkResDto);
     }
-
-    const { userId, ...accessTokenWithUserInfo } = userInfo;
-
-    const { refreshToken, ...cookieOptions } =
-      await this.authService.getCookiesWithJwtRefreshToken(userId);
-
-    await this.userService.setRefreshToken(refreshToken, userId);
-
-    res
-      .cookie('Refresh', refreshToken, cookieOptions)
-      .json(accessTokenWithUserInfo as AuthSignInOkResDto);
   }
 
   /**
    * @author MyeongSeok
    * @description 회원가입
-   * @param userData
+   * @param userData 회원가입에 필요한 데이터를 body에 받습니다.
    */
   @Post('/sign-up')
   @ApiOperation({
@@ -112,28 +113,74 @@ export class AuthController {
     const { refreshToken, ...cookieOptions } =
       await this.authService.getCookiesWithJwtRefreshToken(userId);
 
-    await this.userService.setRefreshToken(refreshToken, userId);
+    await this.userService.saveRefreshToken(refreshToken, userId);
 
-    res.cookie('Refresh', refreshToken, cookieOptions).json(accessToken);
+    res.cookie('Refresh', refreshToken, cookieOptions).json({ accessToken });
   }
 
+  /**
+   * @author MyeongSeok
+   * @description 로그아웃
+   */
   @UseGuards(JwtRefreshGuard)
   @Post('/sign-out')
+  @ApiOperation({
+    summary: '로그아웃',
+    description: '로그아웃 시 응답 쿠키에 빈 값을 넣어 반환합니다.',
+  })
+  @ApiOkResponse({
+    description:
+      '로그아웃 시 LOG_OUT_COMPLETED 메시지와 함께 응답 쿠키에 빈 값을 넣어 반환합니다.',
+    type: SignOutOkDto,
+  })
   @HttpCode(HttpStatus.OK)
   async signOut(@Req() req, @Res({ passthrough: true }) res: Response) {
     const refreshOptions = await this.authService.getCookiesForLogOut();
 
     await this.userService.deleteRefreshToken(req.user.id);
 
-    res.cookie('Refresh', '', refreshOptions);
+    res
+      .cookie('Refresh', '', refreshOptions)
+      .json({ message: 'LOG_OUT_COMPLETED' });
   }
 
+  /**
+   * @author MyeongSeok
+   * @description 리프레시 토큰으로 엑세스 토큰을 재발급 받습니다.
+   */
   @UseGuards(JwtRefreshGuard)
   @Get('/refresh')
+  @ApiOperation({
+    summary: '엑세스 토큰 재발급',
+    description: '리프레시 토큰으로 엑세스 토큰을 재발급 받습니다.',
+  })
+  @ApiOkResponse({
+    description:
+      '리프레시 토큰으로 엑세스 토큰을 재발급 받습니다. 만약 리프레시 토큰의 만료기한이 절반보다 적게 남았을 경우 리프레시 토큰도 재발행하여 쿠키에 담아 반환합니다.',
+    type: RefreshOkDto,
+  })
   @HttpCode(HttpStatus.OK)
-  refresh(@Req() req) {
-    const user = req.user;
-    return this.authService.getJwtAccessToken(user.id, user.name);
+  async refresh(@Req() req, @Res({ passthrough: true }) res: Response) {
+    const currentRefreshToken = req.signedCookies.Refresh;
+    const { user } = req;
+    const accessToken = await this.authService.getJwtAccessToken(
+      user.id,
+      user.userName,
+    );
+    const refreshTokenRegenerationRequired: Boolean =
+      await this.authService.isRefreshTokenExpirationDateHalfPast(
+        currentRefreshToken,
+      );
+    if (refreshTokenRegenerationRequired) {
+      const { refreshToken, ...cookieOptions } =
+        await this.authService.getCookiesWithJwtRefreshToken(user.id);
+
+      await this.userService.saveRefreshToken(refreshToken, user.id);
+
+      res.cookie('Refresh', refreshToken, cookieOptions).json({ accessToken });
+    } else {
+      res.json({ accessToken });
+    }
   }
 
   /**
@@ -150,7 +197,7 @@ export class AuthController {
     type: AuthCategoryOkDto,
   })
   @HttpCode(HttpStatus.OK)
-  getAuthCategory() {
+  getAuthCategory(): Promise<AuthCategoryOkDto> {
     return this.authService.getAuthCategory();
   }
 }

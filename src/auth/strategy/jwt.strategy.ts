@@ -19,6 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: any): Promise<AuthorizedUser> {
+    console.log('payload: ', payload);
     const { userId, userName } = payload;
 
     const userNameInDb = await this.rankerProfileRepository.getUserNameByUserId(
@@ -42,10 +43,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
     const user = {
       id: userId,
+      userName,
       idsOfPostsCreatedByUser,
       idsOfPostLikedByUser,
       idsOfCommentsCreatedByUser,
       idsOfCommentLikedByUser,
+      payload: payload,
     };
     return user;
   }
