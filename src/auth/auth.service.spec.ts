@@ -318,6 +318,10 @@ describe('AuthService', () => {
       const payload = {
         exp: Date.now() + (+jwtConstants.jwtRefreshExpiresIn * 1000) / 3,
       };
+      console.log(
+        '+jwtConstants.jwtRefreshExpiresIn: ',
+        +jwtConstants.jwtRefreshExpiresIn,
+      );
 
       const jwtOptions = {
         secret: jwtConstants.jwtSecret,
