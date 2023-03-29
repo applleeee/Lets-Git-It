@@ -1,4 +1,5 @@
-import { AuthGuard } from '@nestjs/passport';
+import { ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from './../auth/guard/jwt-auth.guard';
 import {
   Body,
   Controller,
@@ -12,11 +13,12 @@ import {
 import { UserService } from './user.service';
 import { UpdateMyPageDto } from './dto/mypage.dto';
 
+@ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get()
   @HttpCode(HttpStatus.OK)
   async getMyPage(@Req() req) {
@@ -24,7 +26,7 @@ export class UserController {
     return await this.userService.getMyPage(userId);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch()
   @HttpCode(HttpStatus.CREATED)
   async updateMyPage(@Body() body: UpdateMyPageDto, @Req() req) {

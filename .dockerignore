@@ -16,3 +16,4 @@ Dockerfile
 *.yml
 scripts
 dist
+*.pem

@@ -17,27 +17,30 @@ dotenv.config();
 const config: TypeOrmModuleOptions = {
   type: 'mysql',
   port: +process.env.DB_PORT,
-  username: process.env.DB_USERNAME,
+  username:
+    process.env.DB_USERNAME_LOCAL ||
+    process.env.DB_USERNAME_DEV ||
+    process.env.DB_USERNAME_PROD,
   host:
     process.env.DB_HOST_LOCAL ||
-    process.env.DB_HOST_PROD ||
-    process.env.DB_HOST_DEV,
+    process.env.DB_HOST_DEV ||
+    process.env.DB_HOST_PROD,
   password:
     process.env.DB_PASSWORD_LOCAL ||
-    process.env.DB_PASSWORD_PROD ||
-    process.env.DB_PASSWORD_DEV,
+    process.env.DB_PASSWORD_DEV ||
+    process.env.DB_PASSWORD_PROD,
   database:
     process.env.DB_DATABASE_LOCAL ||
-    process.env.DB_DATABASE_PROD ||
-    process.env.DB_DATABASE_DEV,
+    process.env.DB_DATABASE_DEV ||
+    process.env.DB_DATABASE_PROD,
   synchronize:
     process.env.DB_SYNCHRONIZE_LOCAL === 'true' ||
-    process.env.DB_SYNCHRONIZE_PROD === 'true' ||
-    process.env.DB_SYNCHRONIZE_DEV === '',
+    process.env.DB_SYNCHRONIZE_DEV === 'true' ||
+    process.env.DB_SYNCHRONIZE_PROD === '',
   logging:
     process.env.DB_LOGGING_LOCAL === 'true' ||
-    process.env.DB_LOGGING_PROD === 'true' ||
-    process.env.DB_LOGGING_DEV === '',
+    process.env.DB_LOGGING_DEV === 'true' ||
+    process.env.DB_LOGGING_PROD === '',
   entities: [
     Career,
     Comment,

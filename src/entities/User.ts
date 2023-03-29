@@ -17,6 +17,10 @@ import { RankerProfile } from './RankerProfile';
 import { Field } from './Field';
 import { Career } from './Career';
 import { BooleanTransformer } from '../utils/boolean-transformer';
+<<<<<<< HEAD
+import { Exclude } from 'class-transformer';
+=======
+>>>>>>> upstream/feature/oauth
 
 @Index('field_id', ['fieldId'], {})
 @Unique(['githubId'])
@@ -52,10 +56,11 @@ export class User {
   isAdmin: boolean | null;
 
   @Column('varchar', {
-    name: 'refresh_token',
+    name: 'hashed_refresh_token',
     nullable: true,
   })
-  refreshToken: string | null;
+  @Exclude()
+  hashedRefreshToken: string | null;
 
   @Column('timestamp', { name: 'created_at', default: () => "'now()'" })
   createdAt: Date;
