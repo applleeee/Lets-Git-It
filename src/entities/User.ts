@@ -17,7 +17,10 @@ import { RankerProfile } from './RankerProfile';
 import { Field } from './Field';
 import { Career } from './Career';
 import { BooleanTransformer } from '../utils/boolean-transformer';
+<<<<<<< HEAD
 import { Exclude } from 'class-transformer';
+=======
+>>>>>>> upstream/feature/oauth
 
 @Index('field_id', ['fieldId'], {})
 @Unique(['githubId'])
