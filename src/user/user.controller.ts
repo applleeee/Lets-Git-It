@@ -11,7 +11,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UpdateMyPageDto } from './dto/myPage.dto';
+import { UpdateMyPageDto } from './dto/mypage.dto';
 
 @ApiTags('User')
 @Controller('user')

@@ -5,7 +5,7 @@ import { CommunityRepository } from './../community/community.repository';
 import { Test } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
-import { UpdateMyPageDto } from './dto/myPage.dto';
+import { UpdateMyPageDto } from './dto/mypage.dto';
 
 class MockUserRepository {}
 class MockRankerProfileRepository {}

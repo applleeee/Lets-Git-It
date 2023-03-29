@@ -8,7 +8,7 @@ import { lastValueFrom, map } from 'rxjs';
 import * as dotenv from 'dotenv';
 import { HttpService } from '@nestjs/axios';
 import { CommunityRepository } from '../community/community.repository';
-import { MyPageDto, UpdateMyPageDto } from './dto/myPage.dto';
+import { MyPageDto, UpdateMyPageDto } from './dto/mypage.dto';
 import { AxiosRequestConfig } from 'axios';
 import { pbkdf2 } from 'crypto';
 dotenv.config();

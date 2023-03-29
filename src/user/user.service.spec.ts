@@ -9,7 +9,7 @@ import { UserRepository } from './user.repository';
 import { RankerProfileRepository } from '../rank/rankerProfile.repository';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { UpdateMyPageDto } from './dto/myPage.dto';
+import { UpdateMyPageDto } from './dto/mypage.dto';
 import { of, map, lastValueFrom } from 'rxjs';
 import { AxiosResponse, AxiosRequestConfig } from 'axios';
 
