@@ -105,9 +105,10 @@ export class AuthService {
   async isRefreshTokenExpirationDateHalfPast(
     refreshToken: string,
   ): Promise<Boolean> {
-    const payload = this.jwtService.verify(refreshToken, {
+    const payload = await this.jwtService.verify(refreshToken, {
       secret: jwtConstants.jwtSecret,
     });
+
     return (
       payload.exp - Date.now() < (+jwtConstants.jwtRefreshExpiresIn * 1000) / 2
     );
