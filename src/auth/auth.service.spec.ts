@@ -316,11 +316,12 @@ describe('AuthService', () => {
       // Given
       const refreshToken = 'test';
       const payload = {
-        exp: Date.now() + (+jwtConstants.jwtRefreshExpiresIn * 1000) / 3,
+        exp:
+          Date.now() + (parseInt(jwtConstants.jwtRefreshExpiresIn) * 1000) / 3,
       };
       console.log(
-        '+jwtConstants.jwtRefreshExpiresIn: ',
-        +jwtConstants.jwtRefreshExpiresIn,
+        'jwtConstants.jwtRefreshExpiresIn: ',
+        parseInt(jwtConstants.jwtRefreshExpiresIn),
       );
 
       const jwtOptions = {
