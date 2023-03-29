@@ -106,7 +106,7 @@ export class AuthService {
     refreshToken: string,
   ): Promise<Boolean> {
     const payload = await this.jwtService.verify(refreshToken, {
-      secret: jwtConstants.jwtSecret,
+      secret: jwtConstants.jwtRefreshSecret,
     });
 
     return (
