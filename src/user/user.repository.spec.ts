@@ -5,7 +5,7 @@ import { QueryFailedError, TypeORMError, UpdateResult } from 'typeorm';
 import { SignUpDto } from './dto/createUser.dto';
 import { UserRepository } from './user.repository';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { UpdateMyPageDto } from './dto/myPage.dto';
+import { UpdateMyPageDto } from './dto/mypage.dto';
 
 class MockRepository extends User {
   create = jest.fn();
