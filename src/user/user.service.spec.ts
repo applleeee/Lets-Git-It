@@ -366,26 +366,32 @@ describe('UserService', () => {
   });
 
   describe('saveRefreshToken()', () => {
+    beforeAll(() => {
+      process.env.REFRESH_SALT = 'testSalt';
+      process.env.REFRESH_ITERATIONS = '1000';
+      process.env.REFRESH_KEYLEN = '64';
+      process.env.REFRESH_DIGEST = 'sha512';
+    });
+
+    afterAll(() => {
+      delete process.env.REFRESH_SALT;
+      delete process.env.REFRESH_ITERATIONS;
+      delete process.env.REFRESH_KEYLEN;
+      delete process.env.REFRESH_DIGEST;
+    });
+
     it('SUCCESS : Should save hashed refresh token for given user', async () => {
       // Given;
       const refreshToken = 'test';
       const userId = 1;
-      const salt = process.env.REFRESH_SALT;
-      const iterations = +process.env.REFRESH_ITERATIONS;
-      const keylen = +process.env.REFRESH_KEYLEN;
-      const digest = process.env.REFRESH_DIGEST;
-      const mockPbkdf2 = jest.fn(pbkdf2);
-      const pbkdf2Promise = promisify(mockPbkdf2);
-      const key = await pbkdf2Promise(
+      const hashedRefreshToken = pbkdf2Sync(
         refreshToken,
-        salt,
-        iterations,
-        keylen,
-        digest,
-      );
+        process.env.REFRESH_SALT,
+        +process.env.REFRESH_ITERATIONS,
+        +process.env.REFRESH_KEYLEN,
+        process.env.REFRESH_DIGEST,
+      ).toString('base64');
       const updateResult = { affected: 1, raw: [] };
-
-      const hashedRefreshToken = key.toString('base64');
 
       jest
         .spyOn(userRepository, 'updateUserRefreshToken')
@@ -465,7 +471,6 @@ describe('UserService', () => {
 
   describe('verifyRefreshToken()', () => {
     beforeAll(() => {
-      // set up process.env variables for testing
       process.env.REFRESH_SALT = 'testSalt';
       process.env.REFRESH_ITERATIONS = '1000';
       process.env.REFRESH_KEYLEN = '64';
@@ -473,7 +478,6 @@ describe('UserService', () => {
     });
 
     afterAll(() => {
-      // clean up process.env variables after testing
       delete process.env.REFRESH_SALT;
       delete process.env.REFRESH_ITERATIONS;
       delete process.env.REFRESH_KEYLEN;
