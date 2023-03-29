@@ -123,7 +123,7 @@ export class AuthController {
    * @description 로그아웃
    */
   @UseGuards(JwtRefreshGuard)
-  @Post('/sign-out')
+  @Get('/sign-out')
   @ApiOperation({
     summary: '로그아웃',
     description: '로그아웃 시 응답 쿠키에 빈 값을 넣어 반환합니다.',
