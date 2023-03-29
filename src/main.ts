@@ -8,10 +8,10 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './utils/http-exception.filter';
 
-import morgan from 'morgan';
+import * as morgan from 'morgan';
 import { ValidationError } from 'class-validator';
 import { SwaggerSetup } from './utils/swagger';
-import cookieParser from 'cookie-parser';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
