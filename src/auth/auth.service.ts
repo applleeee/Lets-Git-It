@@ -109,9 +109,7 @@ export class AuthService {
       secret: jwtConstants.jwtRefreshSecret,
     });
 
-    return (
-      payload.exp - Date.now() < (+jwtConstants.jwtRefreshExpiresIn * 1000) / 2
-    );
+    return (payload.exp - Date.now()) / (payload.exp - payload.iat) < 0.5;
   }
 
   async getCookiesForLogOut() {
