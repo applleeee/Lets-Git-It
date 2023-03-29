@@ -265,22 +265,13 @@ describe('AuthService', () => {
   });
 
   describe('getJwtAccessToken()', () => {
-    beforeAll(async () => {
-      process.env.JWT_SECRET_KEY = 'test';
-      process.env.JWT_EXPIRES_IN = '100';
-    });
-
-    afterAll(async () => {
-      delete process.env.JWT_SECRET_KEY;
-      delete process.env.JWT_EXPIRES_IN;
-    });
     it('SUCCESS : Should return jwtToken', async () => {
       // Given
       const payload = { userId: 1, userName: 'test' };
       const jwtToken = 'test';
       const jwtOptions = {
-        expiresIn: `${jwtConstants.jwtExpiresIn}s`,
         secret: jwtConstants.jwtSecret,
+        expiresIn: `${jwtConstants.jwtExpiresIn}s`,
       };
       jest.spyOn(jwtService, 'sign').mockReturnValue(jwtToken);
 
@@ -297,15 +288,6 @@ describe('AuthService', () => {
   });
 
   describe('getCookiesWithJwtRefreshToken()', () => {
-    beforeAll(async () => {
-      process.env.JWT_REFRESH_SECRET_KEY = 'test';
-      process.env.JWT_REFRESH_EXPIRES_IN = '1000';
-    });
-
-    afterAll(async () => {
-      delete process.env.JWT_REFRESH_SECRET_KEY;
-      delete process.env.JWT_REFRESH_EXPIRES_IN;
-    });
     it('SUCCESS : Should return cookies With refreshToken ', async () => {
       // Given
       const userId = 1;
@@ -330,26 +312,18 @@ describe('AuthService', () => {
   });
 
   describe('isRefreshTokenExpirationDateHalfPast()', () => {
-    beforeAll(async () => {
-      process.env.JWT_REFRESH_SECRET_KEY = 'test';
-      process.env.JWT_REFRESH_EXPIRES_IN = '1000';
-    });
-
-    afterAll(async () => {
-      delete process.env.JWT_REFRESH_SECRET_KEY;
-      delete process.env.JWT_REFRESH_EXPIRES_IN;
-    });
-
     it('SUCCESS : If refreshToken expiration date more than half past, should return true ', async () => {
       // Given
       const refreshToken = 'test';
       const payload = {
-        exp: Date.now() + (+jwtConstants.jwtRefreshExpiresIn * 1000) / 3,
+        exp: Date.now() + 10000,
+        iat: Date.now() - 30000,
       };
 
       const jwtOptions = {
         secret: jwtConstants.jwtRefreshSecret,
       };
+
       jest.spyOn(jwtService, 'verify').mockReturnValue(payload);
 
       // When
@@ -366,8 +340,10 @@ describe('AuthService', () => {
       // Given
       const refreshToken = 'test';
       const payload = {
-        exp: Date.now() + (+jwtConstants.jwtRefreshExpiresIn * 1000 * 2) / 3,
+        exp: Date.now() + 100000,
+        iat: Date.now() - 30000,
       };
+
       const jwtOptions = {
         secret: jwtConstants.jwtRefreshSecret,
       };
