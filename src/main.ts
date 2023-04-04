@@ -12,7 +12,7 @@ import * as morgan from 'morgan';
 import { ValidationError } from 'class-validator';
 import { SwaggerSetup } from './utils/swagger';
 import * as cookieParser from 'cookie-parser';
-import { readFileSync, readdir } from 'fs';
+import { readFileSync } from 'fs';
 
 async function bootstrap() {
   const ssl = process.env.SSL === 'true' ? true : false;
