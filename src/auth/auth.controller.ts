@@ -25,6 +25,7 @@ import {
 import { GithubCodeDto, SignUpWithUserNameDto } from './dto/auth.dto';
 import {
   ApiBadRequestResponse,
+  ApiCookieAuth,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
@@ -124,6 +125,7 @@ export class AuthController {
    */
   @UseGuards(JwtRefreshGuard)
   @Get('/sign-out')
+  @ApiCookieAuth()
   @ApiOperation({
     summary: '로그아웃',
     description: '로그아웃 시 응답 쿠키에 빈 값을 넣어 반환합니다.',
@@ -150,6 +152,7 @@ export class AuthController {
    */
   @UseGuards(JwtRefreshGuard)
   @Get('/refresh')
+  @ApiCookieAuth()
   @ApiOperation({
     summary: '엑세스 토큰 재발급',
     description: '리프레시 토큰으로 엑세스 토큰을 재발급 받습니다.',

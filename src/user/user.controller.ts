@@ -1,4 +1,4 @@
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from './../auth/guard/jwt-auth.guard';
 import {
   Body,
@@ -20,6 +20,7 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   async getMyPage(@Req() req) {
     const userId = req.user.id;
@@ -28,6 +29,7 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Patch()
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
   async updateMyPage(@Body() body: UpdateMyPageDto, @Req() req) {
     const userId = req.user.id;

@@ -1,9 +1,9 @@
-import { RankerProfileRepository } from './../../rank/rankerProfile.repository';
 import { jwtConstants } from './../constants';
 import { UserService } from './../../user/user.service';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Request } from 'express';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -17,12 +17,13 @@ export class JwtRefreshStrategy extends PassportStrategy(
           return request?.signedCookies?.Refresh;
         },
       ]),
+      ignoreExpiration: false,
       secretOrKey: jwtConstants.jwtRefreshSecret,
-      passReqToCallBack: true,
+      passReqToCallback: true,
     });
   }
 
-  async validate(req, payload: any) {
+  async validate(req: Request, payload: any) {
     const refreshToken = req.signedCookies?.Refresh;
 
     if (!refreshToken)
@@ -30,10 +31,11 @@ export class JwtRefreshStrategy extends PassportStrategy(
 
     const { userId } = payload;
 
-    const user = this.userService.getUserIfRefreshTokenMatches(
+    const user = await this.userService.getUserIfRefreshTokenMatches(
       refreshToken,
       userId,
     );
+
     return user;
   }
 }
