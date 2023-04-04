@@ -12,9 +12,18 @@ import * as morgan from 'morgan';
 import { ValidationError } from 'class-validator';
 import { SwaggerSetup } from './utils/swagger';
 import * as cookieParser from 'cookie-parser';
+import { readFileSync } from 'fs';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const ssl = process.env.SSL === 'true' ? true : false;
+  let httpsOptions = null;
+  if (ssl) {
+    httpsOptions = {
+      key: readFileSync(process.env.SSL_KEY_PATH),
+      cert: readFileSync(process.env.SSL_CERT_PATH),
+    };
+  }
+  const app = await NestFactory.create(AppModule, { httpsOptions });
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalPipes(
     new ValidationPipe({
