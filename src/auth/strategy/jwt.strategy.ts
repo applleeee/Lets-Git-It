@@ -15,11 +15,11 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: jwtConstants.jwtSecret,
+      ignoreExpiration: false,
     });
   }
 
   async validate(payload: any): Promise<AuthorizedUser> {
-    console.log('payload: ', payload);
     const { userId, userName } = payload;
 
     const userNameInDb = await this.rankerProfileRepository.getUserNameByUserId(
