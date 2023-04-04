@@ -11,6 +11,7 @@ import { AllExceptionsFilter } from './utils/http-exception.filter';
 import * as morgan from 'morgan';
 import { ValidationError } from 'class-validator';
 import { SwaggerSetup } from './utils/swagger';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -32,7 +33,12 @@ async function bootstrap() {
 
   app.useGlobalFilters(new AllExceptionsFilter());
   app.use(morgan('dev'));
-  app.enableCors();
+  app.enableCors({
+    origin: process.env.CORS_ORIGIN || process.env.CORS_LOCAL_ORIGIN,
+    methods: ['GET', 'POST', 'DELETE', 'PUT', 'PATCH', 'OPTIONS'],
+    credentials: true,
+  });
+  app.use(cookieParser(process.env.COOKIE_SECRET_KEY));
 
   const PORT = process.env.PORT;
   console.log(`Server Listening to localhost:${PORT}~`);

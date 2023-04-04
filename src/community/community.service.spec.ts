@@ -28,7 +28,6 @@ class MockCommunityRepository {
   updatePost = jest.fn();
   deletePost = jest.fn();
   getPostList = jest.fn();
-  getPostDatail = jest.fn();
   createOrDeletePostLike = jest.fn();
   searchPost = jest.fn();
   getPostsCreatedByUser = jest.fn();
@@ -1085,6 +1084,7 @@ describe('CommunityService', () => {
   describe('deleteComment()', () => {
     const mockUser = {
       id: 1,
+      userName: 'test',
       idsOfPostsCreatedByUser: [],
       idsOfPostLikedByUser: [],
       idsOfCommentsCreatedByUser: [1] as any,
@@ -1206,6 +1206,7 @@ describe('CommunityService', () => {
   describe('updateComment()', () => {
     const mockUser = {
       id: 1,
+      userName: 'test',
       idsOfPostsCreatedByUser: [],
       idsOfPostLikedByUser: [],
       idsOfCommentsCreatedByUser: [1] as any,

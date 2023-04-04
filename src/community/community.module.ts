@@ -1,3 +1,4 @@
+import { JwtRefreshStrategy } from './../auth/strategy/jwt-refresh.strategy';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -18,7 +19,7 @@ import { AuthModule } from '../auth/auth.module';
 import { UserModule } from '../user/user.module';
 import { jwtConstants } from '../auth/constants';
 import { AuthService } from '../auth/auth.service';
-import { JwtStrategy } from '../auth/jwt.strategy';
+import { JwtStrategy } from '../auth/strategy/jwt.strategy';
 import { RankerProfileRepository } from '../rank/rankerProfile.repository';
 import { RankService } from '../rank/rank.service';
 import { RankModule } from '../rank/rank.module';
@@ -42,18 +43,13 @@ import { TierRepository } from '../rank/tier.repository';
     AuthModule,
     UserModule,
     RankModule,
-    JwtModule.register({
-      secret: jwtConstants.secret,
-      signOptions: { expiresIn: jwtConstants.expiresIn },
-    }),
   ],
   controllers: [CommunityController],
   providers: [
     CommunityService,
     CommunityRepository,
-    AuthService,
-    JwtService,
     JwtStrategy,
+    JwtRefreshStrategy,
     RankService,
     RankerProfileRepository,
     RankingRepository,

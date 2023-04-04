@@ -1,3 +1,4 @@
+import { AuthorizedUser } from './../auth/dto/auth.dto';
 import { User } from './../entities/User';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CommunityRepository } from './community.repository';
@@ -557,12 +558,12 @@ describe('CommunityRepository', () => {
     it('SUCCESS : Should return an object : DeleteResult ', async () => {
       const mockDeleteResult = { raw: [], affected: 1 };
       const mockDeleteReCommentCriteria = {
-        user: new User(),
+        user: new AuthorizedUser(),
         id: 1,
         content: 'test',
+        userId: mockUserId,
         groupOrder: 1,
         depth: 1,
-        userId: mockUserId,
         postId: 1,
       };
 
@@ -585,7 +586,7 @@ describe('CommunityRepository', () => {
     it('SUCCESS : Should return object of UpdateResult', async () => {
       const mockUpdateResult = { raw: [], affected: 1 };
       const mockUpdateCommentCriteria = {
-        user: new User(),
+        user: new AuthorizedUser(),
         id: 1,
       };
       const mockContent = 'test';

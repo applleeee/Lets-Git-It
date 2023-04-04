@@ -823,6 +823,7 @@ describe('CommunityController', () => {
     const mockReq = {
       user: {
         id: 1,
+        userName: 'test',
         idsOfPostsCreatedByUser: [],
         idsOfPostLikedByUser: [],
         idsOfCommentsCreatedByUser: [],
@@ -862,6 +863,7 @@ describe('CommunityController', () => {
     const mockReq = {
       user: {
         id: 1,
+        userName: 'test',
         idsOfPostsCreatedByUser: [],
         idsOfPostLikedByUser: [],
         idsOfCommentsCreatedByUser: [],

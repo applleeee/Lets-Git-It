@@ -4,7 +4,12 @@ import {
   AuthSignUpCreatedDto,
   AuthSignInUnauthorizedResDto,
   AuthCategoryOkDto,
+  SignOutOkDto,
+  RefreshOkDto,
 } from './dto/auth-res.dto';
+import { JwtRefreshGuard } from './guard/jwt-refresh.guard';
+import { UserService } from './../user/user.service';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
 import {
   Controller,
@@ -13,10 +18,14 @@ import {
   Get,
   HttpStatus,
   HttpCode,
+  Res,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { GithubCodeDto, SignUpWithUserNameDto } from './dto/auth.dto';
 import {
   ApiBadRequestResponse,
+  ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -26,8 +35,10 @@ import {
 @Controller('auth')
 @ApiTags('Auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
-
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UserService,
+  ) {}
   /**
    * @author MyeongSeok
    * @description 로그인
@@ -36,10 +47,12 @@ export class AuthController {
   @Post('/sign-in')
   @ApiOperation({
     summary: '로그인',
-    description: 'github code를 Body로 받아 accessToken을 리턴합니다.',
+    description:
+      'github code를 Body로 받아 accessToken을 리턴합니다. 그리고 응답 쿠키에 refreshToken을 반환합니다.',
   })
   @ApiOkResponse({
-    description: '로그인에 성공하여 accessToken을 리턴합니다.',
+    description:
+      '로그인에 성공하여 accessToken을 리턴합니다. 그리고 응답 쿠키에 refreshToken을 반환합니다.',
     type: AuthSignInOkResDto,
   })
   @ApiUnauthorizedResponse({
@@ -51,30 +64,123 @@ export class AuthController {
     type: AuthSignInWrongCodeDto,
   })
   @HttpCode(HttpStatus.OK)
-  signIn(
+  async signIn(
     @Body() githubCode: GithubCodeDto,
-  ): Promise<AuthSignInOkResDto | AuthSignInUnauthorizedResDto> {
-    return this.authService.signIn(githubCode);
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const userInfo = await this.authService.signIn(githubCode);
+
+    if (!userInfo.isMember) {
+      res
+        .status(HttpStatus.UNAUTHORIZED)
+        .json(userInfo as AuthSignInUnauthorizedResDto);
+    } else {
+      const { userId, ...accessTokenWithUserInfo } = userInfo;
+
+      const { refreshToken, ...cookieOptions } =
+        await this.authService.getCookiesWithJwtRefreshToken(userId);
+
+      await this.userService.saveRefreshToken(refreshToken, userId);
+
+      res
+        .cookie('Refresh', refreshToken, cookieOptions)
+        .json(accessTokenWithUserInfo as AuthSignInOkResDto);
+    }
   }
 
   /**
    * @author MyeongSeok
    * @description 회원가입
-   * @param userData
+   * @param userData 회원가입에 필요한 데이터를 body에 받습니다.
    */
   @Post('/sign-up')
   @ApiOperation({
     summary: '회원가입',
     description:
-      'userName, githubId, fieldId, careerId, isKorean 등 유저의 정보를 받아 회원가입 처리 이후  accessToken을 리턴합니다.',
+      'userName, githubId, fieldId, careerId, isKorean 등 유저의 정보를 받아 회원가입 처리 이후 accessToken을 리턴합니다. 그리고 응답 쿠키에 refreshToken을 반환합니다.',
   })
-  @ApiOkResponse({
-    description: '회원가입이 되어 accessToken을 리턴합니다.',
+  @ApiCreatedResponse({
+    description:
+      '회원가입이 되어 accessToken을 리턴합니다. 그리고 응답 쿠키에 refreshToken을 반환합니다.',
     type: AuthSignUpCreatedDto,
   })
   @HttpCode(HttpStatus.CREATED)
-  signUp(@Body() userData: SignUpWithUserNameDto) {
-    return this.authService.signUp(userData);
+  async signUp(
+    @Body() userData: SignUpWithUserNameDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { accessToken, userId } = await this.authService.signUp(userData);
+    const { refreshToken, ...cookieOptions } =
+      await this.authService.getCookiesWithJwtRefreshToken(userId);
+
+    await this.userService.saveRefreshToken(refreshToken, userId);
+
+    res.cookie('Refresh', refreshToken, cookieOptions).json({ accessToken });
+  }
+
+  /**
+   * @author MyeongSeok
+   * @description 로그아웃
+   */
+  @UseGuards(JwtRefreshGuard)
+  @Get('/sign-out')
+  @ApiOperation({
+    summary: '로그아웃',
+    description: '로그아웃 시 응답 쿠키에 빈 값을 넣어 반환합니다.',
+  })
+  @ApiOkResponse({
+    description:
+      '로그아웃 시 LOG_OUT_COMPLETED 메시지와 함께 응답 쿠키에 빈 값을 넣어 반환합니다.',
+    type: SignOutOkDto,
+  })
+  @HttpCode(HttpStatus.OK)
+  async signOut(@Req() req, @Res({ passthrough: true }) res: Response) {
+    const refreshOptions = await this.authService.getCookiesForLogOut();
+
+    await this.userService.deleteRefreshToken(req.user.id);
+
+    res
+      .cookie('Refresh', '', refreshOptions)
+      .json({ message: 'LOG_OUT_COMPLETED' });
+  }
+
+  /**
+   * @author MyeongSeok
+   * @description 리프레시 토큰으로 엑세스 토큰을 재발급 받습니다.
+   */
+  @UseGuards(JwtRefreshGuard)
+  @Get('/refresh')
+  @ApiOperation({
+    summary: '엑세스 토큰 재발급',
+    description: '리프레시 토큰으로 엑세스 토큰을 재발급 받습니다.',
+  })
+  @ApiOkResponse({
+    description:
+      '리프레시 토큰으로 엑세스 토큰을 재발급 받습니다. 만약 리프레시 토큰의 만료기한이 절반보다 적게 남았을 경우 리프레시 토큰도 재발행하여 쿠키에 담아 반환합니다.',
+    type: RefreshOkDto,
+  })
+  @HttpCode(HttpStatus.OK)
+  async refresh(@Req() req, @Res({ passthrough: true }) res: Response) {
+    const currentRefreshToken = req.signedCookies.Refresh;
+    const { user } = req;
+    const accessToken = await this.authService.getJwtAccessToken(
+      user.id,
+      user.userName,
+    );
+    const refreshTokenRegenerationRequired: Boolean =
+      await this.authService.isRefreshTokenExpirationDateHalfPast(
+        currentRefreshToken,
+      );
+    if (refreshTokenRegenerationRequired) {
+      const { refreshToken, ...cookieOptions } =
+        await this.authService.getCookiesWithJwtRefreshToken(user.id);
+
+      await this.userService.saveRefreshToken(refreshToken, user.id);
+
+      res.cookie('Refresh', refreshToken, cookieOptions).json({ accessToken });
+    } else {
+      res.json({ accessToken });
+    }
   }
 
   /**
@@ -91,7 +197,7 @@ export class AuthController {
     type: AuthCategoryOkDto,
   })
   @HttpCode(HttpStatus.OK)
-  getAuthCategory() {
+  getAuthCategory(): Promise<AuthCategoryOkDto> {
     return this.authService.getAuthCategory();
   }
 }
