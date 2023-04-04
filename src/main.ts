@@ -12,7 +12,7 @@ import * as morgan from 'morgan';
 import { ValidationError } from 'class-validator';
 import { SwaggerSetup } from './utils/swagger';
 import * as cookieParser from 'cookie-parser';
-import { readFileSync } from 'fs';
+import { readFileSync, readdir } from 'fs';
 
 async function bootstrap() {
   const ssl = process.env.SSL === 'true' ? true : false;
@@ -21,6 +21,7 @@ async function bootstrap() {
     httpsOptions = {
       key: readFileSync(process.env.SSL_KEY_PATH),
       cert: readFileSync(process.env.SSL_CERT_PATH),
+      ca: readFileSync(process.env.SSL_CA_PATH),
     };
   }
   const app = await NestFactory.create(AppModule, { httpsOptions });
