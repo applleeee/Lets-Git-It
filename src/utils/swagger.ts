@@ -36,20 +36,11 @@ export class SwaggerSetup {
       //JWT 토큰 설정
       .addBearerAuth(
         {
-          // type: 'oauth2',
-          // scheme: 'Bearer',
           type: 'http',
           scheme: 'bearer',
           name: 'Authorization',
           in: 'header',
           bearerFormat: 'JWT',
-
-          // flows: {
-          //   authorizationCode: {
-          //     scopes: { write: '', read: '' },
-          //     authorizationUrl: `https://github.com/login/oauth/authorize?client_id=${process.env.AUTH_CLIENT_ID}`,
-          //   },
-          // },
         },
         'accessToken',
       )

@@ -21,6 +21,7 @@ import {
   Res,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { GithubCodeDto, SignUpWithUserNameDto } from './dto/auth.dto';
 import {
@@ -202,5 +203,20 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   getAuthCategory(): Promise<AuthCategoryOkDto> {
     return this.authService.getAuthCategory();
+  }
+
+  /**
+   * @author MyeongSeok
+   * @description [개발자용 api] swagger에서 login을 편리하게 하기 위해 만든 api입니다. 로그인 시 보내야 하는 code를 이 api에서 받아서 사용하세요.
+   * @param clientId github oauth app client id
+   */
+  @Get('/getCode')
+  @ApiOperation({
+    summary: '[개발자용] github Authorization Code 받는 api',
+    description:
+      'swagger에서 login을 편리하게 하기 위해 만든 api입니다. 로그인 시 보내야 하는 code를 이 api에서 받아서 사용하세요.',
+  })
+  async getCode(@Res({ passthrough: true }) res: Response) {
+    return await this.authService.getCode();
   }
 }
