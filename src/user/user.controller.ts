@@ -1,5 +1,5 @@
-import { ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from './../auth/guard/jwt-auth.guard';
 import {
   Body,
   Controller,
@@ -18,16 +18,18 @@ import { UpdateMyPageDto } from './dto/mypage.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get()
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   async getMyPage(@Req() req) {
     const userId = req.user.id;
     return await this.userService.getMyPage(userId);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch()
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
   async updateMyPage(@Body() body: UpdateMyPageDto, @Req() req) {
     const userId = req.user.id;

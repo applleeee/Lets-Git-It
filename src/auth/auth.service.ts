@@ -1,7 +1,3 @@
-import {
-  AuthSignInOkResDto,
-  AuthSignInUnauthorizedResDto,
-} from './dto/auth-res.dto';
 import { UserRepository } from './../user/user.repository';
 import { RankService } from './../rank/rank.service';
 import { UserService } from './../user/user.service';
@@ -11,6 +7,7 @@ import { Injectable } from '@nestjs/common';
 import { GithubCodeDto, SignUpWithUserNameDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
+import { jwtConstants, cookieConstants } from './constants';
 dotenv.config();
 
 @Injectable()
@@ -41,22 +38,17 @@ export class AuthService {
         isMember: false,
         userName: userName,
         githubId: githubUserInfo.id,
-      } as AuthSignInUnauthorizedResDto;
+      };
     }
 
-    const jwtToken = this.jwtService.sign(
-      {
-        userId: user.id,
-        userName: userName,
-      },
-      { secret: process.env.JWT_SECRET_KEY },
-    );
+    const jwtToken = await this.getJwtAccessToken(user.id, userName);
 
     return {
       isMember: true,
       userName: userName,
       accessToken: jwtToken,
-    } as AuthSignInOkResDto;
+      userId: user.id,
+    };
   }
 
   async signUp(signUpDataWithUserName: SignUpWithUserNameDto) {
@@ -65,43 +57,63 @@ export class AuthService {
 
     const user = await this.userService.getByGithubId(signUpData.githubId);
 
-    const jwtToken = this.jwtService.sign(
-      {
-        userId: user.id,
-        userName: userName,
-      },
-      { secret: process.env.JWT_SECRET_KEY },
-    );
+    const jwtToken = await this.getJwtAccessToken(user.id, userName);
 
     await this.rankService.checkRanker(userName);
+
     const userId = await this.userRepository.getUserIdByGithubId(user.githubId);
 
     const ranker = await this.rankerProfileRepository.getRankerProfile(
       userName,
     );
 
-    const updateRankerProfileDto = {
-      profileImageUrl: ranker.profileImage,
-      homepageUrl: ranker.blog,
-      email: ranker.email,
-      company: ranker.company,
-      region: ranker.region,
-      userId: userId,
-    };
     await this.rankerProfileRepository.updateRankerProfile(
       userName,
-      updateRankerProfileDto.profileImageUrl,
-      updateRankerProfileDto.homepageUrl,
-      updateRankerProfileDto.email,
-      updateRankerProfileDto.company,
-      updateRankerProfileDto.region,
-      updateRankerProfileDto.userId,
+      ranker.profileImage,
+      ranker.blog,
+      ranker.email,
+      ranker.company,
+      ranker.region,
+      userId,
     );
 
-    return { accessToken: jwtToken };
+    return { accessToken: jwtToken, userId: user.id };
   }
 
   async getAuthCategory() {
     return await this.authRepository.getAuthCategory();
+  }
+
+  async getJwtAccessToken(userId: number, userName: string) {
+    const payload = { userId, userName };
+    return this.jwtService.sign(payload, {
+      secret: jwtConstants.jwtSecret,
+      expiresIn: `${jwtConstants.jwtExpiresIn}s`,
+    });
+  }
+
+  async getCookiesWithJwtRefreshToken(userId: number) {
+    const payload = { userId };
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: jwtConstants.jwtRefreshSecret,
+      expiresIn: `${jwtConstants.jwtRefreshExpiresIn}s`,
+    });
+
+    return { refreshToken, ...cookieConstants };
+  }
+
+  async isRefreshTokenExpirationDateHalfPast(
+    refreshToken: string,
+  ): Promise<Boolean> {
+    const payload = await this.jwtService.verify(refreshToken, {
+      secret: jwtConstants.jwtRefreshSecret,
+    });
+
+    return (payload.exp - Date.now()) / (payload.exp - payload.iat) < 0.5;
+  }
+
+  async getCookiesForLogOut() {
+    const { maxAge, ...refreshOptions } = cookieConstants;
+    return refreshOptions;
   }
 }
