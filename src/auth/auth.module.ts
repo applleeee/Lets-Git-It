@@ -53,7 +53,7 @@ import { RankerProfileRepository } from '../rank/rankerProfile.repository';
     PassportModule,
     JwtModule.register({
       secret: jwtConstants.jwtSecret,
-      signOptions: { expiresIn: jwtConstants.jwtExpiresIn },
+      signOptions: { expiresIn: `${jwtConstants.jwtExpiresIn}s` },
     }),
     RankModule,
     RankerProfile,

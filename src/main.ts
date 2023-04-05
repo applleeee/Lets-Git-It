@@ -53,8 +53,10 @@ async function bootstrap() {
   const PORT = process.env.PORT;
   console.log(`Server Listening to localhost:${PORT}~`);
 
-  //Swagger 환경설정 연결
-  new SwaggerSetup(app).setup();
+  // dev server & local server Swagger 연결
+  if (process.env.DB_HOST_DEV || process.env.DB_HOST_LOCAL) {
+    new SwaggerSetup(app).setup();
+  }
 
   await app.listen(PORT);
 }
