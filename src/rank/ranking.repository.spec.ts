@@ -1,8 +1,10 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { RankerProfile } from 'src/entities/RankerProfile';
 import { Ranking } from 'src/entities/Ranking';
 import { Repository } from 'typeorm';
 import { LangOutput, TotalScoresOutput } from './dto/ranking.dto';
+import { RankerProfileRepository } from './rankerProfile.repository';
 import { RankingRepository } from './ranking.repository';
 
 const mockRepository = () => ({
@@ -49,6 +51,8 @@ const ranking = {
 
 describe('RankingRepository', () => {
   let rankingRepository: RankingRepository;
+  let rankerProfileRepository: RankerProfileRepository;
+  let rankerProfileRepo: Repository<RankerProfile>;
   let rankingRepo: Repository<Ranking>;
 
   beforeEach(async () => {
@@ -57,6 +61,11 @@ describe('RankingRepository', () => {
         RankingRepository,
         {
           provide: getRepositoryToken(Ranking),
+          useValue: mockRepository(),
+        },
+        RankerProfileRepository,
+        {
+          provide: getRepositoryToken(RankerProfile),
           useValue: mockRepository(),
         },
       ],

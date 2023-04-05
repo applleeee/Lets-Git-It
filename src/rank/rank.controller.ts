@@ -39,19 +39,12 @@ export class RankController {
     return await this.rankService.getTop5();
   }
 
-  @UseGuards(OptionalAuthGuard)
   @Get('/ranking/top100')
-  async getTop100(
-    @Query('langFilter') langFilter: string,
-    @Req() req,
-  ): Promise<{
+  async getTop100(@Query('langFilter') langFilter: string): Promise<{
     langCategory: unknown[];
     top100: Top100[];
   }> {
-    if (!req.user) {
-      return await this.rankService.getTop100(langFilter);
-    } else {
-    }
+    return await this.rankService.getTop100(langFilter);
   }
 
   @Patch('/latest/:userName')
