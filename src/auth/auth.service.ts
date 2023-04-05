@@ -3,16 +3,20 @@ import { RankService } from './../rank/rank.service';
 import { UserService } from './../user/user.service';
 import { RankerProfileRepository } from '../rank/rankerProfile.repository';
 import { AuthRepository } from './auth.repository';
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { GithubCodeDto, SignUpWithUserNameDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
 import { jwtConstants, cookieConstants } from './constants';
+import { AxiosError, AxiosRequestConfig } from 'axios';
+import { HttpService } from '@nestjs/axios';
+import { catchError, lastValueFrom, map } from 'rxjs';
 dotenv.config();
 
 @Injectable()
 export class AuthService {
   constructor(
+    private readonly http: HttpService,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly authRepository: AuthRepository,
@@ -115,5 +119,33 @@ export class AuthService {
   async getCookiesForLogOut() {
     const { maxAge, ...refreshOptions } = cookieConstants;
     return refreshOptions;
+  }
+
+  async getCode() {
+    const config: AxiosRequestConfig = {
+      headers: {
+        accept: 'application/json',
+      },
+      params: {
+        client_id:
+          process.env.AUTH_CLIENT_ID_DEV || process.env.AUTH_CLIENT_ID_LOCAL,
+      },
+    };
+    const result = await lastValueFrom(
+      this.http.get(`https://github.com/login/oauth/authorize`, config).pipe(
+        map((res) => res.data),
+        catchError((err: AxiosError) => {
+          throw err;
+        }),
+      ),
+    );
+    if (result === undefined) {
+      throw new HttpException(
+        'WRONG_GITHUB_AUTHORIZATION_CODE',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    return result;
   }
 }
