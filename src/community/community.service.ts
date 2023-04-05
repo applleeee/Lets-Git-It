@@ -1,7 +1,7 @@
 import { Comment } from './../entities/Comment';
 import { HttpException, Injectable, HttpStatus } from '@nestjs/common';
 import { CommunityRepository } from './community.repository';
-import { uploadToS3, getS3Data, deleteS3Data } from '../utiles/aws';
+import { uploadToS3, getS3Data, deleteS3Data } from '../utils/aws';
 import {
   CreateCommentDto,
   CreateOrDeleteCommentLikesDto,
@@ -144,7 +144,7 @@ export class CommunityService {
   }
 
   async getPostDetail(postId: number) {
-    const postDetail = await this.CommunityRepository.getPostDatail(postId);
+    const postDetail = await this.CommunityRepository.getPostDetail(postId);
 
     try {
       const postContent = await getS3Data(postDetail.content);

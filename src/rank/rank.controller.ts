@@ -1,16 +1,9 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Query,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
-import { OptionalAuthGuard } from 'src/community/guard/optionalGuard';
+import { ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, Patch, Query } from '@nestjs/common';
 import { SearchOutput, Top100, Top5 } from './dto/rankerProfile.dto';
 import { RankService } from './rank.service';
 
+@ApiTags('Ranks')
 @Controller('/ranks')
 export class RankController {
   constructor(private rankService: RankService) {}

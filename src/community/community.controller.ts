@@ -1,3 +1,5 @@
+import { ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from './../auth/guard/jwt-auth.guard';
 import { AuthorizedUser } from './../auth/dto/auth.dto';
 import {
   Controller,
@@ -16,7 +18,6 @@ import {
   HttpStatus,
   HttpException,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CommunityService } from './community.service';
 import {
@@ -29,7 +30,7 @@ import {
   UpdateCommentDto,
 } from './dto/comment.dto';
 import { ValidateSubCategoryIdPipe } from './pipe/getPostList.pipe';
-import { OptionalAuthGuard } from './guard/optionalGuard';
+import { OptionalAuthGuard } from '../auth/guard/jwt-auth-optional.guard';
 import {
   GetPostListDto,
   CreatePostDto,
@@ -38,6 +39,7 @@ import {
   PostLikeDto,
 } from './dto/Post.dto';
 
+@ApiTags('Community')
 @Controller('/community')
 export class CommunityController {
   constructor(private communityService: CommunityService) {}
@@ -47,7 +49,7 @@ export class CommunityController {
     return await this.communityService.getAllCategories();
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post('/post/image')
   @UseInterceptors(FileInterceptor('image'))
   async saveImageToS3(
@@ -58,13 +60,13 @@ export class CommunityController {
     return await this.communityService.saveImageToS3(image, userId);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Delete('/post/image')
   async deleteImageInS3(@Body() toDeleteImageData: DeleteImageDto) {
     return await this.communityService.deleteImageInS3(toDeleteImageData);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post('/post')
   async createPost(@Body() postData: CreatePostDto, @Req() req) {
     const userId: number = req.user.id;
@@ -72,7 +74,7 @@ export class CommunityController {
     return { message: 'post created' };
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Put('/posts/update/:postId')
   async updatePost(
     @Param('postId') postId: number,
@@ -93,7 +95,7 @@ export class CommunityController {
     }
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Delete('/posts/:postId')
   async deletePost(@Param('postId') postId: number, @Req() req) {
     const { idsOfPostsCreatedByUser } = req.user;
@@ -148,7 +150,7 @@ export class CommunityController {
     }
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post('/like')
   async createOrDeletePostLike(@Body() data: PostLikeDto, @Req() req) {
     const userId: number = req.user.id;
@@ -169,7 +171,7 @@ export class CommunityController {
   }
 
   // 댓글생성
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post('/posts/:post_id/comment')
   @HttpCode(HttpStatus.CREATED)
   async createComment(
@@ -187,7 +189,7 @@ export class CommunityController {
   }
 
   // 댓글삭제
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post('/comments/:comment_id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteComment(
@@ -207,7 +209,7 @@ export class CommunityController {
   }
 
   // 댓글수정
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Put('/comments/:comment_id')
   @HttpCode(HttpStatus.CREATED)
   async updateComment(
@@ -233,7 +235,7 @@ export class CommunityController {
   }
 
   // 댓글좋아요 생성/삭제
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post('/comments/:comment_id/likes')
   @HttpCode(HttpStatus.CREATED)
   async createOrDeleteCommentLikes(

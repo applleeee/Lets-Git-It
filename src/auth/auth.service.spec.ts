@@ -1,3 +1,6 @@
+import { RankerProfileOutput } from './../rank/dto/rankerProfile.dto';
+import { User } from './../entities/User';
+import { jwtConstants, cookieConstants } from './constants';
 import { GithubCodeDto, SignUpWithUserNameDto } from './dto/auth.dto';
 import { RankerProfile } from './../entities/RankerProfile';
 import { Field } from './../entities/Field';
@@ -86,7 +89,6 @@ describe('AuthService', () => {
         if (token === UserRepository) {
           return {
             getUserIdByGithubId: jest.fn(),
-            createUser: jest.fn(),
           };
         }
         if (typeof token === 'function') {
@@ -119,51 +121,41 @@ describe('AuthService', () => {
   });
 
   describe('signIn()', () => {
+    // Given
     const githubCode: GithubCodeDto = { code: 'github_code' };
     const githubAccessToken = 'github_access_token';
     const githubUserInfo = { id: 123456, login: 'user' };
-    const user = { id: 123, githubId: 123456 };
     const jwtToken = 'jwt-token';
 
     beforeEach(() => {
-      userService.getGithubAccessToken = jest
-        .fn()
+      jest
+        .spyOn(userService, 'getGithubAccessToken')
         .mockResolvedValue(githubAccessToken);
-      userService.getByGithubAccessToken = jest
-        .fn()
+      jest
+        .spyOn(userService, 'getByGithubAccessToken')
         .mockResolvedValue(githubUserInfo);
-      userService.getByGithubId = jest.fn().mockResolvedValue(user);
-      jwtService.sign = jest.fn().mockReturnValue(jwtToken);
     });
 
     it('SUCCESS : should return an object { isMember : true, accessToken, userName }', async () => {
+      // Given
       const expectedResult = {
         isMember: true,
         userName: githubUserInfo.login,
         accessToken: jwtToken,
+        userId: 123,
       };
 
+      const user = new User();
+      user.id = 123;
+
+      jest.spyOn(userService, 'getByGithubId').mockResolvedValue(user);
+      jest.spyOn(authService, 'getJwtAccessToken').mockResolvedValue(jwtToken);
+
+      // When
       const result = await authService.signIn(githubCode);
 
+      // Then
       expect(result).toEqual(expectedResult);
-    });
-
-    it('FAILURE : should return an object {isMember: false, userName, githubId} when the user is not registered', async () => {
-      userService.getByGithubId = jest.fn().mockResolvedValue(undefined);
-      const expectedResult = {
-        isMember: false,
-        userName: githubUserInfo.login,
-        githubId: githubUserInfo.id,
-      };
-
-      const result = await authService.signIn(githubCode);
-
-      expect(result).toEqual(expectedResult);
-    });
-
-    it('Should call the UserService methods with the correct parameters', async () => {
-      await authService.signIn(githubCode);
-
       expect(userService.getGithubAccessToken).toHaveBeenCalledWith(
         githubCode.code,
       );
@@ -173,20 +165,35 @@ describe('AuthService', () => {
       expect(userService.getByGithubId).toHaveBeenCalledWith(githubUserInfo.id);
     });
 
-    it('Should call the JwtService method with the correct parameters', async () => {
-      await authService.signIn(githubCode);
+    it('FAILURE : should return an object {isMember: false, userName, githubId} when the user is not registered', async () => {
+      // Given
+      const expectedResult = {
+        isMember: false,
+        userName: githubUserInfo.login,
+        githubId: githubUserInfo.id,
+      };
 
-      expect(jwtService.sign).toHaveBeenCalledWith(
-        {
-          userId: 123,
-          userName: githubUserInfo.login,
-        },
-        { secret: process.env.JWT_SECRET_KEY },
+      const user = undefined;
+
+      jest.spyOn(userService, 'getByGithubId').mockResolvedValue(user);
+
+      // When
+      const result = await authService.signIn(githubCode);
+
+      // Then
+      expect(result).toEqual(expectedResult);
+      expect(userService.getGithubAccessToken).toHaveBeenCalledWith(
+        githubCode.code,
       );
+      expect(userService.getByGithubAccessToken).toHaveBeenCalledWith(
+        githubAccessToken,
+      );
+      expect(userService.getByGithubId).toHaveBeenCalledWith(githubUserInfo.id);
     });
   });
 
   describe('signUp()', () => {
+    // Given
     const signUpDataWithUserName: SignUpWithUserNameDto = {
       userName: 'user',
       githubId: 123456,
@@ -196,82 +203,49 @@ describe('AuthService', () => {
     };
 
     const { userName, ...signUpData } = signUpDataWithUserName;
-    const user = { id: 1, ...signUpData };
+    const user = new User();
+    user.id = 1;
+    user.githubId = 12345;
     const jwtToken = 'jwtToken';
+    const rankerProfile = new RankerProfileOutput();
 
     beforeEach(() => {
-      userService.createUser = jest.fn().mockResolvedValue(undefined);
-      userService.getByGithubId = jest.fn().mockResolvedValue(user);
-      jwtService.sign = jest.fn().mockReturnValue(jwtToken);
-      rankService.checkRanker = jest.fn().mockResolvedValue(undefined);
+      jest.spyOn(userService, 'createUser').mockResolvedValue(undefined);
+      jest.spyOn(userService, 'getByGithubId').mockResolvedValue(user);
+      jest.spyOn(authService, 'getJwtAccessToken').mockResolvedValue(jwtToken);
+      jest.spyOn(rankService, 'checkRanker').mockResolvedValue(undefined);
       userRepository.getUserIdByGithubId = jest.fn().mockResolvedValue(user.id);
-      rankerProfileRepository.getRankerProfile = jest.fn().mockResolvedValue({
-        profileImage: 'profileImage',
-        blog: 'blog',
-        email: 'email',
-        company: 'company',
-        region: 'region',
-        userId: user.id,
-      });
+      rankerProfileRepository.getRankerProfile = jest
+        .fn()
+        .mockResolvedValue(rankerProfile);
       rankerProfileRepository.updateRankerProfile = jest
         .fn()
         .mockResolvedValue(undefined);
     });
 
-    it('SUCCESS : should create a new user, sign a JWT token, and update the ranker profile and return an object { accessToken: jwtToken }', async () => {
+    it('SUCCESS : should create a new user, sign a JWT token, and update the ranker profile and return an object { accessToken: jwtToken, userId : userId }', async () => {
+      // When
       const result = await authService.signUp(signUpDataWithUserName);
-      expect(result).toEqual({ accessToken: jwtToken });
-    });
 
-    it('Should call the UserService methods with the correct parameters', async () => {
-      await authService.signUp(signUpDataWithUserName);
-
+      // Then
+      expect(result).toEqual({ accessToken: jwtToken, userId: user.id });
       expect(userService.createUser).toHaveBeenCalledWith(signUpData);
       expect(userService.getByGithubId).toHaveBeenCalledWith(
         signUpData.githubId,
       );
-    });
-
-    it('Should call the JwtService methods with the correct parameters', async () => {
-      await authService.signUp(signUpDataWithUserName);
-
-      expect(jwtService.sign).toHaveBeenCalledWith(
-        {
-          userId: user.id,
-          userName: userName,
-        },
-        { secret: process.env.JWT_SECRET_KEY },
+      expect(authService.getJwtAccessToken).toHaveBeenCalledWith(
+        user.id,
+        userName,
       );
-    });
-
-    it('Should call the RankService methods with the correct parameters', async () => {
-      await authService.signUp(signUpDataWithUserName);
-
-      expect(rankService.checkRanker).toHaveBeenCalledWith(userName);
-    });
-
-    it('Should call the UserRepository methods with the correct parameters', async () => {
-      await authService.signUp(signUpDataWithUserName);
-
+      expect(rankService.checkRanker).toHaveBeenCalledTimes(1);
       expect(userRepository.getUserIdByGithubId).toHaveBeenCalledWith(
         user.githubId,
       );
-    });
-
-    it('Should call the RankerProfileRepository methods with the correct parameters', async () => {
-      await authService.signUp(signUpDataWithUserName);
-
       expect(rankerProfileRepository.getRankerProfile).toHaveBeenCalledWith(
         userName,
       );
-      expect(rankerProfileRepository.updateRankerProfile).toHaveBeenCalledWith(
-        userName,
-        'profileImage',
-        'blog',
-        'email',
-        'company',
-        'region',
-        user.id,
+      expect(rankerProfileRepository.updateRankerProfile).toHaveBeenCalledTimes(
+        1,
       );
     });
   });
@@ -283,10 +257,119 @@ describe('AuthService', () => {
         .fn()
         .mockResolvedValue(expectedResult);
 
-      const result = await authRepository.getAuthCategory();
+      const result = await authService.getAuthCategory();
 
       expect(authRepository.getAuthCategory).toHaveBeenCalledWith();
       expect(result).toBe(expectedResult);
+    });
+  });
+
+  describe('getJwtAccessToken()', () => {
+    it('SUCCESS : Should return jwtToken', async () => {
+      // Given
+      const payload = { userId: 1, userName: 'test' };
+      const jwtToken = 'test';
+      const jwtOptions = {
+        secret: jwtConstants.jwtSecret,
+        expiresIn: `${jwtConstants.jwtExpiresIn}s`,
+      };
+      jest.spyOn(jwtService, 'sign').mockReturnValue(jwtToken);
+
+      // When
+      const result = await authService.getJwtAccessToken(
+        payload.userId,
+        payload.userName,
+      );
+
+      // Then
+      expect(result).toBe(jwtToken);
+      expect(jwtService.sign).toHaveBeenCalledWith(payload, jwtOptions);
+    });
+  });
+
+  describe('getCookiesWithJwtRefreshToken()', () => {
+    it('SUCCESS : Should return cookies With refreshToken ', async () => {
+      // Given
+      const userId = 1;
+      const payload = { userId };
+      const refreshToken = 'test';
+      const jwtOptions = {
+        secret: jwtConstants.jwtRefreshSecret,
+        expiresIn: `${jwtConstants.jwtRefreshExpiresIn}s`,
+      };
+
+      jest.spyOn(jwtService, 'sign').mockReturnValue(refreshToken);
+
+      const expectedResult = { refreshToken, ...cookieConstants };
+
+      // When
+      const result = await authService.getCookiesWithJwtRefreshToken(userId);
+
+      // Then
+      expect(result).toEqual(expectedResult);
+      expect(jwtService.sign).toHaveBeenCalledWith(payload, jwtOptions);
+    });
+  });
+
+  describe('isRefreshTokenExpirationDateHalfPast()', () => {
+    it('SUCCESS : If refreshToken expiration date more than half past, should return true ', async () => {
+      // Given
+      const refreshToken = 'test';
+      const payload = {
+        exp: Date.now() + 10000,
+        iat: Date.now() - 30000,
+      };
+
+      const jwtOptions = {
+        secret: jwtConstants.jwtRefreshSecret,
+      };
+
+      jest.spyOn(jwtService, 'verify').mockReturnValue(payload);
+
+      // When
+      const result = await authService.isRefreshTokenExpirationDateHalfPast(
+        refreshToken,
+      );
+
+      // Then
+      expect(result).toBe(true);
+      expect(jwtService.verify).toHaveBeenCalledWith(refreshToken, jwtOptions);
+    });
+
+    it('SUCCESS : If refreshToken expiration date less than half past, should return true ', async () => {
+      // Given
+      const refreshToken = 'test';
+      const payload = {
+        exp: Date.now() + 100000,
+        iat: Date.now() - 30000,
+      };
+
+      const jwtOptions = {
+        secret: jwtConstants.jwtRefreshSecret,
+      };
+      jest.spyOn(jwtService, 'verify').mockReturnValue(payload);
+
+      // When
+      const result = await authService.isRefreshTokenExpirationDateHalfPast(
+        refreshToken,
+      );
+
+      // Then
+      expect(result).toBe(false);
+      expect(jwtService.verify).toHaveBeenCalledWith(refreshToken, jwtOptions);
+    });
+  });
+
+  describe('getCookiesForLogOut()', () => {
+    it('SUCCESS : Should return refreshOptions', async () => {
+      // Given
+      const { maxAge, ...refreshOptions } = cookieConstants;
+
+      // When
+      const result = await authService.getCookiesForLogOut();
+
+      // Then
+      expect(result).toEqual(refreshOptions);
     });
   });
 });
