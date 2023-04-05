@@ -33,8 +33,14 @@ export class UserService {
   async getGithubAccessToken(code: string) {
     const requestBody = {
       code,
-      client_id: process.env.AUTH_CLIENT_ID,
-      client_secret: process.env.AUTH_CLIENT_SECRETS,
+      client_id:
+        process.env.AUTH_CLIENT_ID_PROD ||
+        process.env.AUTH_CLIENT_ID_DEV ||
+        process.env.AUTH_CLIENT_ID_LOCAL,
+      client_secret:
+        process.env.AUTH_CLIENT_SECRETS_PROD ||
+        process.env.AUTH_CLIENT_SECRETS_DEV ||
+        process.env.AUTH_CLIENT_SECRETS_LOCAL,
     };
 
     const config: AxiosRequestConfig = {

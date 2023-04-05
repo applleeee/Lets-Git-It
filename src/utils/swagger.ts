@@ -34,25 +34,27 @@ export class SwaggerSetup {
       .addTag('Ranks')
       .addTag('User')
       //JWT 토큰 설정
-      .addBearerAuth(
-        {
-          // type: 'oauth2',
-          // scheme: 'Bearer',
-          type: 'http',
-          scheme: 'bearer',
-          name: 'Authorization',
-          in: 'header',
-          bearerFormat: 'JWT',
-
-          // flows: {
-          //   authorizationCode: {
-          //     scopes: { write: '', read: '' },
-          //     authorizationUrl: `https://github.com/login/oauth/authorize?client_id=${process.env.AUTH_CLIENT_ID}`,
-          //   },
-          // },
+      .addOAuth2({
+        type: 'oauth2',
+        scheme: 'Bearer',
+        flows: {
+          authorizationCode: {
+            scopes: { read: '' },
+            authorizationUrl: `https://github.com/login/oauth/authorize`,
+            tokenUrl: `https://github.com/login/oauth/access_token`,
+          },
         },
-        'accessToken',
-      )
+      })
+      // .addBearerAuth(
+      //   {
+      //     type: 'http',
+      //     scheme: 'bearer',
+      //     name: 'Authorization',
+      //     in: 'header',
+      //     bearerFormat: 'JWT',
+      //   },
+      //   'accessToken',
+      // )
       .addCookieAuth('Refresh')
       .build();
 
