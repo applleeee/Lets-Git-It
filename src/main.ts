@@ -13,6 +13,7 @@ import { ValidationError } from 'class-validator';
 import { SwaggerSetup } from './utils/swagger';
 import * as cookieParser from 'cookie-parser';
 import { readFileSync } from 'fs';
+import * as basicAuth from 'express-basic-auth';
 
 async function bootstrap() {
   const ssl = process.env.SSL === 'true' ? true : false;
@@ -55,6 +56,15 @@ async function bootstrap() {
 
   // dev server & local server Swagger 연결
   if (process.env.DB_HOST_DEV || process.env.DB_HOST_LOCAL) {
+    app.use(
+      ['/api-docs'],
+      basicAuth({
+        users: {
+          [process.env.SWAGGER_USER]: `${process.env.SWAGGER_PASSWORD}`,
+        },
+        challenge: true,
+      }),
+    );
     new SwaggerSetup(app).setup();
   }
 
