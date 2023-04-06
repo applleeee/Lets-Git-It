@@ -162,9 +162,10 @@ export class AuthController {
 
     await this.userService.deleteRefreshToken(req.user.id);
 
-    res
-      .cookie('Refresh', '', refreshOptions)
-      .json({ message: 'LOG_OUT_COMPLETED' });
+    res.clearCookie('Refresh').json({ message: 'LOG_OUT_COMPLETED' });
+    // return res
+    //   .cookie('Refresh', null, refreshOptions)
+    //   .json({ message: 'LOG_OUT_COMPLETED' });
   }
 
   /**
