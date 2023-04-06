@@ -22,7 +22,7 @@ export class SwaggerSetup {
     const swaggerCustomOptions: SwaggerCustomOptions = {
       swaggerOptions: {
         persistAuthorization: true,
-        initOAuth: {},
+        withCredentials: true,
       },
       customSiteTitle: `API DOCS - let's Git it`,
     };
