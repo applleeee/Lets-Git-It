@@ -52,13 +52,11 @@ export class AuthController {
       'swagger api-docs에서 login을 편리하게 하기 위해 만든 api입니다. github code를 받을 수 있는 url을 생성해줍니다. res에 담긴 url을 로그인 시 보내야 하는 code를 이 api에서 받아서 사용하세요. 그리고 받은 code를 아래 로그인 api에 복사하여 붙여넣으세요.',
   })
   async getCode(@Res({ passthrough: true }) res: Response) {
-    return {
-      authorize: `https://github.com/login/oauth/authorize?client_id=${
-        process.env.AUTH_CLIENT_ID_DEV || process.env.AUTH_CLIENT_ID_LOCAL
-      }&redirect_uri=${
-        process.env.AUTH_CALLBACK_DEV || process.env.AUTH_CALLBACK_LOCAL
-      }/githublogin`,
-    };
+    return `https://github.com/login/oauth/authorize?client_id=${
+      process.env.AUTH_CLIENT_ID_DEV || process.env.AUTH_CLIENT_ID_LOCAL
+    }&redirect_uri=${
+      process.env.AUTH_CALLBACK_DEV || process.env.AUTH_CALLBACK_LOCAL
+    }/githublogin`;
   }
 
   /**
@@ -158,12 +156,9 @@ export class AuthController {
   })
   @HttpCode(HttpStatus.OK)
   async signOut(@Req() req, @Res({ passthrough: true }) res: Response) {
-    const refreshOptions = await this.authService.getCookiesForLogOut();
-
     await this.userService.deleteRefreshToken(req.user.id);
-
     res
-      .cookie('Refresh', '', refreshOptions)
+      .cookie('Refresh', null, { expires: new Date(0) })
       .json({ message: 'LOG_OUT_COMPLETED' });
   }
 
