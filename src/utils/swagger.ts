@@ -40,7 +40,7 @@ export class SwaggerSetup {
         {
           type: 'http',
           scheme: 'bearer',
-          name: 'Authorization',
+          name: 'authorization',
           in: 'header',
           bearerFormat: 'JWT',
         },

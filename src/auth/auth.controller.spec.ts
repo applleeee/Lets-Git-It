@@ -207,25 +207,18 @@ describe('AuthController', () => {
 
     it('SUCCESS : Should set empty refresh token cookie', async () => {
       jest
-        .spyOn(authService, 'getCookiesForLogOut')
-        .mockResolvedValue(mockCookieConstants);
-
-      jest
         .spyOn(userService, 'deleteRefreshToken')
         .mockResolvedValue(undefined);
 
       await authController.signOut(mockReq, mockRes);
 
-      expect(authService.getCookiesForLogOut).toHaveBeenCalled();
       expect(userService.deleteRefreshToken).toHaveBeenCalledWith(
         mockReq.user.id,
       );
 
-      expect(mockRes.cookie).toHaveBeenCalledWith(
-        'Refresh',
-        '',
-        mockCookieConstants,
-      );
+      expect(mockRes.cookie).toHaveBeenCalledWith('Refresh', null, {
+        expires: new Date(0),
+      });
       expect(mockRes.json).toHaveBeenCalledWith({
         message: 'LOG_OUT_COMPLETED',
       });
