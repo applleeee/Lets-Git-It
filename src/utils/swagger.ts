@@ -22,12 +22,14 @@ export class SwaggerSetup {
     const swaggerCustomOptions: SwaggerCustomOptions = {
       swaggerOptions: {
         persistAuthorization: true,
+        withCredentials: true,
       },
+      customSiteTitle: `API DOCS - let's Git it`,
     };
 
     const swaggerConfig = new DocumentBuilder()
       .setTitle("API DOCS - let's Git it")
-      .setDescription("The let's Git it API description")
+      .setDescription(`The let's Git it API description`)
       .setVersion('1.0.0')
       .addTag('Auth')
       .addTag('Community')
@@ -38,7 +40,7 @@ export class SwaggerSetup {
         {
           type: 'http',
           scheme: 'bearer',
-          name: 'Authorization',
+          name: 'authorization',
           in: 'header',
           bearerFormat: 'JWT',
         },
