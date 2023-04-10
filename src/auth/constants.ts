@@ -10,9 +10,7 @@ export const jwtConstants = {
 
 export const cookieConstants = {
   domain:
-    process.env.COOKIE_CLIENT_DOMAIN ||
-    process.env.COOKIE_CLIENT_DEV_SERVER ||
-    'localhost',
+    process.env.COOKIE_DOMAIN || process.env.COOKIE_DOMAIN_DEV || 'localhost',
   path: '/',
   httpOnly: true,
   maxAge: Number(jwtConstants.jwtRefreshExpiresIn) * 1000,

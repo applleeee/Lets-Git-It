@@ -60,7 +60,7 @@ describe('AuthController', () => {
     const githubCodeDto = { code: 'github_code' };
 
     const mockCookieConstants = {
-      domain: process.env.COOKIE_CLIENT_DOMAIN || 'localhost',
+      domain: process.env.COOKIE_DOMAIN || 'localhost',
       path: '/',
       httpOnly: true,
       maxAge: 1000,
@@ -137,7 +137,7 @@ describe('AuthController', () => {
     } as any;
 
     const mockCookieConstants = {
-      domain: process.env.COOKIE_CLIENT_DOMAIN || 'localhost',
+      domain: process.env.COOKIE_DOMAIN || 'localhost',
       path: '/',
       httpOnly: true,
       maxAge: 1000,
@@ -197,7 +197,7 @@ describe('AuthController', () => {
     } as any;
 
     const mockCookieConstants = {
-      domain: process.env.COOKIE_CLIENT_DOMAIN || 'localhost',
+      domain: process.env.COOKIE_DOMAIN || 'localhost',
       path: '/',
       httpOnly: true,
       sameSite: 'none' as const,
@@ -239,7 +239,7 @@ describe('AuthController', () => {
     const accessToken = 'test';
 
     const mockCookieConstants = {
-      domain: process.env.COOKIE_CLIENT_DOMAIN || 'localhost',
+      domain: process.env.COOKIE_DOMAIN || 'localhost',
       path: '/',
       httpOnly: true,
       maxAge: 1000,
