@@ -301,7 +301,6 @@ describe('CommunityService', () => {
         mockPostId,
         title,
         subCategoryId,
-        mockContentUrl,
       );
     });
 
