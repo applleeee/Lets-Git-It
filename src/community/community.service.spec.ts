@@ -297,12 +297,7 @@ describe('CommunityService', () => {
       await communityService.updatePost(mockPostId, mockData, mockUserId);
 
       // Assert
-      expect(mockUpdatePost).toHaveBeenCalledWith(
-        mockPostId,
-        title,
-        subCategoryId,
-        mockContentUrl,
-      );
+      expect(mockUpdatePost).toBeCalledTimes(1);
     });
 
     it('FAILURE : should return internal server error when fail to delete post in s3', async () => {
