@@ -62,34 +62,34 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: set variables from aws system manager parameter store
-        run: |
-          export AUTH_ACCESS_TOKEN=$(aws ssm get-parameter --name /lets-git-it/env/AUTH_ACCESS_TOKEN --with-decryption --query Parameter.Value --output text) |
-          export AUTH_CALLBACK_DEV=$(aws ssm get-parameter --name /lets-git-it/env/AUTH_CALLBACK_DEV --with-decryption --query Parameter.Value --output text) |
-          export AUTH_CLIENT_ID_DEV=$(aws ssm get-parameter --name /lets-git-it/env/AUTH_CLIENT_ID_DEV --with-decryption --query Parameter.Value --output text) |
-          export AUTH_CLIENT_SECRETS_DEV=$(aws ssm get-parameter --name /lets-git-it/env/AUTH_CLIENT_SECRETS_DEV --with-decryption --query Parameter.Value --output text) |
-          export COOKIE_DOMAIN_DEV=$(aws ssm get-parameter --name /lets-git-it/env/COOKIE_DOMAIN_DEV --with-decryption --query Parameter.Value --output text) |
-          export COOKIE_SECRET_KEY=$(aws ssm get-parameter --name /lets-git-it/env/COOKIE_SECRET_KEY --with-decryption --query Parameter.Value --output text) |
-          export DB_DATABASE_DEV=$(aws ssm get-parameter --name /lets-git-it/env/DB_DATABASE_DEV --with-decryption --query Parameter.Value --output text) |
-          export DB_HOST_DEV=$(aws ssm get-parameter --name /lets-git-it/env/DB_HOST_DEV --with-decryption --query Parameter.Value --output text) |
-          export DB_LOGGING_DEV=$(aws ssm get-parameter --name /lets-git-it/env/DB_LOGGING_DEV --with-decryption --query Parameter.Value --output text) |
-          export DB_PASSWORD_DEV=$(aws ssm get-parameter --name /lets-git-it/env/DB_PASSWORD_DEV --with-decryption --query Parameter.Value --output text) |
-          export DB_SYNCHRONIZE_DEV=$(aws ssm get-parameter --name /lets-git-it/env/DB_SYNCHRONIZE_DEV --with-decryption --query Parameter.Value --output text) |
-          export DB_TYPE=$(aws ssm get-parameter --name /lets-git-it/env/DB_TYPE --with-decryption --query Parameter.Value --output text) |
-          export DB_USERNAME_DEV=$(aws ssm get-parameter --name /lets-git-it/env/DB_USERNAME_DEV --with-decryption --query Parameter.Value --output text) |
-          export JWT_EXPIRES_IN=$(aws ssm get-parameter --name /lets-git-it/env/JWT_EXPIRES_IN --with-decryption --query Parameter.Value --output text) |
-          export JWT_REFRESH_EXPIRES_IN=$(aws ssm get-parameter --name /lets-git-it/env/JWT_REFRESH_EXPIRES_IN --with-decryption --query Parameter.Value --output text) |
-          export JWT_REFRESH_SECRET_KEY=$(aws ssm get-parameter --name /lets-git-it/env/JWT_REFRESH_SECRET_KEY --with-decryption --query Parameter.Value --output text) |
-          export JWT_SECRET_KEY=$(aws ssm get-parameter --name /lets-git-it/env/JWT_SECRET_KEY --with-decryption --query Parameter.Value --output text) |
-          export PERSONAL_ACCESS_TOKEN=$(aws ssm get-parameter --name /lets-git-it/env/PERSONAL_ACCESS_TOKEN --with-decryption --query Parameter.Value --output text) |
-          export PORT=$(aws ssm get-parameter --name /lets-git-it/env/PORT --with-decryption --query Parameter.Value --output text) |
-          export REFRESH_DIGEST=$(aws ssm get-parameter --name /lets-git-it/env/REFRESH_DIGEST --with-decryption --query Parameter.Value --output text) |
-          export REFRESH_ITERATIONS=$(aws ssm get-parameter --name /lets-git-it/env/REFRESH_ITERATIONS --with-decryption --query Parameter.Value --output text) |
-          export REFRESH_KEYLEN=$(aws ssm get-parameter --name /lets-git-it/env/REFRESH_KEYLEN --with-decryption --query Parameter.Value --output text) |
-          export REFRESH_SALT=$(aws ssm get-parameter --name /lets-git-it/env/REFRESH_SALT --with-decryption --query Parameter.Value --output text) |
-          export S3_ACCESS_KEY_ID=$(aws ssm get-parameter --name /lets-git-it/env/S3_ACCESS_KEY_ID --with-decryption --query Parameter.Value --output text) |
-          export S3_BUCKET_NAME_DEV=$(aws ssm get-parameter --name /lets-git-it/env/S3_BUCKET_NAME_DEV --with-decryption --query Parameter.Value --output text) |
-          export S3_SECRET_ACEESS_KEY=$(aws ssm get-parameter --name /lets-git-it/env/S3_SECRET_ACEESS_KEY --with-decryption --query Parameter.Value --output text) |
-          export SWAGGER_PASSWORD=$(aws ssm get-parameter --name /lets-git-it/env/SWAGGER_PASSWORD --with-decryption --query Parameter.Value --output text) |
+        run:
+          export AUTH_ACCESS_TOKEN=$(aws ssm get-parameter --name /lets-git-it/env/AUTH_ACCESS_TOKEN --with-decryption --query Parameter.Value --output text) &&
+          export AUTH_CALLBACK_DEV=$(aws ssm get-parameter --name /lets-git-it/env/AUTH_CALLBACK_DEV --with-decryption --query Parameter.Value --output text) &&
+          export AUTH_CLIENT_ID_DEV=$(aws ssm get-parameter --name /lets-git-it/env/AUTH_CLIENT_ID_DEV --with-decryption --query Parameter.Value --output text) &&
+          export AUTH_CLIENT_SECRETS_DEV=$(aws ssm get-parameter --name /lets-git-it/env/AUTH_CLIENT_SECRETS_DEV --with-decryption --query Parameter.Value --output text) &&
+          export COOKIE_DOMAIN_DEV=$(aws ssm get-parameter --name /lets-git-it/env/COOKIE_DOMAIN_DEV --with-decryption --query Parameter.Value --output text) &&
+          export COOKIE_SECRET_KEY=$(aws ssm get-parameter --name /lets-git-it/env/COOKIE_SECRET_KEY --with-decryption --query Parameter.Value --output text) &&
+          export DB_DATABASE_DEV=$(aws ssm get-parameter --name /lets-git-it/env/DB_DATABASE_DEV --with-decryption --query Parameter.Value --output text) &&
+          export DB_HOST_DEV=$(aws ssm get-parameter --name /lets-git-it/env/DB_HOST_DEV --with-decryption --query Parameter.Value --output text) &&
+          export DB_LOGGING_DEV=$(aws ssm get-parameter --name /lets-git-it/env/DB_LOGGING_DEV --with-decryption --query Parameter.Value --output text) &&
+          export DB_PASSWORD_DEV=$(aws ssm get-parameter --name /lets-git-it/env/DB_PASSWORD_DEV --with-decryption --query Parameter.Value --output text) &&
+          export DB_SYNCHRONIZE_DEV=$(aws ssm get-parameter --name /lets-git-it/env/DB_SYNCHRONIZE_DEV --with-decryption --query Parameter.Value --output text) &&
+          export DB_TYPE=$(aws ssm get-parameter --name /lets-git-it/env/DB_TYPE --with-decryption --query Parameter.Value --output text) &&
+          export DB_USERNAME_DEV=$(aws ssm get-parameter --name /lets-git-it/env/DB_USERNAME_DEV --with-decryption --query Parameter.Value --output text) &&
+          export JWT_EXPIRES_IN=$(aws ssm get-parameter --name /lets-git-it/env/JWT_EXPIRES_IN --with-decryption --query Parameter.Value --output text) &&
+          export JWT_REFRESH_EXPIRES_IN=$(aws ssm get-parameter --name /lets-git-it/env/JWT_REFRESH_EXPIRES_IN --with-decryption --query Parameter.Value --output text) &&
+          export JWT_REFRESH_SECRET_KEY=$(aws ssm get-parameter --name /lets-git-it/env/JWT_REFRESH_SECRET_KEY --with-decryption --query Parameter.Value --output text) &&
+          export JWT_SECRET_KEY=$(aws ssm get-parameter --name /lets-git-it/env/JWT_SECRET_KEY --with-decryption --query Parameter.Value --output text) &&
+          export PERSONAL_ACCESS_TOKEN=$(aws ssm get-parameter --name /lets-git-it/env/PERSONAL_ACCESS_TOKEN --with-decryption --query Parameter.Value --output text) &&
+          export PORT=$(aws ssm get-parameter --name /lets-git-it/env/PORT --with-decryption --query Parameter.Value --output text) &&
+          export REFRESH_DIGEST=$(aws ssm get-parameter --name /lets-git-it/env/REFRESH_DIGEST --with-decryption --query Parameter.Value --output text) &&
+          export REFRESH_ITERATIONS=$(aws ssm get-parameter --name /lets-git-it/env/REFRESH_ITERATIONS --with-decryption --query Parameter.Value --output text) &&
+          export REFRESH_KEYLEN=$(aws ssm get-parameter --name /lets-git-it/env/REFRESH_KEYLEN --with-decryption --query Parameter.Value --output text) &&
+          export REFRESH_SALT=$(aws ssm get-parameter --name /lets-git-it/env/REFRESH_SALT --with-decryption --query Parameter.Value --output text) &&
+          export S3_ACCESS_KEY_ID=$(aws ssm get-parameter --name /lets-git-it/env/S3_ACCESS_KEY_ID --with-decryption --query Parameter.Value --output text) &&
+          export S3_BUCKET_NAME_DEV=$(aws ssm get-parameter --name /lets-git-it/env/S3_BUCKET_NAME_DEV --with-decryption --query Parameter.Value --output text) &&
+          export S3_SECRET_ACEESS_KEY=$(aws ssm get-parameter --name /lets-git-it/env/S3_SECRET_ACEESS_KEY --with-decryption --query Parameter.Value --output text) &&
+          export SWAGGER_PASSWORD=$(aws ssm get-parameter --name /lets-git-it/env/SWAGGER_PASSWORD --with-decryption --query Parameter.Value --output text) &&
           export SWAGGER_USER=$(aws ssm get-parameter --name /lets-git-it/env/SWAGGER_USER --with-decryption --query Parameter.Value --output text)
       - name: Docker run
         run: docker ps -a --filter "name=git_rank" | grep -q . && docker stop git_rank && docker rm -f git_rank && docker run -it -d -p 3000:3000 --name git_rank -e AUTH_ACCESS_TOKEN=${ $AUTH_ACCESS_TOKEN } -e AUTH_CLIENT_ID_DEV=${ $AUTH_CLIENT_ID_DEV } -e AUTH_CLIENT_SECRETS_DEV=${ $AUTH_CLIENT_SECRETS_DEV } -e AUTH_CALLBACK_DEV=${ $AUTH_CALLBACK_DEV } -e PERSONAL_ACCESS_TOKEN=${ $PERSONAL_ACCESS_TOKEN } -e DB_DATABASE_DEV=${ $DB_DATABASE_DEV } -e DB_HOST_DEV=${ $DB_HOST_DEV } -e DB_USERNAME_DEV=${ $DB_USERNAME_DEV } -e DB_TYPE=${ $DB_TYPE } -e DB_PASSWORD_DEV=${ $DB_PASSWORD_DEV } -e DB_LOGGING_DEV=${ $DB_LOGGING_DEV } -e DB_SYNCHRONIZE_DEV=${ $DB_SYNCHRONIZE_DEV } -e DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }} -e DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} -e JWT_EXPIRES_IN=${ $JWT_EXPIRES_IN } -e JWT_SECRET_KEY=${ $JWT_SECRET_KEY } -e JWT_REFRESH_SECRET_KEY=${ $JWT_REFRESH_SECRET_KEY } -e JWT_REFRESH_EXPIRES_IN=${ $JWT_REFRESH_EXPIRES_IN } -e REFRESH_SALT=${ $REFRESH_SALT } -e REFRESH_ITERATIONS=${ $REFRESH_ITERATIONS } -e REFRESH_KEYLEN=${ $REFRESH_KEYLEN } -e REFRESH_DIGEST=${ $REFRESH_DIGEST } -e COOKIE_SECRET_KEY=${ $COOKIE_SECRET_KEY } -e COOKIE_DOMAIN_DEV=${ $COOKIE_DOMAIN_DEV } -e PORT=${ $PORT } -e S3_ACCESS_KEY_ID=${ $S3_ACCESS_KEY_ID } -e S3_BUCKET_NAME_DEV=${ $S3_BUCKET_NAME_DEV } -e S3_SECRET_ACEESS_KEY=${ $S3_SECRET_ACEESS_KEY } -e SWAGGER_USER=${ $SWAGGER_USER } -e SWAGGER_PASSWORD=${ $SWAGGER_PASSWORD } -v /home/ubuntu/.aws/credentials:/root/.aws/credentials --restart always ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
