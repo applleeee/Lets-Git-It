@@ -45,7 +45,10 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
   app.use(morgan('dev'));
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || process.env.CORS_LOCAL_ORIGIN,
+    origin:
+      process.env.CORS_ORIGIN ||
+      process.env.CORS_DEV_ORIGIN ||
+      process.env.CORS_LOCAL_ORIGIN,
     methods: ['GET', 'POST', 'DELETE', 'PUT', 'PATCH', 'OPTIONS'],
     credentials: true,
   });
