@@ -43,13 +43,13 @@ export class AuthController {
 
   /**
    * @author MyeongSeok
-   * @description [개발자용 api] swagger에서 login을 편리하게 하기 위해 만든 api입니다. github code를 받을 수 있는 url을 생성해줍니다. res에 담긴 url을 로그인 시 보내야 하는 code를 이 api에서 받아서 사용하세요. 그리고 받은 code를 아래 로그인 api에 복사하여 붙여넣으세요.
+   * @description [개발자용 api] swagger에서 login을 편리하게 하기 위해 만든 api입니다. 로그인 api 요청 바디에 넣을 github code를 받을 수 있는 url을 생성해줍니다.
    */
   @Get('/getCode')
   @ApiOperation({
     summary: '[개발자용] github Authorization Code 받는 url을 만들어주는 api',
     description:
-      'swagger api-docs에서 login을 편리하게 하기 위해 만든 api입니다. github code를 받을 수 있는 url을 생성해줍니다. res에 담긴 url을 로그인 시 보내야 하는 code를 이 api에서 받아서 사용하세요. 그리고 받은 code를 아래 로그인 api에 복사하여 붙여넣으세요.',
+      'swagger api-docs에서  login을 편리하게 하기 위해 만든 api입니다. 로그인 api 요청 바디에 넣을 github code를 받을 수 있는 url을 생성해줍니다.',
   })
   async getCode(@Res({ passthrough: true }) res: Response) {
     return `https://github.com/login/oauth/authorize?client_id=${
@@ -68,11 +68,11 @@ export class AuthController {
   @ApiOperation({
     summary: '로그인',
     description:
-      'github code를 Body로 받아 accessToken을 리턴합니다. 그리고 응답 쿠키에 refreshToken을 반환합니다. 쿠키는 개발자도구 network 탭에서 복사하여 사용합니다.',
+      'github code를 Body로 받아 accessToken을 리턴합니다. 그리고 응답 쿠키에 refreshToken을 반환합니다. 쿠키는 브라우저 쿠키로 저장됩니다.',
   })
   @ApiOkResponse({
     description:
-      '로그인에 성공하여 accessToken을 리턴합니다. 그리고 응답 쿠키에 refreshToken을 반환합니다.',
+      '로그인에 성공하여 accessToken을 Res body로 리턴합니다. 그리고 응답 쿠키에 refreshToken을 반환합니다.',
     type: AuthSignInOkResDto,
   })
   @ApiUnauthorizedResponse({
