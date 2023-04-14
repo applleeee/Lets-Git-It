@@ -14,6 +14,7 @@ import { SwaggerSetup } from './utils/swagger';
 import * as cookieParser from 'cookie-parser';
 import { readFileSync } from 'fs';
 import * as basicAuth from 'express-basic-auth';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
   const ssl = process.env.SSL === 'true' ? true : false;
@@ -25,7 +26,9 @@ async function bootstrap() {
       ca: readFileSync(process.env.SSL_CA_PATH),
     };
   }
-  const app = await NestFactory.create(AppModule, { httpsOptions });
+  const app: NestExpressApplication = await NestFactory.create(AppModule, {
+    httpsOptions,
+  });
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalPipes(
     new ValidationPipe({
@@ -42,6 +45,7 @@ async function bootstrap() {
     }),
   );
 
+  app.set('trust proxy', true);
   app.useGlobalFilters(new AllExceptionsFilter());
   app.use(morgan('dev'));
   app.enableCors({
