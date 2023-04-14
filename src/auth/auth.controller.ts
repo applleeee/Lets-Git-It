@@ -181,6 +181,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async refresh(@Req() req, @Res({ passthrough: true }) res: Response) {
     const currentRefreshToken = req.signedCookies.Refresh;
+    console.log('currentRefreshToken: ', currentRefreshToken);
     const { user } = req;
     const accessToken = await this.authService.getJwtAccessToken(
       user.id,
