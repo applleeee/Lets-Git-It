@@ -59,8 +59,34 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Docker run
-        run: docker ps -a --filter "name=git_rank" | grep -q . && docker stop git_rank && docker rm -f git_rank && docker run -it -d -p 3000:3000 --name git_rank -e AUTH_ACCESS_TOKEN=${{ secrets.AUTH_ACCESS_TOKEN }} -e AUTH_CLIENT_ID_PROD=${{ secrets.AUTH_CLIENT_ID_PROD }} -e AUTH_CLIENT_SECRETS_PROD=${{ secrets.AUTH_CLIENT_SECRETS_PROD }} -e PERSONAL_ACCESS_TOKEN=${{ secrets.PERSONAL_ACCESS_TOKEN }} -e DB_DATABASE_PROD=${{ secrets.DB_DATABASE_PROD }} -e DB_HOST_PROD=${{ secrets.DB_HOST_PROD }} -e DB_USERNAME_PROD=${{ secrets.DB_USERNAME_PROD }} -e DB_TYPE=${{ secrets.DB_TYPE }} -e DB_PASSWORD_PROD=${{ secrets.DB_PASSWORD_PROD }} -e DB_LOGGING_PROD=${{ secrets.DB_LOGGING_PROD }} -e DB_SYNCHRONIZE_PROD=${{ secrets.DB_SYNCHRONIZE_PROD }} -e DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }} -e DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} -e JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }} -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} -e JWT_REFRESH_SECRET_KEY=${{ secrets.JWT_REFRESH_SECRET_KEY }} -e JWT_REFRESH_EXPIRES_IN=${{ secrets.JWT_REFRESH_EXPIRES_IN }} -e REFRESH_SALT=${{ secrets.REFRESH_SALT }} -e REFRESH_ITERATIONS=${{ secrets.REFRESH_ITERATIONS }} -e REFRESH_KEYLEN=${{ secrets.REFRESH_KEYLEN }} -e REFRESH_DIGEST=${{ secrets.REFRESH_DIGEST }} -e COOKIE_SECRET_KEY=${{ secrets.COOKIE_SECRET_KEY }} -e COOKIE_DOMAIN=${{ secrets.COOKIE_DOMAIN }} -e PORT=${{ secrets.PORT }} -e S3_ACCESS_KEY_ID=${{ secrets.S3_ACCESS_KEY_ID }} -e S3_BUCKET_NAME_PROD=${{ secrets.S3_BUCKET_NAME_PROD }} -e S3_SECRET_ACEESS_KEY=${{ secrets.S3_SECRET_ACEESS_KEY}} -v /home/ubuntu/.aws/credentials:/root/.aws/credentials --restart always ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
+      - name: set variables from aws system manager parameter store and run docker
+        run:
+          export AUTH_ACCESS_TOKEN=$(aws ssm get-parameter --name /lets-git-it/env/AUTH_ACCESS_TOKEN --with-decryption --query Parameter.Value --output text) &&
+          export AUTH_CLIENT_ID_PROD=$(aws ssm get-parameter --name /lets-git-it/env/AUTH_CLIENT_ID_PROD --with-decryption --query Parameter.Value --output text) &&
+          export AUTH_CLIENT_SECRETS_PROD=$(aws ssm get-parameter --name /lets-git-it/env/AUTH_CLIENT_SECRETS_PROD --with-decryption --query Parameter.Value --output text) &&
+          export COOKIE_DOMAIN=$(aws ssm get-parameter --name /lets-git-it/env/COOKIE_DOMAIN --with-decryption --query Parameter.Value --output text) &&
+          export COOKIE_SECRET_KEY=$(aws ssm get-parameter --name /lets-git-it/env/COOKIE_SECRET_KEY --with-decryption --query Parameter.Value --output text) &&
+          export DB_DATABASE_PROD=$(aws ssm get-parameter --name /lets-git-it/env/DB_DATABASE_PROD --with-decryption --query Parameter.Value --output text) &&
+          export DB_HOST_PROD=$(aws ssm get-parameter --name /lets-git-it/env/DB_HOST_PROD --with-decryption --query Parameter.Value --output text) &&
+          export DB_LOGGING_PROD=$(aws ssm get-parameter --name /lets-git-it/env/DB_LOGGING_PROD --with-decryption --query Parameter.Value --output text) &&
+          export DB_PASSWORD_PROD=$(aws ssm get-parameter --name /lets-git-it/env/DB_PASSWORD_PROD --with-decryption --query Parameter.Value --output text) &&
+          export DB_SYNCHRONIZE_PROD=$(aws ssm get-parameter --name /lets-git-it/env/DB_SYNCHRONIZE_PROD --with-decryption --query Parameter.Value --output text) &&
+          export DB_TYPE=$(aws ssm get-parameter --name /lets-git-it/env/DB_TYPE --with-decryption --query Parameter.Value --output text) &&
+          export DB_USERNAME_PROD=$(aws ssm get-parameter --name /lets-git-it/env/DB_USERNAME_PROD --with-decryption --query Parameter.Value --output text) &&
+          export JWT_EXPIRES_IN=$(aws ssm get-parameter --name /lets-git-it/env/JWT_EXPIRES_IN --with-decryption --query Parameter.Value --output text) &&
+          export JWT_REFRESH_EXPIRES_IN=$(aws ssm get-parameter --name /lets-git-it/env/JWT_REFRESH_EXPIRES_IN --with-decryption --query Parameter.Value --output text) &&
+          export JWT_REFRESH_SECRET_KEY=$(aws ssm get-parameter --name /lets-git-it/env/JWT_REFRESH_SECRET_KEY --with-decryption --query Parameter.Value --output text) &&
+          export JWT_SECRET_KEY=$(aws ssm get-parameter --name /lets-git-it/env/JWT_SECRET_KEY --with-decryption --query Parameter.Value --output text) &&
+          export PERSONAL_ACCESS_TOKEN=$(aws ssm get-parameter --name /lets-git-it/env/PERSONAL_ACCESS_TOKEN --with-decryption --query Parameter.Value --output text) &&
+          export PORT=$(aws ssm get-parameter --name /lets-git-it/env/PORT --with-decryption --query Parameter.Value --output text) &&
+          export REFRESH_DIGEST=$(aws ssm get-parameter --name /lets-git-it/env/REFRESH_DIGEST --with-decryption --query Parameter.Value --output text) &&
+          export REFRESH_ITERATIONS=$(aws ssm get-parameter --name /lets-git-it/env/REFRESH_ITERATIONS --with-decryption --query Parameter.Value --output text) &&
+          export REFRESH_KEYLEN=$(aws ssm get-parameter --name /lets-git-it/env/REFRESH_KEYLEN --with-decryption --query Parameter.Value --output text) &&
+          export REFRESH_SALT=$(aws ssm get-parameter --name /lets-git-it/env/REFRESH_SALT --with-decryption --query Parameter.Value --output text) &&
+          export S3_ACCESS_KEY_ID=$(aws ssm get-parameter --name /lets-git-it/env/S3_ACCESS_KEY_ID --with-decryption --query Parameter.Value --output text) &&
+          export S3_BUCKET_NAME_PROD=$(aws ssm get-parameter --name /lets-git-it/env/S3_BUCKET_NAME_PROD --with-decryption --query Parameter.Value --output text) &&
+          export S3_SECRET_ACEESS_KEY=$(aws ssm get-parameter --name /lets-git-it/env/S3_SECRET_ACEESS_KEY --with-decryption --query Parameter.Value --output text) &&
+          docker ps -a --filter "name=git_rank" | grep -q . && docker stop git_rank && docker rm -f git_rank && docker run -it -d -p 3000:3000 --name git_rank -e AUTH_ACCESS_TOKEN=$AUTH_ACCESS_TOKEN -e AUTH_CLIENT_ID_PROD=$AUTH_CLIENT_ID_PROD -e AUTH_CLIENT_SECRETS_PROD=$AUTH_CLIENT_SECRETS_PROD -e PERSONAL_ACCESS_TOKEN=$PERSONAL_ACCESS_TOKEN -e DB_DATABASE_PROD=$DB_DATABASE_PROD -e DB_HOST_PROD=$DB_HOST_PROD -e DB_USERNAME_PROD=$DB_USERNAME_PROD -e DB_TYPE=$DB_TYPE -e DB_PASSWORD_PROD=$DB_PASSWORD_PROD -e DB_LOGGING_PROD=$DB_LOGGING_PROD -e DB_SYNCHRONIZE_PROD=$DB_SYNCHRONIZE_PROD -e DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }} -e DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} -e JWT_EXPIRES_IN=$JWT_EXPIRES_IN -e JWT_SECRET_KEY=$JWT_SECRET_KEY -e JWT_REFRESH_SECRET_KEY=$JWT_REFRESH_SECRET_KEY -e JWT_REFRESH_EXPIRES_IN=$JWT_REFRESH_EXPIRES_IN -e REFRESH_SALT=$REFRESH_SALT -e REFRESH_ITERATIONS=$REFRESH_ITERATIONS -e REFRESH_KEYLEN=$REFRESH_KEYLEN -e REFRESH_DIGEST=$REFRESH_DIGEST -e COOKIE_SECRET_KEY=$COOKIE_SECRET_KEY -e COOKIE_DOMAIN=$COOKIE_DOMAIN -e PORT=$PORT -e S3_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID -e S3_BUCKET_NAME_PROD=$S3_BUCKET_NAME_PROD -e S3_SECRET_ACEESS_KEY=$S3_SECRET_ACEESS_KEY -v /home/ubuntu/.aws/credentials:/root/.aws/credentials --restart always ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
   cleanup:
     name: Clean up docker images
     needs: [build, deploy]
