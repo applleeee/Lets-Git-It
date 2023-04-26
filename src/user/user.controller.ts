@@ -1,4 +1,4 @@
-import { ApiBasicAuth, ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from './../auth/guard/jwt-auth.guard';
 import {
   Body,

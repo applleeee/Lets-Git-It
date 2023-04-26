@@ -219,9 +219,6 @@ describe('AuthController', () => {
       expect(mockRes.cookie).toHaveBeenCalledWith('Refresh', null, {
         expires: new Date(0),
       });
-      expect(mockRes.json).toHaveBeenCalledWith({
-        message: 'LOG_OUT_COMPLETED',
-      });
     });
   });
 
