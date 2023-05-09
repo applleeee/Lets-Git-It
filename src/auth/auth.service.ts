@@ -3,14 +3,12 @@ import { RankService } from './../rank/rank.service';
 import { UserService } from './../user/user.service';
 import { RankerProfileRepository } from '../rank/rankerProfile.repository';
 import { AuthRepository } from './auth.repository';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { GithubCodeDto, SignUpWithUserNameDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
 import { jwtConstants, cookieConstants } from './constants';
-import { AxiosRequestConfig } from 'axios';
 import { HttpService } from '@nestjs/axios';
-import { lastValueFrom, map } from 'rxjs';
 dotenv.config();
 
 @Injectable()
@@ -108,7 +106,7 @@ export class AuthService {
 
   async isRefreshTokenExpirationDateHalfPast(
     refreshToken: string,
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     const payload = await this.jwtService.verify(refreshToken, {
       secret: jwtConstants.jwtRefreshSecret,
     });

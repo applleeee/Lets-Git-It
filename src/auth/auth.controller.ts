@@ -9,7 +9,7 @@ import {
 } from './dto/auth-res.dto';
 import { JwtRefreshGuard } from './guard/jwt-refresh.guard';
 import { UserService } from './../user/user.service';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import {
   Controller,
@@ -51,7 +51,7 @@ export class AuthController {
     description:
       'swagger api-docs에서  login을 편리하게 하기 위해 만든 api입니다. 로그인 api 요청 바디에 넣을 github code를 받을 수 있는 url을 생성해줍니다.',
   })
-  async getCode(@Res({ passthrough: true }) res: Response) {
+  async getCode() {
     return `https://github.com/login/oauth/authorize?client_id=${
       process.env.AUTH_CLIENT_ID_DEV || process.env.AUTH_CLIENT_ID_LOCAL
     }&redirect_uri=${
@@ -157,9 +157,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async signOut(@Req() req, @Res({ passthrough: true }) res: Response) {
     await this.userService.deleteRefreshToken(req.user.id);
-    res
-      .cookie('Refresh', null, { expires: new Date(0) })
-      .json({ message: 'LOG_OUT_COMPLETED' });
+    res.cookie('Refresh', null, { expires: new Date(0) });
+    return { message: 'LOG_OUT_COMPLETED' };
   }
 
   /**
@@ -181,12 +180,13 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async refresh(@Req() req, @Res({ passthrough: true }) res: Response) {
     const currentRefreshToken = req.signedCookies.Refresh;
+    console.log('currentRefreshToken: ', currentRefreshToken);
     const { user } = req;
     const accessToken = await this.authService.getJwtAccessToken(
       user.id,
       user.userName,
     );
-    const refreshTokenRegenerationRequired: Boolean =
+    const refreshTokenRegenerationRequired: boolean =
       await this.authService.isRefreshTokenExpirationDateHalfPast(
         currentRefreshToken,
       );

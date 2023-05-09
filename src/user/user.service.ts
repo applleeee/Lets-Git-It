@@ -147,7 +147,7 @@ export class UserService {
   async getUserIfRefreshTokenMatches(refreshToken: string, id: number) {
     const user = await this.getById(id);
 
-    const isRefreshTokenMatching: Boolean = await this.verifyRefreshToken(
+    const isRefreshTokenMatching: boolean = await this.verifyRefreshToken(
       user.hashedRefreshToken,
       refreshToken,
     );
