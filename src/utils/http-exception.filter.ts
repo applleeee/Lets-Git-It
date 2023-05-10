@@ -4,6 +4,7 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { QueryFailedError } from 'typeorm';
@@ -11,6 +12,7 @@ import { QueryFailedError } from 'typeorm';
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
+    console.log('exception: ', exception);
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
@@ -27,6 +29,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
         status = HttpStatus.UNPROCESSABLE_ENTITY;
         message = (exception as QueryFailedError).message;
         code = (exception as any).code;
+        break;
+
+      case UnauthorizedException: // auth error
+        status = (exception as UnauthorizedException).getStatus();
         break;
 
       default: // default
