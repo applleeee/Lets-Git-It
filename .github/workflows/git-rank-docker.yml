@@ -52,7 +52,7 @@ jobs:
   deploy:
     name: Deploy
     needs: docker-push
-    runs-on: [self-hosted, prod]
+    runs-on: [self-hosted, deploy-server]
     steps:
       - name: Login to DockerHub
         uses: docker/login-action@v1
@@ -90,7 +90,7 @@ jobs:
   cleanup:
     name: Clean up docker images
     needs: [build, deploy]
-    runs-on: [self-hosted, prod]
+    runs-on: [self-hosted, deploy-server]
     steps:
       - name: Clean up docker images
         run: docker rmi $(docker images --filter "before=${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}" --filter=reference="${{ env.DOCKER_IMAGE }}:*" -q)

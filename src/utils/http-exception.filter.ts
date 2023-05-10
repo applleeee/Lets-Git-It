@@ -31,7 +31,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         code = (exception as any).code;
         break;
 
-      case UnauthorizedException: // Auth guard error
+      case UnauthorizedException: // for Auth guard error
         status = (exception as UnauthorizedException).getStatus();
         break;
 
