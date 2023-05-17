@@ -53,7 +53,6 @@ export class UserRepository {
     return await this.userRepository.update({ id: userId }, partialEntity);
   }
 
-  // todo Add test code from this line
   async updateUserRefreshToken(id: number, hashedRefreshToken: string) {
     return await this.userRepository.update(id, { hashedRefreshToken });
   }

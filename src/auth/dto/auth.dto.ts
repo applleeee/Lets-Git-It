@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Comment } from 'src/entities/Comment';
-import { IsBoolean, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { Type, Exclude, Expose } from 'class-transformer';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
 import { Post } from 'src/entities/Post';
 
 /**

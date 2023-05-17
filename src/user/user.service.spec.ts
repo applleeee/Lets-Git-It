@@ -1,5 +1,4 @@
-import { pbkdf2, pbkdf2Sync } from 'crypto';
-import { promisify } from 'util';
+import { pbkdf2Sync } from 'crypto';
 import { SignUpDto } from './dto/createUser.dto';
 import { User } from './../entities/User';
 import { CommunityRepository } from './../community/community.repository';
@@ -243,8 +242,8 @@ describe('UserService', () => {
         }
       } catch (err) {
         expect(err).toBeInstanceOf(HttpException);
-        expect(err.status).toBe(HttpStatus.UNAUTHORIZED);
-        expect(err.message).toBe('WRONG_GITHUB_ACCESS_TOKEN');
+        expect(err.status).toBe(HttpStatus.NOT_FOUND);
+        expect(err.message).toBe('NOT_FOUND_GITHUB_USER');
       }
 
       expect(http.get).toHaveBeenCalledWith(

@@ -2,7 +2,7 @@ import { jwtConstants } from './../constants';
 import { UserService } from './../../user/user.service';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 
 @Injectable()
@@ -25,9 +25,6 @@ export class JwtRefreshStrategy extends PassportStrategy(
 
   async validate(req: Request, payload: any) {
     const refreshToken = req.signedCookies?.Refresh;
-
-    if (!refreshToken)
-      throw new HttpException('FORBIDDEN', HttpStatus.FORBIDDEN);
 
     const { userId } = payload;
 

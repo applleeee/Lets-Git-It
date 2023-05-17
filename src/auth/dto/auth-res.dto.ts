@@ -99,8 +99,57 @@ export class AuthSignInWrongCodeDto {
    * @example WRONG_GITHUB_CODE
    */
   @ApiProperty({
-    description: '잘못된 github code 입니다.',
+    description: '잘못된 github code입니다.',
     example: 'WRONG_GITHUB_CODE',
+    required: true,
+  })
+  readonly message: string;
+
+  /**
+   * 요청 시간을 나타냅니다.
+   * @example 2023-03-09T17:32:56.871Z
+   */
+  @ApiProperty({
+    description: '요청 시간을 나타냅니다.',
+    example: '2023-03-09T17:32:56.871Z',
+    required: true,
+  })
+  readonly timestamp: Date;
+
+  /**
+   * 요청 엔드포인트를 나타냅니다.
+   * @example /auth/sign-in
+   */
+  @ApiProperty({
+    description: '요청 엔드포인트를 나타냅니다.',
+    example: '/auth/sign-in',
+    required: true,
+  })
+  readonly path: string;
+}
+
+/**
+ * @author MyeongSeok
+ * @description github access token으로 github user 정보 조회에 실패한 경우입니다.
+ */
+export class AuthSignInWrongGithubAccessTokenDto {
+  /**
+   * @example 404
+   */
+  @ApiProperty({
+    example: HttpStatusCode.NotFound,
+    required: true,
+  })
+  readonly statusCode: number;
+
+  /**
+   * github access token으로 github user 정보 조회에 실패한 경우입니다.
+   * @example NOT_FOUND_GITHUB_USER
+   */
+  @ApiProperty({
+    description:
+      'github access token으로 github user 정보 조회에 실패한 경우입니다.',
+    example: 'NOT_FOUND_GITHUB_USER',
     required: true,
   })
   readonly message: string;
@@ -135,6 +184,54 @@ export class AuthSignInWrongCodeDto {
 export class AuthSignUpCreatedDto extends PickType(AuthSignInOkResDto, [
   'accessToken',
 ] as const) {}
+
+/**
+ * @author MyeongSeok
+ * @description 이미 가입한 회원이 회원 가입을 시도할 때 응답 객체의 DTO입니다.
+ */
+export class AuthSignUpConflictDto {
+  /**
+   * @example 409
+   */
+  @ApiProperty({
+    example: HttpStatusCode.Conflict,
+    required: true,
+  })
+  readonly statusCode: number;
+
+  /**
+   * 이미 가입된 유저입니다.
+   * @example EXISTING_USERNAME
+   */
+  @ApiProperty({
+    description: '이미 가입된 유저입니다.',
+    example: 'EXISTING_USERNAME',
+    required: true,
+  })
+  readonly message: string;
+
+  /**
+   * 요청 시간을 나타냅니다.
+   * @example 2023-03-09T17:32:56.871Z
+   */
+  @ApiProperty({
+    description: '요청 시간을 나타냅니다.',
+    example: '2023-03-09T17:32:56.871Z',
+    required: true,
+  })
+  readonly timestamp: Date;
+
+  /**
+   * 요청 엔드포인트를 나타냅니다.
+   * @example /auth/sign-up
+   */
+  @ApiProperty({
+    description: '요청 엔드포인트를 나타냅니다.',
+    example: '/auth/sign-up',
+    required: true,
+  })
+  readonly path: string;
+}
 
 /**
  * @author MyeongSeok
@@ -205,6 +302,102 @@ export class SignOutOkDto {
 
 /**
  * @author MyeongSeok
+ * @description 만료된 refresh token 또는 refresh token이 없이 요청한 경우의 응답 DTO입니다.
+ */
+export class AuthSignOutUnauthorizedDto {
+  /**
+   * @example 401
+   */
+  @ApiProperty({
+    example: HttpStatusCode.Unauthorized,
+    required: true,
+  })
+  readonly statusCode: number;
+
+  /**
+   * refresh token이 없거나 기간이 만료된 경우입니다.
+   * @example Unauthorized
+   */
+  @ApiProperty({
+    description: 'refresh token이 없거나 기간이 만료되었습니다.',
+    example: 'Unauthorized',
+    required: true,
+  })
+  readonly message: string;
+
+  /**
+   * 요청 시간을 나타냅니다.
+   * @example 2023-03-09T17:32:56.871Z
+   */
+  @ApiProperty({
+    description: '요청 시간을 나타냅니다.',
+    example: '2023-03-09T17:32:56.871Z',
+    required: true,
+  })
+  readonly timestamp: Date;
+
+  /**
+   * 요청 엔드포인트를 나타냅니다.
+   * @example /auth/sign-out
+   */
+  @ApiProperty({
+    description: '요청 엔드포인트를 나타냅니다.',
+    example: '/auth/sign-out',
+    required: true,
+  })
+  readonly path: string;
+}
+
+/**
+ * @author MyeongSeok
  * @description 엑세스 토큰 재발급 성공 시 응답 객체의 DTO입니다.
  */
 export class RefreshOkDto extends AuthSignUpCreatedDto {}
+
+/**
+ * @author MyeongSeok
+ * @description 만료된 refresh token 또는 refresh token이 없이 요청한 경우의 응답 DTO입니다.
+ */
+export class RefreshUnauthorizedDto {
+  /**
+   * @example 401
+   */
+  @ApiProperty({
+    example: HttpStatusCode.Unauthorized,
+    required: true,
+  })
+  readonly statusCode: number;
+
+  /**
+   * refresh token이 없거나 기간이 만료된 경우입니다.
+   * @example Unauthorized
+   */
+  @ApiProperty({
+    description: 'refresh token이 없거나 기간이 만료되었습니다.',
+    example: 'Unauthorized',
+    required: true,
+  })
+  readonly message: string;
+
+  /**
+   * 요청 시간을 나타냅니다.
+   * @example 2023-03-09T17:32:56.871Z
+   */
+  @ApiProperty({
+    description: '요청 시간을 나타냅니다.',
+    example: '2023-03-09T17:32:56.871Z',
+    required: true,
+  })
+  readonly timestamp: Date;
+
+  /**
+   * 요청 엔드포인트를 나타냅니다.
+   * @example /auth/refresh
+   */
+  @ApiProperty({
+    description: '요청 엔드포인트를 나타냅니다.',
+    example: '/auth/refresh',
+    required: true,
+  })
+  readonly path: string;
+}

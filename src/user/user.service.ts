@@ -1,7 +1,12 @@
 import { promisify } from 'util';
 import { RankerProfileRepository } from './../rank/rankerProfile.repository';
 import { SignUpDto } from './dto/createUser.dto';
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { User } from '../entities/User';
 import { UserRepository } from './user.repository';
 import { lastValueFrom, map } from 'rxjs';
@@ -21,7 +26,7 @@ export class UserService {
     private readonly rankerProfileRepository: RankerProfileRepository,
     private readonly communityRepository: CommunityRepository,
   ) {}
-  // todo refactoring : getUser 메서드 getUserByKeyword로 통합
+
   async getByGithubId(githubId: number): Promise<User> {
     return await this.userRepository.getByGithubId(githubId);
   }
@@ -59,7 +64,7 @@ export class UserService {
     );
 
     if (result === undefined) {
-      throw new HttpException('WRONG_GITHUB_CODE', HttpStatus.BAD_REQUEST);
+      throw new BadRequestException('WRONG_GITHUB_CODE');
     }
     return result;
   }
@@ -77,10 +82,7 @@ export class UserService {
         .pipe(map((res) => res.data)),
     );
     if (result === undefined) {
-      throw new HttpException(
-        'WRONG_GITHUB_ACCESS_TOKEN',
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new NotFoundException('NOT_FOUND_GITHUB_USER');
     }
     return result;
   }
@@ -180,7 +182,7 @@ export class UserService {
     const currentHashedRefreshToken = key.toString('base64');
 
     if (currentHashedRefreshToken !== hashedRefreshToken)
-      throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
+      throw new UnauthorizedException('UNAUTHORIZED');
 
     return true;
   }

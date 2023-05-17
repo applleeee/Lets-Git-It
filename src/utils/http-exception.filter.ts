@@ -5,6 +5,7 @@ import {
   HttpException,
   HttpStatus,
   UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { QueryFailedError } from 'typeorm';
@@ -34,6 +35,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
       case UnauthorizedException: // for Auth guard error
         status = (exception as UnauthorizedException).getStatus();
         break;
+
+      case ForbiddenException:
+        status = (exception as ForbiddenException).getStatus();
 
       default: // default
         status = HttpStatus.INTERNAL_SERVER_ERROR;
