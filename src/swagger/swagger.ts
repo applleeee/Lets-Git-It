@@ -22,27 +22,31 @@ export class SwaggerSetup {
     const swaggerCustomOptions: SwaggerCustomOptions = {
       swaggerOptions: {
         persistAuthorization: true,
+        withCredentials: true,
       },
+      customSiteTitle: `API DOCS - let's Git it`,
     };
 
     const swaggerConfig = new DocumentBuilder()
       .setTitle("API DOCS - let's Git it")
-      .setDescription("The let's Git it API description")
+      .setDescription(`The let's Git it API description`)
       .setVersion('1.0.0')
       .addTag('Auth')
       .addTag('Community')
       .addTag('Ranks')
       .addTag('User')
       //JWT 토큰 설정
-      .addOAuth2(
+      .addBearerAuth(
         {
-          type: 'oauth2',
-          scheme: 'Bearer',
-          name: 'Authorization',
+          type: 'http',
+          scheme: 'bearer',
+          name: 'authorization',
           in: 'header',
+          bearerFormat: 'JWT',
         },
         'accessToken',
       )
+      .addCookieAuth('Refresh')
       .build();
 
     const swaggerOptions: SwaggerDocumentOptions = {

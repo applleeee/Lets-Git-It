@@ -1,17 +1,21 @@
+import { User } from './../entities/User';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { QueryFailedError, TypeORMError } from 'typeorm';
-import { User } from '../entities/User';
-import { SignUpDto } from '../auth/dto/auth.dto';
+import { SignUpDto } from './dto/createUser.dto';
 import { UserRepository } from './user.repository';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { UpdateMyPageDto } from './dto/mypage.dto';
 
-class MockRepository {
+class MockRepository extends User {
   create = jest.fn();
   save = jest.fn();
   findOneBy = jest.fn();
   update = jest.fn();
+
+  constructor() {
+    super();
+  }
 }
 
 describe('UserRepository', () => {
@@ -95,29 +99,37 @@ describe('UserRepository', () => {
       user.isKorean = signUpData.isKorean;
 
       jest.spyOn(mockRepository, 'create').mockReturnValue(user);
-      jest.spyOn(mockRepository, 'save').mockReturnValue(undefined);
+      jest.spyOn(mockRepository, 'save').mockReturnValue(user);
 
-      await userRepository.createUser(signUpData);
+      const result = await userRepository.createUser(signUpData);
 
+      expect(result).toEqual(user);
       expect(mockRepository.create).toHaveBeenCalledWith(signUpData);
       expect(mockRepository.save).toHaveBeenCalledWith(user);
     });
 
     it('FAILURE : Should handle a duplicate username when creating a user', async () => {
+      const user = new User();
+      user.githubId = signUpData.githubId;
+      user.fieldId = signUpData.fieldId;
+      user.careerId = signUpData.careerId;
+      user.isKorean = signUpData.isKorean;
+
       const mockError = new QueryFailedError(
         `test`,
         [],
         new Error('ER_DUP_ENTRY'),
       );
 
+      jest.spyOn(mockRepository, 'create').mockReturnValue(user);
       jest.spyOn(mockRepository, 'save').mockRejectedValue(mockError);
 
-      const existUser = await mockRepository.create(signUpData);
+      await mockRepository.create(signUpData);
       try {
-        await mockRepository.save(existUser);
+        await mockRepository.save(user);
       } catch (error) {
         try {
-          if (error.message === 'ER_DUP_ENTRY') {
+          if (error.name === 'QueryFailedError') {
             expect(error).toBeInstanceOf(QueryFailedError);
             throw new HttpException('EXISTING_USERNAME', HttpStatus.CONFLICT);
           } else {
@@ -133,7 +145,8 @@ describe('UserRepository', () => {
         }
       }
 
-      expect(mockRepository.save).toHaveBeenCalledWith(existUser);
+      expect(mockRepository.create).toHaveBeenCalledWith(signUpData);
+      expect(mockRepository.save).toHaveBeenCalledWith(user);
     });
 
     it('FAILURE : Should handle other errors when creating a user', async () => {
@@ -171,15 +184,39 @@ describe('UserRepository', () => {
         careerId: 1,
         isKorean: true,
       };
+      const updateResult = { affected: 1, raw: [] };
 
-      jest.spyOn(mockRepository, 'update');
+      jest.spyOn(mockRepository, 'update').mockResolvedValue(updateResult);
 
-      await userRepository.updateMyPage(userId, partialEntity);
+      const result = await userRepository.updateMyPage(userId, partialEntity);
 
+      expect(result).toEqual(updateResult);
       expect(mockRepository.update).toBeCalledWith(
         { id: userId },
         partialEntity,
       );
+    });
+  });
+
+  describe('updateUserRefreshToken()', () => {
+    it('SUCCESS : ', async () => {
+      // Given
+      const id = 1;
+      const hashedRefreshToken = 'test';
+      const updateResult = { affected: 1, raw: [] };
+      jest.spyOn(mockRepository, 'update').mockResolvedValue(updateResult);
+
+      // When
+      const result = await userRepository.updateUserRefreshToken(
+        id,
+        hashedRefreshToken,
+      );
+
+      // Then
+      expect(result).toEqual(updateResult);
+      expect(mockRepository.update).toHaveBeenCalledWith(id, {
+        hashedRefreshToken,
+      });
     });
   });
 });

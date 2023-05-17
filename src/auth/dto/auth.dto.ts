@@ -1,9 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Comment } from 'src/entities/Comment';
-import { IsBoolean, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { Type, Exclude, Expose } from 'class-transformer';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
 import { Post } from 'src/entities/Post';
 
+/**
+ * @author MyeongSeok
+ * @description 깃허브 엑세스 토큰을 발급 받기 위해 필요한 github code 입니다.
+ */
 export class GithubCodeDto {
   /**
    * github access token을 얻기 위한 github code 입니다.
@@ -18,7 +22,16 @@ export class GithubCodeDto {
   readonly code: string;
 }
 
-export class SignUpDto {
+/**
+ * @author MyeongSeok
+ * @description 회원가입 시 필요한 정보를 받는 req DTO 입니다.
+ * @param githubId github user id
+ * @param fieldId 유저의 개발 분야 id
+ * @param careerId 유저의 개발 경력 id
+ * @param isKorean 한국인 유무
+ * @param userName github user name
+ */
+export class SignUpWithUserNameDto {
   /**
    * 유저의 github userId 입니다.
    * @example 12345
@@ -70,9 +83,7 @@ export class SignUpDto {
   @Type(() => Boolean)
   @IsBoolean()
   readonly isKorean: boolean;
-}
 
-export class SignUpWithUserNameDto extends SignUpDto {
   /**
    * 유저의 github userName입니다.
    * @example userName
@@ -89,6 +100,7 @@ export class SignUpWithUserNameDto extends SignUpDto {
 
 export class AuthorizedUser {
   readonly id: number;
+  readonly userName: string;
   readonly idsOfPostsCreatedByUser?: Post[];
   readonly idsOfPostLikedByUser?: number[];
   readonly idsOfCommentsCreatedByUser?: Comment[];

@@ -1,3 +1,4 @@
+import { JwtRefreshStrategy } from './strategy/jwt-refresh.strategy';
 import { CommunityRepository } from './../community/community.repository';
 import { MainCategory } from '../entities/MainCategory';
 import { SubCategory } from '../entities/SubCategory';
@@ -13,7 +14,7 @@ import { UserModule } from '../user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { jwtConstants } from './constants';
-import { JwtStrategy } from './jwt.strategy';
+import { JwtStrategy } from './strategy/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { AuthRepository } from './auth.repository';
 import { RankModule } from '../rank/rank.module';
@@ -51,8 +52,8 @@ import { RankerProfileRepository } from '../rank/rankerProfile.repository';
     UserModule,
     PassportModule,
     JwtModule.register({
-      secret: jwtConstants.secret,
-      signOptions: { expiresIn: jwtConstants.expiresIn },
+      secret: jwtConstants.jwtSecret,
+      signOptions: { expiresIn: `${jwtConstants.jwtExpiresIn}s` },
     }),
     RankModule,
     RankerProfile,
@@ -62,6 +63,7 @@ import { RankerProfileRepository } from '../rank/rankerProfile.repository';
     AuthService,
     UserService,
     JwtStrategy,
+    JwtRefreshStrategy,
     AuthRepository,
     CommunityRepository,
     CommunityService,
@@ -71,6 +73,6 @@ import { RankerProfileRepository } from '../rank/rankerProfile.repository';
     UserRepository,
     RankerProfileRepository,
   ],
-  exports: [AuthService, AuthRepository],
+  exports: [AuthService, AuthRepository, JwtStrategy, JwtRefreshStrategy],
 })
 export class AuthModule {}

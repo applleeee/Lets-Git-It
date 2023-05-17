@@ -1,6 +1,12 @@
+import { promisify } from 'util';
 import { RankerProfileRepository } from './../rank/rankerProfile.repository';
-import { SignUpDto } from './../auth/dto/auth.dto';
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { SignUpDto } from './dto/createUser.dto';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { User } from '../entities/User';
 import { UserRepository } from './user.repository';
 import { lastValueFrom, map } from 'rxjs';
@@ -9,6 +15,7 @@ import { HttpService } from '@nestjs/axios';
 import { CommunityRepository } from '../community/community.repository';
 import { MyPageDto, UpdateMyPageDto } from './dto/mypage.dto';
 import { AxiosRequestConfig } from 'axios';
+import { pbkdf2 } from 'crypto';
 dotenv.config();
 
 @Injectable()
@@ -19,7 +26,7 @@ export class UserService {
     private readonly rankerProfileRepository: RankerProfileRepository,
     private readonly communityRepository: CommunityRepository,
   ) {}
-  // todo refactoring : getUser 메서드 getUserByKeyword로 통합
+
   async getByGithubId(githubId: number): Promise<User> {
     return await this.userRepository.getByGithubId(githubId);
   }
@@ -31,8 +38,14 @@ export class UserService {
   async getGithubAccessToken(code: string) {
     const requestBody = {
       code,
-      client_id: process.env.AUTH_CLIENT_ID,
-      client_secret: process.env.AUTH_CLIENT_SECRETS,
+      client_id:
+        process.env.AUTH_CLIENT_ID_PROD ||
+        process.env.AUTH_CLIENT_ID_DEV ||
+        process.env.AUTH_CLIENT_ID_LOCAL,
+      client_secret:
+        process.env.AUTH_CLIENT_SECRETS_PROD ||
+        process.env.AUTH_CLIENT_SECRETS_DEV ||
+        process.env.AUTH_CLIENT_SECRETS_LOCAL,
     };
 
     const config: AxiosRequestConfig = {
@@ -51,7 +64,7 @@ export class UserService {
     );
 
     if (result === undefined) {
-      throw new HttpException('WRONG_GITHUB_CODE', HttpStatus.BAD_REQUEST);
+      throw new BadRequestException('WRONG_GITHUB_CODE');
     }
     return result;
   }
@@ -69,10 +82,7 @@ export class UserService {
         .pipe(map((res) => res.data)),
     );
     if (result === undefined) {
-      throw new HttpException(
-        'WRONG_GITHUB_ACCESS_TOKEN',
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new NotFoundException('NOT_FOUND_GITHUB_USER');
     }
     return result;
   }
@@ -111,6 +121,73 @@ export class UserService {
   }
 
   async updateMyPage(userId: number, partialEntity: UpdateMyPageDto) {
-    await this.userRepository.updateMyPage(userId, partialEntity);
+    return await this.userRepository.updateMyPage(userId, partialEntity);
+  }
+
+  async saveRefreshToken(refreshToken: string, userId: number) {
+    const salt = process.env.REFRESH_SALT;
+    const iterations = +process.env.REFRESH_ITERATIONS;
+    const keylen = +process.env.REFRESH_KEYLEN;
+    const digest = process.env.REFRESH_DIGEST;
+    const pbkdf2Promise = promisify(pbkdf2);
+    const key = await pbkdf2Promise(
+      refreshToken,
+      salt,
+      iterations,
+      keylen,
+      digest,
+    );
+
+    const hashedRefreshToken = key.toString('base64');
+
+    return await this.userRepository.updateUserRefreshToken(
+      userId,
+      hashedRefreshToken,
+    );
+  }
+
+  async getUserIfRefreshTokenMatches(refreshToken: string, id: number) {
+    const user = await this.getById(id);
+
+    const isRefreshTokenMatching: boolean = await this.verifyRefreshToken(
+      user.hashedRefreshToken,
+      refreshToken,
+    );
+
+    if (isRefreshTokenMatching) {
+      const userName = await this.rankerProfileRepository.getUserNameByUserId(
+        id,
+      );
+
+      return { id, userName };
+    }
+  }
+
+  async verifyRefreshToken(
+    hashedRefreshToken: string,
+    currentRefreshToken: string,
+  ) {
+    const salt = process.env.REFRESH_SALT;
+    const iterations = +process.env.REFRESH_ITERATIONS;
+    const keylen = +process.env.REFRESH_KEYLEN;
+    const digest = process.env.REFRESH_DIGEST;
+    const pbkdf2Promise = promisify(pbkdf2);
+    const key = await pbkdf2Promise(
+      currentRefreshToken,
+      salt,
+      iterations,
+      keylen,
+      digest,
+    );
+    const currentHashedRefreshToken = key.toString('base64');
+
+    if (currentHashedRefreshToken !== hashedRefreshToken)
+      throw new UnauthorizedException('UNAUTHORIZED');
+
+    return true;
+  }
+
+  async deleteRefreshToken(id: number) {
+    return await this.userRepository.updateUserRefreshToken(id, null);
   }
 }
