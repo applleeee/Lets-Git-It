@@ -47,7 +47,7 @@ async function bootstrap() {
 
   app.set('trust proxy', true);
   app.useGlobalFilters(new AllExceptionsFilter());
-  app.use(morgan('dev'));
+  app.use(morgan('combined'));
   app.enableCors({
     origin:
       process.env.CORS_ORIGIN ||
