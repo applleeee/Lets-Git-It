@@ -14,6 +14,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request) => {
+          console.log('request: ', request);
           return request?.signedCookies?.Refresh;
         },
       ]),
