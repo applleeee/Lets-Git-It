@@ -1,7 +1,7 @@
 import { User } from './../entities/User';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { QueryFailedError, TypeORMError, UpdateResult } from 'typeorm';
+import { QueryFailedError, TypeORMError } from 'typeorm';
 import { SignUpDto } from './dto/createUser.dto';
 import { UserRepository } from './user.repository';
 import { HttpException, HttpStatus } from '@nestjs/common';
