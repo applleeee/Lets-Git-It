@@ -9,12 +9,12 @@ export const jwtConstants = {
 };
 
 export const cookieConstants = {
-  // domain:
-  //   process.env.COOKIE_DOMAIN || process.env.COOKIE_DOMAIN_DEV || 'localhost',
+  domain:
+    process.env.COOKIE_DOMAIN || process.env.COOKIE_DOMAIN_DEV || 'localhost',
   path: '/',
   httpOnly: true,
   maxAge: Number(jwtConstants.jwtRefreshExpiresIn) * 1000,
-  // sameSite: 'none' as const,
+  sameSite: 'none' as const,
   secure: true,
   signed: true,
 };
