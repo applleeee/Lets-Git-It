@@ -14,7 +14,7 @@ export const cookieConstants = {
   path: '/',
   httpOnly: true,
   maxAge: Number(jwtConstants.jwtRefreshExpiresIn) * 1000,
-  // sameSite: 'none' as const,
+  sameSite: 'none' as const,
   secure: true,
   signed: true,
 };
