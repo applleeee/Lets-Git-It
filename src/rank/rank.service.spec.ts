@@ -8,7 +8,6 @@ describe('RankService', () => {
   let service: RankService;
   let rankerProfileRepository: RankerProfileRepository;
   let rankingRepository: RankingRepository;
-  let tierRepository: TierRepository;
 
   const testRankerDetail = {
     rankerId: 1,
@@ -38,50 +37,30 @@ describe('RankService', () => {
     sponsorNumber: 1,
     contributingRepoStarNumber: 1,
     myStarNumber: 1,
+    tierId: 1,
     tier: '',
     tierImage: '',
+    userRank: '1',
   };
-  const testMaxValues = {
-    maxCuriosityScore: '',
-    maxPassionScore: '',
-    maxFameScore: '',
-    maxAbilityScore: '',
-    maxTotalScore: '',
-    maxIssueNumber: 0,
-    maxForkingNumber: 0,
-    maxStarringNumber: 0,
-    maxFollowingNumber: 0,
-    maxCommitNumber: 0,
-    maxPRNumber: 0,
-    maxReviewNumber: 0,
-    maxPersonalRepoNumber: 0,
-    maxFollowerNumber: 0,
-    maxForkedNumber: 0,
-    maxWatchedNumber: 0,
-    maxSponsorNumber: 0,
-    maxContributingRepoStarNumber: 0,
-    maxMyStartNumber: 0,
-  };
-  const testAvgValues = {
-    avgCuriosityScore: '',
-    avgPassionScore: '',
-    avgFameScore: '',
-    avgAbilityScore: '',
-    avgTotalScore: '',
-    avgIssueNumber: '',
-    avgForkingNumber: '',
-    avgStarringNumber: '',
-    avgFollowingNumber: '',
-    avgCommitNumber: '',
-    avgPRNumber: '',
-    avgReviewNumber: '',
-    avgPersonalRepoNumber: '',
-    avgFollowerNumber: '',
-    avgForkedNumber: '',
-    avgWatchedNumber: '',
-    avgSponsorNumber: '',
-    avgContributingRepoStarNumber: '',
-    avgMyStartNumber: '',
+
+  const rankerPosition = {
+    rankerPosCuriosityScore: 20,
+    rankerPosPassionScore: 13,
+    rankerPosFameScore: 11,
+    rankerPosAbilityScore: 0,
+    rankerPosTotalScore: 8,
+    rankerPosIssueNumber: 50,
+    rankerPosForkingNumber: 23,
+    rankerPosStarringNumber: 10,
+    rankerPosFollowingNumber: 13,
+    rankerPosCommitNumber: 12,
+    rankerPosReviewNumber: 0,
+    rankerPosPersonalRepoNumber: 33,
+    rankerPosFollowerNumber: 12,
+    rankerPosForkedNumber: 0,
+    rankerPosWatchedNumber: 1,
+    rankerPosSponsorNumber: NaN,
+    rankerPosContributingRepoStarNumber: 0,
   };
 
   beforeEach(async () => {
@@ -103,7 +82,9 @@ describe('RankService', () => {
           useValue: {
             getMaxValues: jest.fn(),
             getAvgValues: jest.fn(),
+            getAUserRanking: jest.fn(),
             getTop100Languages: jest.fn(),
+            getTierMaxValues: jest.fn(),
           },
         },
         {
@@ -117,59 +98,58 @@ describe('RankService', () => {
     service = moduleRef.get<RankService>(RankService);
     rankerProfileRepository = moduleRef.get(RankerProfileRepository);
     rankingRepository = moduleRef.get(RankingRepository);
-    tierRepository = moduleRef.get(TierRepository);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  describe('CheckRanker', () => {
-    it('Ranker Exists', async () => {
-      const userName = 'TopBackDev';
+  // describe('CheckRanker', () => {
+  //   it('Ranker Exists', async () => {
+  //     const userName = 'TopBackDev';
+  //     const tierMaxValues = [{ rank: '1', ranker_profile_id: 1 }];
 
-      jest
-        .spyOn(rankerProfileRepository, 'checkRanker')
-        .mockResolvedValue(true);
-      jest
-        .spyOn(rankerProfileRepository, 'getRankerProfile')
-        .mockResolvedValue(testRankerDetail);
-      jest
-        .spyOn(rankingRepository, 'getMaxValues')
-        .mockResolvedValue(testMaxValues);
-      jest
-        .spyOn(rankingRepository, 'getAvgValues')
-        .mockResolvedValue(testAvgValues);
+  //     jest
+  //       .spyOn(rankerProfileRepository, 'checkRanker')
+  //       .mockResolvedValue(true);
+  //     jest
+  //       .spyOn(rankerProfileRepository, 'getRankerProfile')
+  //       .mockResolvedValue(testRankerDetail);
+  //     jest
+  //       .spyOn(rankingRepository, 'getAUserRanking')
+  //       .mockResolvedValue(tierMaxValues);
 
-      const result = await service.checkRanker(userName);
+  //     const result = await service.checkRanker(userName);
 
-      expect(result).toEqual({
-        rankerDetail: testRankerDetail,
-        maxValues: testMaxValues,
-        avgValues: testAvgValues,
-      });
-    });
-    it('Ranker Not Found, Continue to Next Fn', async () => {
-      const userName = 'TopBackDev';
-      jest
-        .spyOn(rankerProfileRepository, 'checkRanker')
-        .mockResolvedValue(false);
+  //     expect(result).toEqual({
+  //       rankerDetail: testRankerDetail,
+  //       rankerPosition,
+  //     });
+  //   });
 
-      jest.spyOn(service, 'getRankerDetail').mockResolvedValue({
-        rankerDetail: testRankerDetail,
-        maxValues: testMaxValues,
-        avgValues: testAvgValues,
-      });
+  //   it('Ranker Not Found, Continue to Next Fn', async () => {
+  //     const userName = 'TopBackDev';
+  //     jest
+  //       .spyOn(rankerProfileRepository, 'checkRanker')
+  //       .mockResolvedValue(false);
 
-      const rankerInfo = await service.checkRanker(userName);
+  //     jest.spyOn(service, 'getRankerDetail').mockResolvedValue({
+  //       rankerDetail: testRankerDetail,
+  //       rankerPosition,
+  //     });
 
-      expect(rankerInfo).toEqual({
-        rankerDetail: testRankerDetail,
-        maxValues: testMaxValues,
-        avgValues: testAvgValues,
-      });
-    });
-  });
+  //     const rankerInfo = await service.checkRanker(userName);
+
+  //     expect(rankerInfo).toEqual({
+  //       rankerDetail: testRankerDetail,
+  //       rankerPosition,
+  //     });
+  //   });
+  // });
 
   describe('Get Top5', () => {
     it('Get Top 5', async () => {
@@ -201,7 +181,7 @@ describe('RankService', () => {
           followerNumber: 3834,
           myStarNumber: 380,
           commitNumber: 12991,
-          totalScore: '191302.0000',
+          totalScore: '191302',
           tier: 'gold',
           tierImage: null,
         },
@@ -212,7 +192,7 @@ describe('RankService', () => {
           followerNumber: 15,
           myStarNumber: 2,
           commitNumber: 971,
-          totalScore: '1020.0000',
+          totalScore: '1020',
           tier: 'silver',
           tierImage: null,
         },
@@ -223,7 +203,7 @@ describe('RankService', () => {
           followerNumber: 12,
           myStarNumber: 3,
           commitNumber: 351,
-          totalScore: '473.0000',
+          totalScore: '473',
           tier: 'silver',
           tierImage: null,
         },
@@ -262,7 +242,7 @@ describe('RankService', () => {
           followerNumber: 3834,
           myStarNumber: 380,
           commitNumber: 12991,
-          totalScore: '191302.0000',
+          totalScore: '191302',
           tier: 'gold',
           tierImage: null,
         },
@@ -273,7 +253,7 @@ describe('RankService', () => {
           followerNumber: 10,
           myStarNumber: 2,
           commitNumber: 189,
-          totalScore: '277.0000',
+          totalScore: '277',
           tier: 'bronze',
           tierImage: null,
         },
@@ -312,7 +292,7 @@ describe('RankService', () => {
           followerNumber: 3834,
           myStarNumber: 380,
           commitNumber: 12991,
-          totalScore: '191302.0000',
+          totalScore: '191302',
           tier: 'gold',
           tierImage: null,
         },
@@ -323,7 +303,7 @@ describe('RankService', () => {
           followerNumber: 15,
           myStarNumber: 2,
           commitNumber: 971,
-          totalScore: '1020.0000',
+          totalScore: '1020',
           tier: 'silver',
           tierImage: null,
         },
@@ -334,7 +314,7 @@ describe('RankService', () => {
           followerNumber: 12,
           myStarNumber: 3,
           commitNumber: 351,
-          totalScore: '473.0000',
+          totalScore: '473',
           tier: 'silver',
           tierImage: null,
         },

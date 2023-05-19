@@ -72,49 +72,6 @@ describe('RankController', () => {
     tierImage: '',
   };
 
-  const testMaxValues = {
-    maxCuriosityScore: '',
-    maxPassionScore: '',
-    maxFameScore: '',
-    maxAbilityScore: '',
-    maxTotalScore: '',
-    maxIssueNumber: 0,
-    maxForkingNumber: 0,
-    maxStarringNumber: 0,
-    maxFollowingNumber: 0,
-    maxCommitNumber: 0,
-    maxPRNumber: 0,
-    maxReviewNumber: 0,
-    maxPersonalRepoNumber: 0,
-    maxFollowerNumber: 0,
-    maxForkedNumber: 0,
-    maxWatchedNumber: 0,
-    maxSponsorNumber: 0,
-    maxContributingRepoStarNumber: 0,
-    maxMyStartNumber: 0,
-  };
-  const testAvgValues = {
-    avgCuriosityScore: '',
-    avgPassionScore: '',
-    avgFameScore: '',
-    avgAbilityScore: '',
-    avgTotalScore: '',
-    avgIssueNumber: '',
-    avgForkingNumber: '',
-    avgStarringNumber: '',
-    avgFollowingNumber: '',
-    avgCommitNumber: '',
-    avgPRNumber: '',
-    avgReviewNumber: '',
-    avgPersonalRepoNumber: '',
-    avgFollowerNumber: '',
-    avgForkedNumber: '',
-    avgWatchedNumber: '',
-    avgSponsorNumber: '',
-    avgContributingRepoStarNumber: '',
-    avgMyStartNumber: '',
-  };
-
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [RankController],
@@ -170,26 +127,18 @@ describe('RankController', () => {
       const testComapreRankerOutput = {
         firstUser: {
           testRankerDetail1,
-          testMaxValues,
-          testAvgValues,
         },
         secondUser: {
           testRankerDetail2,
-          testMaxValues,
-          testAvgValues,
         },
       };
       rankService.checkRanker = jest
         .fn()
         .mockResolvedValueOnce({
           testRankerDetail1,
-          testMaxValues,
-          testAvgValues,
         })
         .mockResolvedValueOnce({
           testRankerDetail2,
-          testMaxValues,
-          testAvgValues,
         });
       const result = await rankController.compareRanker(userName);
 
@@ -201,14 +150,10 @@ describe('RankController', () => {
       const userName = 'Oh';
       const testRankerDetail = {
         testRankerDetail1,
-        testMaxValues,
-        testAvgValues,
       };
 
       rankService.checkRanker = jest.fn().mockResolvedValueOnce({
         testRankerDetail1,
-        testMaxValues,
-        testAvgValues,
       });
       const result = await rankController.getRankerDetail(userName);
 

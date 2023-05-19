@@ -27,7 +27,6 @@ export class RankerProfileRepository {
       const user = await this.rankerProfileRepository.findOne({
         where: { userId: userId },
       });
-
       return user.name;
     } catch (e) {
       throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
@@ -73,11 +72,11 @@ export class RankerProfileRepository {
           'RankerProfile.company as company',
           'RankerProfile.region as region',
           'r.main_language as mainLang',
-          'r.curiosity_score as curiosityScore',
-          'r.passion_score as passionScore',
-          'r.fame_score as fameScore',
-          'r.ability_score as abilityScore',
-          'r.total_score as totalScore',
+          'ROUND(r.curiosity_score) as curiosityScore',
+          'ROUND(r.passion_score) as passionScore',
+          'ROUND(r.fame_score) as fameScore',
+          'ROUND(r.ability_score) as abilityScore',
+          'ROUND(r.total_score) as totalScore',
           'r.curiosity_raise_issue_number as issueNumber',
           'r.curiosity_fork_repository_number as forkingNumber',
           'r.curiosity_give_star_repository_number as starringNumber',
@@ -92,8 +91,10 @@ export class RankerProfileRepository {
           'r.ability_sponsered_number as sponsorNumber',
           'r.ability_contribute_repository_star_number as contributingRepoStarNumber',
           'r.ability_public_repository_star_number as myStarNumber',
+          'r.tier_id as tierId',
           't.name as tier',
           't.image_url as tierImage',
+          'RankerProfile.updated_at as updatedTime',
         ])
         .leftJoin(Ranking, `r`, 'RankerProfile.id = r.ranker_profile_id')
         .leftJoin(Tier, `t`, `t.id=r.tier_id`)
@@ -158,6 +159,7 @@ export class RankerProfileRepository {
       .where('RankerProfile.name LIKE :rankerName', {
         rankerName: `%${userName}%`,
       })
+      .limit(10)
       .getRawMany();
 
     return ranker;

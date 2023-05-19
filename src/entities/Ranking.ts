@@ -103,4 +103,10 @@ export class Ranking {
   })
   @JoinColumn([{ name: 'tier_id', referencedColumnName: 'id' }])
   tier: Tier;
+
+  @Column('timestamp', { name: 'created_at', default: () => "'now()'" })
+  createdAt: Date;
+
+  @Column('timestamp', { name: 'updated_at', nullable: true })
+  updatedAt: Date | null;
 }
