@@ -17,6 +17,7 @@ import {
   Res,
   UseGuards,
   Req,
+  Inject,
 } from '@nestjs/common';
 import { GithubCodeDto, SignUpWithUserNameDto } from './dto/auth.dto';
 import { ApiTags } from '@nestjs/swagger';
@@ -43,11 +44,7 @@ export class AuthController {
   @Get('/getCode')
   @HttpCode(HttpStatus.OK)
   async getCode() {
-    return `https://github.com/login/oauth/authorize?client_id=${
-      process.env.AUTH_CLIENT_ID_DEV || process.env.AUTH_CLIENT_ID_LOCAL
-    }&redirect_uri=${
-      process.env.AUTH_CALLBACK_DEV || process.env.AUTH_CALLBACK_LOCAL
-    }/githublogin`;
+    return `https://github.com/login/oauth/authorize?client_id=${process.env.AUTH_CLIENT_ID}&redirect_uri=${process.env.AUTH_CALLBACK}/githublogin`;
   }
 
   /**

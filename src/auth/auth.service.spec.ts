@@ -1,6 +1,5 @@
 import { RankerProfileOutput } from './../rank/dto/rankerProfile.dto';
 import { User } from './../entities/User';
-import { jwtConstants, cookieConstants } from './constants';
 import { GithubCodeDto, SignUpWithUserNameDto } from './dto/auth.dto';
 import { RankerProfile } from './../entities/RankerProfile';
 import { Field } from './../entities/Field';
@@ -270,8 +269,8 @@ describe('AuthService', () => {
       const payload = { userId: 1, userName: 'test' };
       const jwtToken = 'test';
       const jwtOptions = {
-        secret: jwtConstants.jwtSecret,
-        expiresIn: `${jwtConstants.jwtExpiresIn}s`,
+        secret: '',
+        expiresIn: `15s`,
       };
       jest.spyOn(jwtService, 'sign').mockReturnValue(jwtToken);
 
@@ -294,13 +293,21 @@ describe('AuthService', () => {
       const payload = { userId };
       const refreshToken = 'test';
       const jwtOptions = {
-        secret: jwtConstants.jwtRefreshSecret,
-        expiresIn: `${jwtConstants.jwtRefreshExpiresIn}s`,
+        secret: '',
+        expiresIn: `15s`,
       };
-
+      const cookieOptions = {
+        domain: '',
+        path: '/',
+        httpOnly: true,
+        maxAge: 1000,
+        sameSite: 'none' as const,
+        secure: true,
+        signed: true,
+      };
       jest.spyOn(jwtService, 'sign').mockReturnValue(refreshToken);
 
-      const expectedResult = { refreshToken, ...cookieConstants };
+      const expectedResult = { refreshToken, ...cookieOptions };
 
       // When
       const result = await authService.getCookiesWithJwtRefreshToken(userId);
@@ -321,7 +328,7 @@ describe('AuthService', () => {
       };
 
       const jwtOptions = {
-        secret: jwtConstants.jwtRefreshSecret,
+        secret: '',
       };
 
       jest.spyOn(jwtService, 'verify').mockReturnValue(payload);
@@ -345,7 +352,7 @@ describe('AuthService', () => {
       };
 
       const jwtOptions = {
-        secret: jwtConstants.jwtRefreshSecret,
+        secret: '',
       };
       jest.spyOn(jwtService, 'verify').mockReturnValue(payload);
 
@@ -363,7 +370,16 @@ describe('AuthService', () => {
   describe('getCookiesForLogOut()', () => {
     it('SUCCESS : Should return refreshOptions', async () => {
       // Given
-      const { maxAge, ...refreshOptions } = cookieConstants;
+      const cookieOptions = {
+        domain: '',
+        path: '/',
+        httpOnly: true,
+        maxAge: 1000,
+        sameSite: 'none' as const,
+        secure: true,
+        signed: true,
+      };
+      const { maxAge, ...refreshOptions } = cookieOptions;
 
       // When
       const result = await authService.getCookiesForLogOut();
