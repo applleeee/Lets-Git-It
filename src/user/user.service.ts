@@ -10,13 +10,11 @@ import {
 import { User } from '../entities/User';
 import { UserRepository } from './user.repository';
 import { lastValueFrom, map } from 'rxjs';
-import * as dotenv from 'dotenv';
 import { HttpService } from '@nestjs/axios';
 import { CommunityRepository } from '../community/community.repository';
 import { MyPageDto, UpdateMyPageDto } from './dto/mypage.dto';
 import { AxiosRequestConfig } from 'axios';
 import { pbkdf2 } from 'crypto';
-dotenv.config();
 
 @Injectable()
 export class UserService {
@@ -38,14 +36,8 @@ export class UserService {
   async getGithubAccessToken(code: string) {
     const requestBody = {
       code,
-      client_id:
-        process.env.AUTH_CLIENT_ID_PROD ||
-        process.env.AUTH_CLIENT_ID_DEV ||
-        process.env.AUTH_CLIENT_ID_LOCAL,
-      client_secret:
-        process.env.AUTH_CLIENT_SECRETS_PROD ||
-        process.env.AUTH_CLIENT_SECRETS_DEV ||
-        process.env.AUTH_CLIENT_SECRETS_LOCAL,
+      client_id: process.env.AUTH_CLIENT_ID,
+      client_secret: process.env.AUTH_CLIENT_SECRETS,
     };
 
     const config: AxiosRequestConfig = {

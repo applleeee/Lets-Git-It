@@ -8,7 +8,7 @@ import { Readable } from 'stream';
 
 export const s3Option = {
   accessKeyId: process.env.S3_ACCESS_KEY_ID,
-  secretAccessKey: process.env.S3_SECRET_ACEESS_KEY,
+  secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
   region: 'ap-northeast-2',
 };
 
@@ -27,9 +27,7 @@ export const getS3Data = async (filePath: string) => {
     };
 
     const bucketParams = {
-      Bucket:
-        (process.env.S3_BUCKET_NAME_PROD as string) ||
-        (process.env.S3_BUCKET_NAME_DEV as string),
+      Bucket: process.env.S3_BUCKET_NAME as string,
       Key: filePath,
     };
 
@@ -52,9 +50,7 @@ export const uploadToS3 = async (
     const s3 = new AWS.S3(s3Option);
 
     const params = {
-      Bucket:
-        (process.env.S3_BUCKET_NAME_PROD as string) ||
-        (process.env.S3_BUCKET_NAME_DEV as string),
+      Bucket: process.env.S3_BUCKET_NAME as string,
       Key: name,
       Body: file,
       ContentType: mimetype,
@@ -71,9 +67,7 @@ export const deleteS3Data = async (filePaths: string[]) => {
   try {
     const s3Client = new S3Client(s3Option);
     const bucketParams = {
-      Bucket:
-        (process.env.S3_BUCKET_NAME_PROD as string) ||
-        (process.env.S3_BUCKET_NAME_DEV as string),
+      Bucket: process.env.S3_BUCKET_NAME as string,
       Delete: {
         Objects: filePaths.map((filePath) => ({ Key: filePath })),
         Quiet: false,

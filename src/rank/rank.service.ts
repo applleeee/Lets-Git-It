@@ -1,13 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { RankerProfileRepository } from './rankerProfile.repository';
-import * as dotenv from 'dotenv';
 import { TierRepository } from './tier.repository';
 import { RankingRepository } from './ranking.repository';
 import { SearchOutput, Top100, Top5 } from './dto/rankerProfile.dto';
 import cheerio from 'cheerio';
-
-dotenv.config();
 
 @Injectable()
 export class RankService {

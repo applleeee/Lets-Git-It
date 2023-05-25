@@ -13,7 +13,6 @@ import { HttpModule } from '@nestjs/axios';
 import { UserModule } from '../user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
-import { jwtConstants } from './constants';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { AuthRepository } from './auth.repository';
@@ -52,8 +51,8 @@ import { RankerProfileRepository } from '../rank/rankerProfile.repository';
     UserModule,
     PassportModule,
     JwtModule.register({
-      secret: jwtConstants.jwtSecret,
-      signOptions: { expiresIn: `${jwtConstants.jwtExpiresIn}s` },
+      secret: process.env.JWT_SECRET_KEY,
+      signOptions: { expiresIn: `${process.env.JWT_EXPIRES_IN}s` },
     }),
     RankModule,
     RankerProfile,
@@ -72,7 +71,9 @@ import { RankerProfileRepository } from '../rank/rankerProfile.repository';
     TierRepository,
     UserRepository,
     RankerProfileRepository,
+    JwtStrategy,
+    JwtRefreshStrategy,
   ],
-  exports: [AuthService, AuthRepository, JwtStrategy, JwtRefreshStrategy],
+  exports: [AuthService, AuthRepository],
 })
 export class AuthModule {}

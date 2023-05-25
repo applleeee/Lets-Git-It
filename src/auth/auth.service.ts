@@ -3,13 +3,13 @@ import { RankService } from './../rank/rank.service';
 import { UserService } from './../user/user.service';
 import { RankerProfileRepository } from '../rank/rankerProfile.repository';
 import { AuthRepository } from './auth.repository';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { GithubCodeDto, SignUpWithUserNameDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
-import * as dotenv from 'dotenv';
-import { jwtConstants, cookieConstants } from './constants';
 import { HttpService } from '@nestjs/axios';
-dotenv.config();
+import { ConfigType } from '@nestjs/config';
+import authConfig from '../config/authConfig';
+import cookieConfig from '../config/cookieConfig';
 
 @Injectable()
 export class AuthService {
@@ -21,6 +21,10 @@ export class AuthService {
     private readonly rankService: RankService,
     private readonly userRepository: UserRepository,
     private readonly rankerProfileRepository: RankerProfileRepository,
+    @Inject(cookieConfig.KEY)
+    private readonly _cookieConfig: ConfigType<typeof cookieConfig>,
+    @Inject(authConfig.KEY)
+    private readonly _authConfig: ConfigType<typeof authConfig>,
   ) {}
 
   async signIn(githubCode: GithubCodeDto) {
@@ -89,33 +93,46 @@ export class AuthService {
   async getJwtAccessToken(userId: number, userName: string) {
     const payload = { userId, userName };
     return this.jwtService.sign(payload, {
-      secret: jwtConstants.jwtSecret,
-      expiresIn: `${jwtConstants.jwtExpiresIn}s`,
+      secret: this._authConfig.jwtSecret,
+      expiresIn: `${this._authConfig.jwtExpiresIn}s`,
     });
   }
 
   async getCookiesWithJwtRefreshToken(userId: number) {
     const payload = { userId };
     const refreshToken = this.jwtService.sign(payload, {
-      secret: jwtConstants.jwtRefreshSecret,
-      expiresIn: `${jwtConstants.jwtRefreshExpiresIn}s`,
+      secret: this._authConfig.jwtRefreshSecret,
+      expiresIn: `${this._authConfig.jwtRefreshExpiresIn}s`,
     });
-
-    return { refreshToken, ...cookieConstants };
+    const cookieOptions = this.getCookieOptions();
+    return { refreshToken, ...cookieOptions };
   }
 
   async isRefreshTokenExpirationDateHalfPast(
     refreshToken: string,
   ): Promise<boolean> {
     const payload = await this.jwtService.verify(refreshToken, {
-      secret: jwtConstants.jwtRefreshSecret,
+      secret: this._authConfig.jwtRefreshSecret,
     });
 
     return (payload.exp - Date.now()) / (payload.exp - payload.iat) < 0.5;
   }
 
   async getCookiesForLogOut() {
-    const { maxAge, ...refreshOptions } = cookieConstants;
+    const cookieOptions = this.getCookieOptions();
+    const { maxAge, ...refreshOptions } = cookieOptions;
     return refreshOptions;
+  }
+
+  private getCookieOptions() {
+    return {
+      domain: this._cookieConfig.domain,
+      path: '/',
+      httpOnly: true,
+      maxAge: Number(this._authConfig.jwtRefreshExpiresIn) * 1000,
+      sameSite: 'none' as const,
+      secure: true,
+      signed: true,
+    };
   }
 }

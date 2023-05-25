@@ -7,7 +7,6 @@ import {
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './utils/http-exception.filter';
-
 import * as morgan from 'morgan';
 import { ValidationError } from 'class-validator';
 import { SwaggerSetup } from './swagger/swagger';
@@ -15,20 +14,25 @@ import * as cookieParser from 'cookie-parser';
 import { readFileSync } from 'fs';
 import * as basicAuth from 'express-basic-auth';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { ConfigType } from '@nestjs/config';
+import appConfig from './config/appConfig';
 
 async function bootstrap() {
-  const ssl = process.env.SSL === 'true' ? true : false;
   let httpsOptions = null;
-  if (ssl) {
+
+  if (process.env.SSL_MODE) {
     httpsOptions = {
       key: readFileSync(process.env.SSL_KEY_PATH),
       cert: readFileSync(process.env.SSL_CERT_PATH),
       ca: readFileSync(process.env.SSL_CA_PATH),
     };
   }
-  const app: NestExpressApplication = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     httpsOptions,
   });
+
+  const config = app.get<ConfigType<typeof appConfig>>(appConfig.KEY);
+
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalPipes(
     new ValidationPipe({
@@ -49,25 +53,22 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
   app.use(morgan('combined'));
   app.enableCors({
-    origin:
-      process.env.CORS_ORIGIN ||
-      process.env.CORS_DEV_ORIGIN ||
-      process.env.CORS_LOCAL_ORIGIN,
+    origin: config.corsOrigin,
     methods: ['GET', 'POST', 'DELETE', 'PUT', 'PATCH', 'OPTIONS'],
     credentials: true,
   });
-  app.use(cookieParser(process.env.COOKIE_SECRET_KEY));
+  app.use(cookieParser(config.cookieSecretKey));
 
-  const PORT = process.env.PORT;
+  const PORT = config.port;
   console.log(`Server Listening to localhost:${PORT}~`);
 
   // dev server & local server Swagger 연결
-  if (process.env.DB_HOST_DEV || process.env.DB_HOST_LOCAL) {
+  if (config.nodeEnv !== 'prod') {
     app.use(
       ['/api-docs'],
       basicAuth({
         users: {
-          [process.env.SWAGGER_USER]: `${process.env.SWAGGER_PASSWORD}`,
+          [config.swagger.user]: `${config.swagger.password}`,
         },
         challenge: true,
       }),
@@ -77,4 +78,5 @@ async function bootstrap() {
 
   await app.listen(PORT);
 }
+
 bootstrap();
