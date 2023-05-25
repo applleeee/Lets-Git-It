@@ -1,6 +1,6 @@
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from './../auth/guard/jwt-auth.guard';
-import { AuthorizedUser } from './../auth/dto/auth.dto';
+import { AuthorizedUser } from '../auth/domain/auth.entity';
 import {
   Controller,
   Get,

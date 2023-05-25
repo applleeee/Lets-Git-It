@@ -1,8 +1,17 @@
-import { IsNumber, IsBoolean } from 'class-validator';
-import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
-export class SignUpDto {
+/**
+ * @author MyeongSeok
+ * @description 회원가입 시 필요한 정보를 받는 req DTO 입니다.
+ * @param githubId github user id
+ * @param fieldId 유저의 개발 분야 id
+ * @param careerId 유저의 개발 경력 id
+ * @param isKorean 한국인 유무
+ * @param userName github user name
+ */
+export class SignUpRequestDto {
   /**
    * 유저의 github userId 입니다.
    * @example 12345
@@ -54,4 +63,17 @@ export class SignUpDto {
   @Type(() => Boolean)
   @IsBoolean()
   readonly isKorean: boolean;
+
+  /**
+   * 유저의 github userName입니다.
+   * @example userName
+   */
+  @ApiProperty({
+    description: '유저의 github userName입니다.',
+    example: 'userName',
+    required: true,
+  })
+  @Type(() => String)
+  @IsString()
+  readonly userName: string;
 }

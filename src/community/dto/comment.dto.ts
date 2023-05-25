@@ -1,4 +1,4 @@
-import { AuthorizedUser } from './../../auth/dto/auth.dto';
+import { AuthorizedUser } from '../../auth/domain/auth.entity';
 import { PickType } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsString, IsEnum } from 'class-validator';
 

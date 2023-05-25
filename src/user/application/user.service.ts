@@ -112,8 +112,8 @@ export class UserService {
     return result;
   }
 
-  async updateMyPage(userId: number, partialEntity: UpdateMyPageDto) {
-    return await this.userRepository.updateMyPage(userId, partialEntity);
+  async updateUser(userId: number, partialEntity: UpdateMyPageDto) {
+    return await this.userRepository.updateUser(userId, partialEntity);
   }
 
   async saveRefreshToken(refreshToken: string, userId: number) {

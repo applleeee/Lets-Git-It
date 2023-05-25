@@ -1,7 +1,7 @@
 import { HttpStatusCode } from 'axios';
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { Career } from './../../entities/Career';
-import { Field } from './../../entities/Field';
+import { Career } from '../../../entities/Career';
+import { Field } from '../../../entities/Field';
 
 /**
  * @author MyeongSeok

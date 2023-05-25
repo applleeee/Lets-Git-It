@@ -4,7 +4,7 @@ import { UserService } from './../user/user.service';
 import { RankerProfileRepository } from '../rank/rankerProfile.repository';
 import { AuthRepository } from './auth.repository';
 import { Inject, Injectable } from '@nestjs/common';
-import { GithubCodeDto, SignUpWithUserNameDto } from './dto/auth.dto';
+import { GithubCodeDto, SignUpWithUserNameDto } from './domain/auth.entity';
 import { JwtService } from '@nestjs/jwt';
 import { HttpService } from '@nestjs/axios';
 import { ConfigType } from '@nestjs/config';

@@ -1,4 +1,4 @@
-import { AuthorizedUser } from './../auth/dto/auth.dto';
+import { AuthorizedUser } from '../auth/domain/auth.entity';
 import { User } from './../entities/User';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CommunityRepository } from './community.repository';

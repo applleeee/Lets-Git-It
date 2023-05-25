@@ -3,7 +3,7 @@ import { CommunityService } from '../../community/community.service';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
-import { AuthorizedUser } from '../dto/auth.dto';
+import { AuthorizedUser } from '../domain/auth.entity';
 import { ConfigType } from '@nestjs/config';
 import authConfig from '../../config/authConfig';
 

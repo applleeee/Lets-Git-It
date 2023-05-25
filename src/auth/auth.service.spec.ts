@@ -1,6 +1,6 @@
 import { RankerProfileOutput } from './../rank/dto/rankerProfile.dto';
 import { User } from './../entities/User';
-import { GithubCodeDto, SignUpWithUserNameDto } from './dto/auth.dto';
+import { GithubCodeDto, SignUpWithUserNameDto } from './domain/auth.entity';
 import { RankerProfile } from './../entities/RankerProfile';
 import { Field } from './../entities/Field';
 import { Career } from './../entities/Career';

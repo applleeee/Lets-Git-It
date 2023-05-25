@@ -49,7 +49,7 @@ export class UserRepository {
     }
   }
 
-  async updateMyPage(userId: number, partialEntity: UpdateMyPageDto) {
+  async updateUser(userId: number, partialEntity: UpdateMyPageDto) {
     return await this.userRepository.update({ id: userId }, partialEntity);
   }
 

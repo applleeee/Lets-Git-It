@@ -52,6 +52,7 @@ export class User {
   })
   isAdmin: boolean | null;
 
+  // todo refreshToken 어트리뷰트 정규화 할 것.
   @Column('varchar', {
     name: 'hashed_refresh_token',
     nullable: true,
