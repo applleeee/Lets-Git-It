@@ -20,13 +20,13 @@ import appConfig from './config/appConfig';
 async function bootstrap() {
   let httpsOptions = null;
 
-  if (process.env.SSL_MODE) {
-    httpsOptions = {
-      key: readFileSync(process.env.SSL_KEY_PATH),
-      cert: readFileSync(process.env.SSL_CERT_PATH),
-      ca: readFileSync(process.env.SSL_CA_PATH),
-    };
-  }
+  // if (process.env.SSL_MODE) {
+  //   httpsOptions = {
+  //     key: readFileSync(process.env.SSL_KEY_PATH),
+  //     cert: readFileSync(process.env.SSL_CERT_PATH),
+  //     ca: readFileSync(process.env.SSL_CA_PATH),
+  //   };
+  // }
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     httpsOptions,
   });
@@ -51,7 +51,7 @@ async function bootstrap() {
 
   app.set('trust proxy', true);
   app.useGlobalFilters(new AllExceptionsFilter());
-  app.use(morgan('combined'));
+  app.use(morgan(process.env.NODE_ENV === 'prod' ? 'combined' : 'dev'));
   app.enableCors({
     origin: config.corsOrigin,
     methods: ['GET', 'POST', 'DELETE', 'PUT', 'PATCH', 'OPTIONS'],

@@ -7,7 +7,7 @@ import { CommentLike } from './../entities/CommentLike';
 import { Comment } from './../entities/Comment';
 import { PostLike } from './../entities/PostLike';
 import { Post } from './../entities/Post';
-import { SubCategory } from './../entities/SubCategory';
+import { SubCategory } from '../entities/SubCategory';
 import { DeleteResult, Repository, SelectQueryBuilder } from 'typeorm';
 import { OptionEnum, SortEnum } from './dto/Post.dto';
 

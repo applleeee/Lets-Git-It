@@ -8,7 +8,7 @@ import {
 } from './dto/comment.dto';
 import { Test } from '@nestjs/testing';
 import { CommunityController } from './community.controller';
-import { CommunityService } from './community.service';
+import { CommunityService } from './application/community.service';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import {

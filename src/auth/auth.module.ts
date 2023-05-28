@@ -24,7 +24,7 @@ import { RankerProfile } from '../entities/RankerProfile';
 import { Ranking } from '../entities/Ranking';
 import { Tier } from '../entities/Tier';
 import { Comment } from '../entities/Comment';
-import { CommunityService } from '../community/community.service';
+import { CommunityService } from '../community/application/community.service';
 import { RankService } from '../rank/rank.service';
 import { RankingRepository } from '../rank/ranking.repository';
 import { TierRepository } from '../rank/tier.repository';

@@ -1,5 +1,5 @@
 import { RankerProfileRepository } from '../../rank/rankerProfile.repository';
-import { CommunityService } from '../../community/community.service';
+import { CommunityService } from '../../community/application/community.service';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';

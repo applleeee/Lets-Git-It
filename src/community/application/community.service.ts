@@ -1,22 +1,22 @@
-import { Comment } from './../entities/Comment';
+import { Comment } from '../../entities/Comment';
 import { HttpException, Injectable, HttpStatus } from '@nestjs/common';
-import { CommunityRepository } from './community.repository';
-import { uploadToS3, getS3Data, deleteS3Data } from '../utils/aws';
+import { CommunityRepository } from '../community.repository';
+import { uploadToS3, getS3Data, deleteS3Data } from '../../utils/aws';
 import {
   CreateCommentDto,
   CreateOrDeleteCommentLikesDto,
   DeleteCommentDto,
   UpdateCommentDto,
   Depth,
-} from './dto/comment.dto';
-import { Post } from '../entities/Post';
+} from '../dto/comment.dto';
+import { Post } from '../../entities/Post';
 import {
   GetPostListDto,
   CreatePostDto,
   SearchPostDto,
   DeleteImageDto,
   PostLikeDto,
-} from './dto/Post.dto';
+} from '../dto/Post.dto';
 @Injectable()
 export class CommunityService {
   constructor(private CommunityRepository: CommunityRepository) {}

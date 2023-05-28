@@ -19,7 +19,7 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CommunityService } from './community.service';
+import { CommunityService } from './application/community.service';
 import {
   CreateCommentBodyDto,
   CreateCommentDto,

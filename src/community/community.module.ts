@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommunityController } from './community.controller';
 import { CommunityRepository } from './community.repository';
-import { CommunityService } from './community.service';
+import { CommunityService } from './application/community.service';
 import { SubCategory } from '../entities/SubCategory';
 import { MainCategory } from '../entities/MainCategory';
 import { Post } from '../entities/Post';
@@ -22,6 +22,11 @@ import { RankService } from '../rank/rank.service';
 import { RankModule } from '../rank/rank.module';
 import { RankingRepository } from '../rank/ranking.repository';
 import { TierRepository } from '../rank/tier.repository';
+import { GetAllPostCategoriesController } from './application/queries/get-all-post-categories/get-all-post-categories.controller';
+import { CqrsModule } from '@nestjs/cqrs';
+import { GetAllCategoriesQueryHandler } from './application/queries/get-all-post-categories/get-all-post-categories.query-handler';
+
+const Communitycontrollers = [GetAllPostCategoriesController];
 
 @Module({
   imports: [
@@ -40,8 +45,9 @@ import { TierRepository } from '../rank/tier.repository';
     AuthModule,
     UserModule,
     RankModule,
+    CqrsModule,
   ],
-  controllers: [CommunityController],
+  controllers: [...Communitycontrollers],
   providers: [
     CommunityService,
     CommunityRepository,
@@ -51,6 +57,7 @@ import { TierRepository } from '../rank/tier.repository';
     RankerProfileRepository,
     RankingRepository,
     TierRepository,
+    GetAllCategoriesQueryHandler,
   ],
   exports: [CommunityRepository, CommunityService],
 })

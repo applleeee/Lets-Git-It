@@ -31,7 +31,7 @@ import appConfig from './config/appConfig';
     RankModule,
     AuthModule,
     UserModule,
-    SchedulerModule,
+    //SchedulerModule,
   ],
   controllers: [],
   providers: [
