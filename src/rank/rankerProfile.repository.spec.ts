@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { RankerProfile } from 'src/entities/RankerProfile';
-import { Ranking } from 'src/entities/Ranking';
-import { User } from 'src/entities/User';
+import { RankerProfile } from 'src/entities/ranker-profile.orm-entity';
+import { Ranking } from 'src/entities/ranking.orm-entity';
+import { User } from 'src/user/database/user.orm-entity';
 import { Repository } from 'typeorm';
 import { Top5 } from './dto/rankerProfile.dto';
 import { RankerProfileRepository } from './rankerProfile.repository';

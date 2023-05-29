@@ -1,8 +1,7 @@
 import {
   UpdateMyPageCreatedDto,
   UpdateMyPageUnauthorizedDto,
-} from './../../user/dto/user-res.dto';
-
+} from './../../user/application/dtos/update-user.response.dto';
 import { applyDecorators } from '@nestjs/common';
 import {
   ApiBearerAuth,

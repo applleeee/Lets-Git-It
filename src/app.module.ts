@@ -9,10 +9,13 @@ import { UserModule } from './user/user.module';
 import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from './utils/http-exception.filter';
 import { SchedulerModule } from './schedule/schedule.module';
+import { GithubModule } from './github-api/github.module';
 import authConfig from './config/authConfig';
 import cookieConfig from './config/cookieConfig';
 import ormConfig from './config/ormConfig';
 import appConfig from './config/appConfig';
+import { JwtRefreshStrategy } from './auth/strategy/jwt-refresh.strategy';
+import { JwtStrategy } from './auth/strategy/jwt.strategy';
 
 @Module({
   imports: [
@@ -32,9 +35,12 @@ import appConfig from './config/appConfig';
     AuthModule,
     UserModule,
     SchedulerModule,
+    GithubModule,
   ],
   controllers: [],
   providers: [
+    JwtStrategy,
+    JwtRefreshStrategy,
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,

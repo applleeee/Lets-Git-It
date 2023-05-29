@@ -1,6 +1,6 @@
 import { pbkdf2Sync } from 'crypto';
 import { SignUpDto } from './dto/createUser.dto';
-import { User } from './../entities/User';
+import { User } from './database/user.orm-entity';
 import { CommunityRepository } from './../community/community.repository';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';

@@ -1,27 +1,18 @@
-import { JwtRefreshStrategy } from './../auth/strategy/jwt-refresh.strategy';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommunityController } from './community.controller';
 import { CommunityRepository } from './community.repository';
 import { CommunityService } from './community.service';
-import { SubCategory } from '../entities/SubCategory';
-import { MainCategory } from '../entities/MainCategory';
-import { Post } from '../entities/Post';
-import { User } from '../entities/User';
-import { PostLike } from '../entities/PostLike';
-import { Comment } from '../entities/Comment';
-import { RankerProfile } from '../entities/RankerProfile';
-import { Ranking } from '../entities/Ranking';
-import { Tier } from '../entities/Tier';
-import { CommentLike } from '../entities/CommentLike';
-import { AuthModule } from '../auth/auth.module';
-import { UserModule } from '../user/user.module';
-import { JwtStrategy } from '../auth/strategy/jwt.strategy';
-import { RankerProfileRepository } from '../rank/rankerProfile.repository';
-import { RankService } from '../rank/rank.service';
-import { RankModule } from '../rank/rank.module';
-import { RankingRepository } from '../rank/ranking.repository';
-import { TierRepository } from '../rank/tier.repository';
+import { SubCategory } from '../entities/sub-category.orm-entity';
+import { MainCategory } from '../entities/main-category.orm-entity';
+import { Post } from '../entities/post.orm-entity';
+import { User } from '../user/database/user.orm-entity';
+import { PostLike } from '../entities/post-like.orm-entity';
+import { Comment } from '../entities/comment.orm-entity';
+import { RankerProfile } from '../entities/ranker-profile.orm-entity';
+import { Ranking } from '../entities/ranking.orm-entity';
+import { Tier } from '../entities/tier.orm-entity';
+import { CommentLike } from '../entities/comment-like.orm-entity';
 
 @Module({
   imports: [
@@ -37,21 +28,9 @@ import { TierRepository } from '../rank/tier.repository';
       Ranking,
       Tier,
     ]),
-    AuthModule,
-    UserModule,
-    RankModule,
   ],
   controllers: [CommunityController],
-  providers: [
-    CommunityService,
-    CommunityRepository,
-    JwtStrategy,
-    JwtRefreshStrategy,
-    RankService,
-    RankerProfileRepository,
-    RankingRepository,
-    TierRepository,
-  ],
+  providers: [CommunityService, CommunityRepository],
   exports: [CommunityRepository, CommunityService],
 })
 export class CommunityModule {}

@@ -1,7 +1,7 @@
 import {
   RefreshOkDto,
   RefreshUnauthorizedDto,
-} from '../../user/application/dtos/auth-res.dto';
+} from './../../auth/dtos/refresh.response.dto';
 import { applyDecorators } from '@nestjs/common';
 import {
   ApiCookieAuth,

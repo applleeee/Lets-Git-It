@@ -1,4 +1,4 @@
-import { CommentLike } from './../entities/CommentLike';
+import { CommentLike } from '../entities/comment-like.orm-entity';
 import {
   CreateCommentDto,
   CreateOrDeleteCommentLikesDto,

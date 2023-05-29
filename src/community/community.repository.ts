@@ -1,17 +1,17 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SubCategory } from '../entities/SubCategory';
-import { Post } from '../entities/Post';
-import { PostLike } from '../entities/PostLike';
-import { Comment } from '../entities/Comment';
+import { SubCategory } from '../entities/sub-category.orm-entity';
+import { Post } from '../entities/post.orm-entity';
+import { PostLike } from '../entities/post-like.orm-entity';
+import { Comment } from '../entities/comment.orm-entity';
 import {
   CreateCommentDto,
   CreateOrDeleteCommentLikesDto,
   DeleteCommentDto,
   UpdateCommentDto,
 } from './dto/comment.dto';
-import { CommentLike } from '../entities/CommentLike';
+import { CommentLike } from '../entities/comment-like.orm-entity';
 import { DateEnum, SortEnum } from './dto/Post.dto';
 
 @Injectable()
@@ -69,7 +69,7 @@ export class CommunityRepository {
 
   async createPost(
     title: string,
-    userId: number,
+    userId: string,
     subCategoryId: number,
     contentUrl: string,
   ) {
@@ -204,9 +204,9 @@ export class CommunityRepository {
     return postDetail;
   }
 
-  async createOrDeletePostLike(postId: number, userId: number) {
+  async createOrDeletePostLike(postId: number, userId: string) {
     const ifLiked = await this.postLikeRepository.findOne({
-      where: { postId: postId, userId: userId },
+      where: { postId, userId },
     });
 
     if (!ifLiked) {
@@ -256,7 +256,7 @@ export class CommunityRepository {
     return { postLists: data, total: total };
   }
 
-  async getPostsCreatedByUser(userId: number): Promise<Post[]> {
+  async getPostsCreatedByUser(userId: string): Promise<Post[]> {
     return this.postRepository
       .createQueryBuilder('post')
       .select([
@@ -287,7 +287,7 @@ export class CommunityRepository {
       .getRawMany();
   }
 
-  async getIdsOfPostLikedByUser(userId: number): Promise<Post[]> {
+  async getIdsOfPostLikedByUser(userId: string): Promise<Post[]> {
     return this.postLikeRepository
       .createQueryBuilder('post')
       .select(['post_id'])

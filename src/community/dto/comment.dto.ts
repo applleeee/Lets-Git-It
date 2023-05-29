@@ -28,7 +28,7 @@ export class UpdateCommentBodyDto extends PickType(CreateCommentBodyDto, [
 export class CreateCommentDto extends CreateCommentBodyDto {
   @IsNumber()
   @IsNotEmpty()
-  readonly userId: number;
+  readonly userId: string;
 
   @IsNumber()
   @IsNotEmpty()
@@ -66,9 +66,9 @@ export class DeleteCommentBodyDto extends PickType(DeleteCommentDto, [
 ] as const) {}
 
 export class CreateOrDeleteCommentLikesDto {
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
-  readonly userId: number;
+  readonly userId: string;
 
   @IsNumber()
   @IsNotEmpty()

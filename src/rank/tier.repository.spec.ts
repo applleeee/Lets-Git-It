@@ -2,7 +2,7 @@ import { HttpException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Tier } from '../entities/Tier';
+import { Tier } from '../entities/tier.orm-entity';
 import { TierRepository } from './tier.repository';
 
 describe('TierRepository', () => {

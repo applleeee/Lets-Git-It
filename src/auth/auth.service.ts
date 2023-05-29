@@ -1,12 +1,10 @@
-import { UserRepository } from './../user/user.repository';
+import { UserRepository } from './../user/database/user.repository';
+import { UserService } from './../user/application/user.service';
 import { RankService } from './../rank/rank.service';
-import { UserService } from './../user/user.service';
 import { RankerProfileRepository } from '../rank/rankerProfile.repository';
-import { AuthRepository } from './auth.repository';
+import { AuthRepository } from '../user/database/auth.repository';
 import { Inject, Injectable } from '@nestjs/common';
-import { GithubCodeDto, SignUpWithUserNameDto } from './domain/auth.entity';
 import { JwtService } from '@nestjs/jwt';
-import { HttpService } from '@nestjs/axios';
 import { ConfigType } from '@nestjs/config';
 import authConfig from '../config/authConfig';
 import cookieConfig from '../config/cookieConfig';
@@ -14,83 +12,49 @@ import cookieConfig from '../config/cookieConfig';
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly http: HttpService,
-    private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly authRepository: AuthRepository,
-    private readonly rankService: RankService,
-    private readonly userRepository: UserRepository,
-    private readonly rankerProfileRepository: RankerProfileRepository,
     @Inject(cookieConfig.KEY)
     private readonly _cookieConfig: ConfigType<typeof cookieConfig>,
     @Inject(authConfig.KEY)
     private readonly _authConfig: ConfigType<typeof authConfig>,
   ) {}
 
-  async signIn(githubCode: GithubCodeDto) {
-    const { code } = githubCode;
+  // async signIn(githubCode: SignInRequestDto) {
+  //   const { code } = githubCode;
 
-    const githubAccessToken = await this.userService.getGithubAccessToken(code);
+  //   const userName = githubUserInfo.login;
+  //   const user = await this.userService.getByGithubId(githubUserInfo.id);
 
-    const githubUserInfo = await this.userService.getByGithubAccessToken(
-      githubAccessToken,
-    );
+  //   if (!user) {
+  //     return {
+  //       isMember: false,
+  //       userName: userName,
+  //       githubId: githubUserInfo.id,
+  //     };
+  //   }
 
-    const userName = githubUserInfo.login;
-    const user = await this.userService.getByGithubId(githubUserInfo.id);
+  //   const jwtToken = await this.getJwtAccessToken(user.id, userName);
 
-    if (!user) {
-      return {
-        isMember: false,
-        userName: userName,
-        githubId: githubUserInfo.id,
-      };
-    }
+  //   return {
+  //     isMember: true,
+  //     userName: userName,
+  //     accessToken: jwtToken,
+  //     userId: user.id,
+  //   };
+  // }
 
-    const jwtToken = await this.getJwtAccessToken(user.id, userName);
+  // async signUp(signUpDataWithUserName) {
+  //   const { userName, ...signUpData } = signUpDataWithUserName;
+  //   await this.userService.createUser(signUpData);
 
-    return {
-      isMember: true,
-      userName: userName,
-      accessToken: jwtToken,
-      userId: user.id,
-    };
-  }
-
-  async signUp(signUpDataWithUserName: SignUpWithUserNameDto) {
-    const { userName, ...signUpData } = signUpDataWithUserName;
-    await this.userService.createUser(signUpData);
-
-    const user = await this.userService.getByGithubId(signUpData.githubId);
-
-    const jwtToken = await this.getJwtAccessToken(user.id, userName);
-
-    await this.rankService.checkRanker(userName);
-
-    const userId = await this.userRepository.getUserIdByGithubId(user.githubId);
-
-    const ranker = await this.rankerProfileRepository.getRankerProfile(
-      userName,
-    );
-
-    await this.rankerProfileRepository.updateRankerProfile(
-      userName,
-      ranker.profileImage,
-      ranker.blog,
-      ranker.email,
-      ranker.company,
-      ranker.region,
-      userId,
-    );
-
-    return { accessToken: jwtToken, userId: user.id };
-  }
+  //   const user = await this.userService.getUserByGithubId(signUpData.githubId);
 
   async getAuthCategory() {
     return await this.authRepository.getAuthCategory();
   }
 
-  async getJwtAccessToken(userId: number, userName: string) {
+  async getJwtAccessToken(userId: string, userName: string) {
     const payload = { userId, userName };
     return this.jwtService.sign(payload, {
       secret: this._authConfig.jwtSecret,
@@ -98,7 +62,7 @@ export class AuthService {
     });
   }
 
-  async getCookiesWithJwtRefreshToken(userId: number) {
+  async getCookiesWithJwtRefreshToken(userId: string) {
     const payload = { userId };
     const refreshToken = this.jwtService.sign(payload, {
       secret: this._authConfig.jwtRefreshSecret,

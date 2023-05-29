@@ -6,8 +6,8 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { RankerProfile } from './RankerProfile';
-import { Tier } from './Tier';
+import { RankerProfile } from './ranker-profile.orm-entity';
+import { Tier } from './tier.orm-entity';
 
 @Index('ranker_profile_id', ['rankerProfileId'], {})
 @Entity('ranking', { schema: 'git_rank' })

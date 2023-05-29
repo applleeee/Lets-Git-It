@@ -1,4 +1,5 @@
-import { SwaggerSignUp } from '../../../../swagger/auth/SignUp.decorator';
+import { CommandBus } from '@nestjs/cqrs';
+import { SwaggerSignUp } from '../../../../swagger/auth/sign-up.decorator';
 import { UserService } from './../../user.service';
 import { AuthService } from './../../../../auth/auth.service';
 import {
@@ -12,14 +13,12 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { SignUpRequestDto } from './sign-up.request.dto';
+import { SignUpCommand } from './sign-up.command';
 
 @Controller('user')
 @ApiTags('User')
 export class SignUpController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly userService: UserService,
-  ) {}
+  constructor(private readonly _commandBus: CommandBus) {}
 
   /**
    * @author MyeongSeok
@@ -29,16 +28,13 @@ export class SignUpController {
   @SwaggerSignUp()
   @Post('/sign-up')
   @HttpCode(HttpStatus.CREATED)
-  async signUp(
-    @Body() userData: SignUpRequestDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const { accessToken, userId } = await this.authService.signUp(userData);
-    const { refreshToken, ...cookieOptions } =
-      await this.authService.getCookiesWithJwtRefreshToken(userId);
-
-    await this.userService.saveRefreshToken(refreshToken, userId);
-
-    res.cookie('Refresh', refreshToken, cookieOptions).json({ accessToken });
+  async signUp(@Body() userData: SignUpRequestDto) {
+    const command = new SignUpCommand(userData);
+    return await this._commandBus.execute(command);
+    // const { accessToken, userId } = await this.authService.signUp(userData);
+    //   const { refreshToken, ...cookieOptions } =
+    //     await this.authService.getCookiesWithJwtRefreshToken(userId);
+    //   await this.userService.saveRefreshToken(refreshToken, userId);
+    //   res.cookie('Refresh', refreshToken, cookieOptions).json({ accessToken });
   }
 }

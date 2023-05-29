@@ -1,18 +1,22 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { User } from '../entities/User';
-import { SignUpDto } from './dto/createUser.dto';
+
 import { InjectRepository } from '@nestjs/typeorm';
-import { UpdateMyPageDto } from './dto/mypage.dto';
+import { User } from './user.orm-entity';
+import { SignUpRequestDto } from '../application/commands/sign-up/sign-up.request.dto';
+import { UpdateUserDto } from '../application/commands/update-user/update-user.request.dto';
+import { UserEntity } from '../domain/user.entity';
+import { UserMapper } from '../user.mapper';
 
 @Injectable()
 export class UserRepository {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly _mapper: UserMapper,
   ) {}
 
-  async getByGithubId(githubId: number) {
+  async getUserByGithubId(githubId: number) {
     return await this.userRepository.findOneBy({
       githubId,
     });
@@ -25,14 +29,16 @@ export class UserRepository {
     return user.id;
   }
 
-  async getByUserId(id: number): Promise<User> {
+  async getByUserId(id: string): Promise<User> {
     return await this.userRepository.findOneBy({
       id,
     });
   }
 
-  async createUser(signUpData: SignUpDto) {
-    const user = this.userRepository.create(signUpData);
+  async createUser(entity: UserEntity) {
+    const record = this._mapper.toPersistence(entity);
+
+    const user = this.userRepository.create(record);
 
     try {
       return await this.userRepository.save(user);
@@ -49,11 +55,11 @@ export class UserRepository {
     }
   }
 
-  async updateUser(userId: number, partialEntity: UpdateMyPageDto) {
+  async updateUser(userId: string, partialEntity: UpdateUserDto) {
     return await this.userRepository.update({ id: userId }, partialEntity);
   }
 
-  async updateUserRefreshToken(id: number, hashedRefreshToken: string) {
+  async updateUserRefreshToken(id: string, hashedRefreshToken: string) {
     return await this.userRepository.update(id, { hashedRefreshToken });
   }
 }

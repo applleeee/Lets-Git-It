@@ -1,33 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { HttpStatusCode } from 'axios';
-
-export class GetUserResponseDto {
-  readonly userName: string;
-
-  readonly email: string;
-
-  readonly profileText: string;
-
-  readonly profileImageUrl: string;
-
-  readonly fieldId: number;
-
-  readonly careerId: number;
-
-  readonly isKorean: boolean;
-
-  readonly tierName: string;
-
-  readonly tierImage: string;
-
-  readonly posts: PostDto[];
-}
+import { AuthSignUpCreatedDto } from 'src/user/application/dtos/sign-up.response.dto';
 
 /**
  * @author MyeongSeok
- * @description AccessToken이 누락되었거나 기간이 만료된 경우입니다.
+ * @description 엑세스 토큰 재발급 성공 시 응답 객체의 DTO입니다.
  */
-export class GetMyPageUnauthorizedDto {
+export class RefreshOkDto extends AuthSignUpCreatedDto {}
+
+/**
+ * @author MyeongSeok
+ * @description 만료된 refresh token 또는 refresh token이 없이 요청한 경우의 응답 DTO입니다.
+ */
+export class RefreshUnauthorizedDto {
   /**
    * @example 401
    */
@@ -38,11 +23,11 @@ export class GetMyPageUnauthorizedDto {
   readonly statusCode: number;
 
   /**
-   * access token이 없거나 기간이 만료된 경우입니다.
+   * refresh token이 없거나 기간이 만료된 경우입니다.
    * @example Unauthorized
    */
   @ApiProperty({
-    description: 'access token이 없거나 기간이 만료되었습니다.',
+    description: 'refresh token이 없거나 기간이 만료되었습니다.',
     example: 'Unauthorized',
     required: true,
   })
@@ -61,22 +46,12 @@ export class GetMyPageUnauthorizedDto {
 
   /**
    * 요청 엔드포인트를 나타냅니다.
-   * @example /user
+   * @example /auth/refresh
    */
   @ApiProperty({
     description: '요청 엔드포인트를 나타냅니다.',
-    example: '/user',
+    example: '/auth/refresh',
     required: true,
   })
   readonly path: string;
-}
-
-class PostDto {
-  title: string;
-
-  contentUrl: string;
-
-  subCategoryId: number;
-
-  createdAt: Date;
 }

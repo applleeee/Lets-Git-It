@@ -1,4 +1,4 @@
-import { Comment } from './../entities/Comment';
+import { Comment } from '../entities/comment.orm-entity';
 import {
   CreateCommentBodyDto,
   UpdateCommentBodyDto,

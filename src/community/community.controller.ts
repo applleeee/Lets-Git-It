@@ -69,7 +69,7 @@ export class CommunityController {
   @UseGuards(JwtAuthGuard)
   @Post('/post')
   async createPost(@Body() postData: CreatePostDto, @Req() req) {
-    const userId: number = req.user.id;
+    const userId: string = req.user.id;
     await this.communityService.createPost(postData, userId);
     return { message: 'post created' };
   }
@@ -153,7 +153,7 @@ export class CommunityController {
   @UseGuards(JwtAuthGuard)
   @Post('/like')
   async createOrDeletePostLike(@Body() data: PostLikeDto, @Req() req) {
-    const userId: number = req.user.id;
+    const userId: string = req.user.id;
     const result = await this.communityService.createOrDeletePostLike(
       data,
       userId,

@@ -8,20 +8,20 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Comment } from './Comment';
-import { User } from './User';
+import { Post } from './post.orm-entity';
+import { User } from '../user/database/user.orm-entity';
 
-@Index('comment_id', ['commentId'], {})
-@Entity('comment_like', { schema: 'git_rank' })
-export class CommentLike {
+@Index('post_id', ['postId'], {})
+@Entity('post_like', { schema: 'git_rank' })
+export class PostLike {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id', unsigned: true })
   id: number;
 
-  @Column('int', { name: 'comment_id', nullable: false, unsigned: true })
-  commentId: number;
+  @Column('int', { name: 'post_id', nullable: false, unsigned: true })
+  postId: number;
 
-  @Column('int', { name: 'user_id', nullable: false, unsigned: true })
-  userId: number;
+  @Column('uuid', { name: 'user_id', nullable: false })
+  userId: string;
 
   @CreateDateColumn({ name: 'created_at', nullable: false })
   createdAt: Date;
@@ -29,14 +29,14 @@ export class CommentLike {
   @UpdateDateColumn({ name: 'updated_at', nullable: true })
   updatedAt: Date | null;
 
-  @ManyToOne(() => Comment, (comment) => comment.commentLikes, {
+  @ManyToOne(() => Post, (post) => post.postLikes, {
     onDelete: 'CASCADE',
     onUpdate: 'NO ACTION',
   })
-  @JoinColumn([{ name: 'comment_id', referencedColumnName: 'id' }])
-  comment: Comment;
+  @JoinColumn([{ name: 'post_id', referencedColumnName: 'id' }])
+  post: Post;
 
-  @ManyToOne(() => User, (user) => user.commentLikes, {
+  @ManyToOne(() => User, (user) => user.postLikes, {
     onDelete: 'CASCADE',
     onUpdate: 'NO ACTION',
   })

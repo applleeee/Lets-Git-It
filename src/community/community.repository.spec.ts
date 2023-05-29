@@ -1,13 +1,13 @@
 import { AuthorizedUser } from '../auth/domain/auth.entity';
-import { User } from './../entities/User';
+import { User } from '../user/database/user.orm-entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CommunityRepository } from './community.repository';
 import { Test } from '@nestjs/testing';
-import { CommentLike } from './../entities/CommentLike';
-import { Comment } from './../entities/Comment';
-import { PostLike } from './../entities/PostLike';
-import { Post } from './../entities/Post';
-import { SubCategory } from './../entities/SubCategory';
+import { CommentLike } from '../entities/comment-like.orm-entity';
+import { Comment } from '../entities/comment.orm-entity';
+import { PostLike } from '../entities/post-like.orm-entity';
+import { Post } from '../entities/post.orm-entity';
+import { SubCategory } from '../entities/sub-category.orm-entity';
 import { DeleteResult, Repository, SelectQueryBuilder } from 'typeorm';
 import { OptionEnum, SortEnum } from './dto/Post.dto';
 

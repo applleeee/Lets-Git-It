@@ -1,6 +1,7 @@
-import { GetMyPageUnauthorizedDto } from './../../user/dto/user-res.dto';
-import { MyPageDto } from '../../user/dto/mypage.dto';
-
+import {
+  GetUserResponseDto,
+  GetMyPageUnauthorizedDto,
+} from './../../user/application/dtos/get-user.response.dto';
 import { applyDecorators } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -20,7 +21,7 @@ export function SwaggerGetMyPage(): MethodDecorator {
     ApiOkResponse({
       description:
         'AccessToken으로 유저의 권한 검증에 통과되면 해당 유저의 정보를 반환합니다.',
-      type: MyPageDto,
+      type: GetUserResponseDto,
     }),
     ApiUnauthorizedResponse({
       description: 'AccessToken이 누락되었거나 기간이 만료된 경우입니다.',

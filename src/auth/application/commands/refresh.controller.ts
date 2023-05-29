@@ -1,4 +1,4 @@
-import { SwaggerRefresh } from 'src/swagger/auth/Refresh.decorator';
+import { SwaggerRefresh } from 'src/swagger/auth/refresh.decorator';
 import { UserService } from './../../../user/application/user.service';
 import { AuthService } from './../../auth.service';
 import { JwtRefreshGuard } from './../../guard/jwt-refresh.guard';

@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RankerProfile } from 'src/entities/RankerProfile';
-import { Ranking } from 'src/entities/Ranking';
-import { Tier } from 'src/entities/Tier';
+import { RankerProfile } from 'src/entities/ranker-profile.orm-entity';
+import { Ranking } from 'src/entities/ranking.orm-entity';
+import { Tier } from 'src/entities/tier.orm-entity';
 import { RankerProfileRepository } from 'src/rank/rankerProfile.repository';
 import { RankingRepository } from 'src/rank/ranking.repository';
 import { TierRepository } from 'src/rank/tier.repository';

@@ -1,9 +1,9 @@
 import { RankerProfileOutput } from './../rank/dto/rankerProfile.dto';
-import { User } from './../entities/User';
+import { User } from '../user/database/user.orm-entity';
 import { GithubCodeDto, SignUpWithUserNameDto } from './domain/auth.entity';
-import { RankerProfile } from './../entities/RankerProfile';
-import { Field } from './../entities/Field';
-import { Career } from './../entities/Career';
+import { RankerProfile } from '../entities/ranker-profile.orm-entity';
+import { Field } from './database/field.orm-entity';
+import { Career } from './database/career.orm-entity';
 import { RankerProfileRepository } from './../rank/rankerProfile.repository';
 import { UserRepository } from './../user/user.repository';
 import { RankService } from './../rank/rank.service';
@@ -12,7 +12,7 @@ import { UserService } from '../user/user.service';
 import { Test } from '@nestjs/testing';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { AuthService } from './auth.service';
-import { AuthRepository } from './auth.repository';
+import { AuthRepository } from '../user/database/auth.repository';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
 class MockFieldRepository {}

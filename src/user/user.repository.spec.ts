@@ -1,4 +1,4 @@
-import { User } from './../entities/User';
+import { User } from './database/user.orm-entity';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { QueryFailedError, TypeORMError } from 'typeorm';

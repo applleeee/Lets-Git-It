@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Ranking } from './Ranking';
+import { Ranking } from './ranking.orm-entity';
 
 @Entity('tier', { schema: 'git_rank' })
 export class Tier {

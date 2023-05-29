@@ -1,7 +1,7 @@
 import {
   AuthSignUpConflictDto,
   AuthSignUpCreatedDto,
-} from '../../user/application/dtos/auth-res.dto';
+} from './../../user/application/dtos/sign-up.response.dto';
 import { applyDecorators } from '@nestjs/common';
 import {
   ApiConflictResponse,

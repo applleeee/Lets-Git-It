@@ -7,8 +7,8 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Post } from './Post';
-import { MainCategory } from './MainCategory';
+import { Post } from './post.orm-entity';
+import { MainCategory } from './main-category.orm-entity';
 
 @Index('main_category_id', ['mainCategoryId'], {})
 @Entity('sub_category', { schema: 'git_rank' })

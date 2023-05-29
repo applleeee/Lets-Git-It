@@ -3,7 +3,7 @@ import {
   AuthSignInUnauthorizedResDto,
   AuthSignInWrongCodeDto,
   AuthSignInWrongGithubAccessTokenDto,
-} from '../../user/application/dtos/auth-res.dto';
+} from './../../user/application/dtos/sign-in.response.dto';
 import { applyDecorators } from '@nestjs/common';
 import {
   ApiBadRequestResponse,

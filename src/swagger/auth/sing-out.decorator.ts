@@ -1,7 +1,7 @@
 import {
   AuthSignOutUnauthorizedDto,
   SignOutOkDto,
-} from '../../user/application/dtos/auth-res.dto';
+} from './../../user/application/dtos/sign-out.response.dto';
 import { applyDecorators } from '@nestjs/common';
 import {
   ApiCookieAuth,

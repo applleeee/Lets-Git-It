@@ -6,25 +6,26 @@ import {
   ManyToOne,
   OneToMany,
   OneToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   Unique,
 } from 'typeorm';
-import { Comment } from './Comment';
-import { CommentLike } from './CommentLike';
-import { Post } from './Post';
-import { PostLike } from './PostLike';
-import { RankerProfile } from './RankerProfile';
-import { Field } from './Field';
-import { Career } from './Career';
-import { BooleanTransformer } from '../utils/boolean-transformer';
+import { Comment } from '../../entities/comment.orm-entity';
+import { CommentLike } from '../../entities/comment-like.orm-entity';
+import { Post } from '../../entities/post.orm-entity';
+import { PostLike } from '../../entities/post-like.orm-entity';
+import { RankerProfile } from './../../entities/ranker-profile.orm-entity';
+import { BooleanTransformer } from '../../utils/boolean-transformer';
 import { Exclude } from 'class-transformer';
+import { Field } from './field.orm-entity';
+import { Career } from './career.orm-entity';
 
+// todo 인덱스 이게 맞아..?
 @Index('field_id', ['fieldId'], {})
 @Unique(['githubId'])
 @Entity('user', { schema: 'git_rank' })
 export class User {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id', unsigned: true })
-  id: number;
+  @PrimaryColumn({ type: 'uuid', name: 'id' })
+  id: string;
 
   @Column('int', { name: 'github_id', nullable: false, unsigned: true })
   githubId: number;

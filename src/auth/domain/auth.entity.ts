@@ -1,8 +1,8 @@
-import { Comment } from './../../entities/Comment';
-import { Post } from './../../entities/Post';
+import { Comment } from '../../entities/comment.orm-entity';
+import { Post } from '../../entities/post.orm-entity';
 
 export class AuthorizedUser {
-  readonly id: number;
+  readonly id: string;
   readonly userName: string;
   readonly idsOfPostsCreatedByUser?: Post[];
   readonly idsOfPostLikedByUser?: number[];

@@ -1,6 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Ranking } from 'src/entities/Ranking';
+import { Ranking } from 'src/entities/ranking.orm-entity';
 import { Repository } from 'typeorm';
 import {
   AvgValuesOutput,

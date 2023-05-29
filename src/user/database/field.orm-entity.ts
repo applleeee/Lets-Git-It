@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { User } from './User';
+import { User } from '../../user/database/user.orm-entity';
 
 @Entity('field', { schema: 'git_rank' })
 export class Field {

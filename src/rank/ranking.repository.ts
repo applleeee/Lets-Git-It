@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Ranking } from '../entities/Ranking';
+import { Ranking } from '../entities/ranking.orm-entity';
 import {
   AvgValuesOutput,
   LangOutput,

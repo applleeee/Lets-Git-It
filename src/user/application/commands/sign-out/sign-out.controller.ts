@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-import { SwaggerSignOut } from 'src/swagger/auth/SingOut.decorator';
+import { SwaggerSignOut } from 'src/swagger/auth/sing-out.decorator';
 
 @Controller('user')
 @ApiTags('User')
@@ -22,7 +22,6 @@ export class SignOutController {
   /**
    * @author MyeongSeok
    * @description 로그아웃
-   * todo method restful하게 수정 필요. -> post
    */
   @SwaggerSignOut()
   @UseGuards(JwtRefreshGuard)

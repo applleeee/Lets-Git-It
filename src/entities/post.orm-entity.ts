@@ -9,10 +9,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Comment } from './Comment';
-import { User } from './User';
-import { SubCategory } from './SubCategory';
-import { PostLike } from './PostLike';
+import { Comment } from './comment.orm-entity';
+import { User } from '../user/database/user.orm-entity';
+import { SubCategory } from './sub-category.orm-entity';
+import { PostLike } from './post-like.orm-entity';
 
 @Index('user_id', ['userId'], {})
 @Entity('post', { schema: 'git_rank' })
@@ -29,8 +29,8 @@ export class Post {
   @Column('int', { name: 'view', nullable: false, default: () => "'0'" })
   view: number;
 
-  @Column('int', { name: 'user_id', nullable: false, unsigned: true })
-  userId: number;
+  @Column('uuid', { name: 'user_id', nullable: false })
+  userId: string;
 
   @Column('tinyint', {
     name: 'sub_category_id',

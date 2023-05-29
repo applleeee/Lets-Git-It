@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Tier } from '../entities/Tier';
+import { Tier } from '../entities/tier.orm-entity';
 
 @Injectable()
 export class TierRepository {

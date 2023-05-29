@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { SubCategory } from './SubCategory';
+import { SubCategory } from './sub-category.orm-entity';
 
 @Entity('main_category', { schema: 'git_rank' })
 export class MainCategory {

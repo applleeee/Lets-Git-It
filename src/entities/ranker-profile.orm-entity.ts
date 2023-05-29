@@ -8,8 +8,8 @@ import {
   UpdateDateColumn,
   OneToOne,
 } from 'typeorm';
-import { User } from './User';
-import { Ranking } from './Ranking';
+import { User } from '../user/database/user.orm-entity';
+import { Ranking } from './ranking.orm-entity';
 
 @Index('user_id', ['userId'], {})
 @Entity('ranker_profile', { schema: 'git_rank' })
@@ -42,8 +42,8 @@ export class RankerProfile {
   @Column('varchar', { name: 'region', nullable: true, length: 255 })
   region: string | null;
 
-  @Column('int', { name: 'user_id', nullable: true, unsigned: true })
-  userId: number | null;
+  @Column('uuid', { name: 'user_id', nullable: true })
+  userId: string | null;
 
   @CreateDateColumn({ name: 'created_at', nullable: false })
   createdAt: Date;

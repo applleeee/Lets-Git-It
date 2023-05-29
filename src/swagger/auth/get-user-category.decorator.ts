@@ -1,4 +1,4 @@
-import { AuthCategoryOkDto } from '../../user/application/dtos/auth-res.dto';
+import { AuthCategoryOkDto } from './../../user/application/dtos/get-user-category.response.dto';
 import { applyDecorators } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 

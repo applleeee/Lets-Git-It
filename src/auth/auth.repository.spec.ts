@@ -1,9 +1,9 @@
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test } from '@nestjs/testing';
 import { Repository } from 'typeorm';
-import { AuthRepository } from './auth.repository';
-import { Career } from '../entities/Career';
-import { Field } from '../entities/Field';
+import { AuthRepository } from '../user/database/auth.repository';
+import { Career } from './database/career.orm-entity';
+import { Field } from './database/field.orm-entity';
 
 describe('AuthRepository', () => {
   let authRepository: AuthRepository;

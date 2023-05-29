@@ -1,4 +1,4 @@
-import { Comment } from './../entities/Comment';
+import { Comment } from '../entities/comment.orm-entity';
 import { HttpException, Injectable, HttpStatus } from '@nestjs/common';
 import { CommunityRepository } from './community.repository';
 import { uploadToS3, getS3Data, deleteS3Data } from '../utils/aws';
@@ -9,7 +9,7 @@ import {
   UpdateCommentDto,
   Depth,
 } from './dto/comment.dto';
-import { Post } from '../entities/Post';
+import { Post } from '../entities/post.orm-entity';
 import {
   GetPostListDto,
   CreatePostDto,
@@ -64,7 +64,7 @@ export class CommunityService {
     return { message: 'No image to delete' };
   }
 
-  async createPost(postData: CreatePostDto, userId: number) {
+  async createPost(postData: CreatePostDto, userId: string) {
     const now = this.getCurrentTime();
 
     const { title, subCategoryId, content } = postData;
@@ -158,7 +158,7 @@ export class CommunityService {
     }
   }
 
-  async createOrDeletePostLike(data: PostLikeDto, userId: number) {
+  async createOrDeletePostLike(data: PostLikeDto, userId: string) {
     const { postId } = data;
     return await this.CommunityRepository.createOrDeletePostLike(
       postId,
@@ -177,12 +177,12 @@ export class CommunityService {
     return result;
   }
 
-  async getIdsOfPostsCreatedByUser(userId: number) {
+  async getIdsOfPostsCreatedByUser(userId: string) {
     const data = await this.CommunityRepository.getPostsCreatedByUser(userId);
     return data?.map<Post>((item) => Object.values(item)[0]);
   }
 
-  async getIdsOfPostLikedByUser(userId: number) {
+  async getIdsOfPostLikedByUser(userId: string) {
     const data = await this.CommunityRepository.getIdsOfPostLikedByUser(userId);
     return data?.map<Post['id']>((item) => Object.values(item)[0]);
   }

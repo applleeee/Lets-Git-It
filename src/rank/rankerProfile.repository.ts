@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { RankerProfile } from '../entities/RankerProfile';
-import { Ranking } from '../entities/Ranking';
-import { Tier } from '../entities/Tier';
+import { RankerProfile } from '../entities/ranker-profile.orm-entity';
+import { Ranking } from '../entities/ranking.orm-entity';
+import { Tier } from '../entities/tier.orm-entity';
 import {
   RankerProfileOutput,
   SearchOutput,
@@ -22,7 +22,7 @@ export class RankerProfileRepository {
     return await this.rankerProfileRepository.exist({ where: { name } });
   }
 
-  async getUserNameByUserId(userId: number) {
+  async getUserNameByUserId(userId: string) {
     try {
       const user = await this.rankerProfileRepository.findOne({
         where: { userId: userId },
@@ -163,7 +163,7 @@ export class RankerProfileRepository {
     return ranker;
   }
 
-  async getMyPage(userId: number) {
+  async getMyPage(userId: string) {
     let result;
     const ranker = await this.rankerProfileRepository.findBy({
       userId: userId,
@@ -190,7 +190,7 @@ export class RankerProfileRepository {
     email: string,
     company: string,
     region: string,
-    userId: number,
+    userId: string,
   ) {
     return await this.rankerProfileRepository
       .createQueryBuilder('ranker_profile')

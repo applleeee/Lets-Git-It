@@ -9,9 +9,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './User';
-import { Post } from './Post';
-import { CommentLike } from './CommentLike';
+import { User } from '../user/database/user.orm-entity';
+import { Post } from './post.orm-entity';
+import { CommentLike } from './comment-like.orm-entity';
 
 @Index('post_id', ['postId'], {})
 @Entity('comment', { schema: 'git_rank' })
@@ -22,8 +22,8 @@ export class Comment {
   @Column('varchar', { name: 'content', nullable: false, length: 2083 })
   content: string;
 
-  @Column('int', { name: 'user_id', nullable: false, unsigned: true })
-  userId: number;
+  @Column('uuid', { name: 'user_id', nullable: false })
+  userId: string;
 
   @Column('int', { name: 'post_id', nullable: false, unsigned: true })
   postId: number;
