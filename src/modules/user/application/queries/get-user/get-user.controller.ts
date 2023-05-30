@@ -1,4 +1,3 @@
-import { JwtAuthGuard } from '../../../../module/auth/guard/jwt-auth.guard';
 import { ApiTags } from '@nestjs/swagger';
 
 import {
@@ -10,8 +9,9 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { UserService } from '../../user.service';
-import { SwaggerGetMyPage } from 'src/swagger/user/GetMyPage.decorator';
 import { GetUserResponseDto } from '../../dtos/get-user.response.dto';
+import { SwaggerGetMyPage } from 'src/modules/swagger/user/GetMyPage.decorator';
+import { JwtAuthGuard } from 'src/modules/auth/guard/jwt-auth.guard';
 
 // todo MyPage 도메인을 둬야하는가? 혹시 redirect로
 

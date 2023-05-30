@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { HttpStatusCode } from 'axios';
-import { AuthSignUpCreatedDto } from 'src/user/application/dtos/sign-up.response.dto';
+import { AuthSignUpCreatedDto } from 'src/modules/user/application/dtos/sign-up.response.dto';
 
 /**
  * @author MyeongSeok

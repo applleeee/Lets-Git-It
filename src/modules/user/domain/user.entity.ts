@@ -1,6 +1,7 @@
 import { ulid } from 'ulid';
-import { BaseEntity } from './entity.base';
+
 import { CreateUserProps, UserProps } from './user.types';
+import { BaseEntity } from 'src/libs/base/entity.base';
 
 export class UserEntity extends BaseEntity<UserProps> {
   static create(create: CreateUserProps): UserEntity {

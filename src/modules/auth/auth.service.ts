@@ -1,13 +1,9 @@
-import { UserRepository } from '../../user/database/user.repository';
-import { UserService } from '../../user/application/user.service';
-import { RankService } from '../rank/rank.service';
-import { RankerProfileRepository } from '../rank/rankerProfile.repository';
-import { AuthRepository } from '../../user/database/auth.repository';
 import { Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigType } from '@nestjs/config';
 import authConfig from '../../config/authConfig';
 import cookieConfig from '../../config/cookieConfig';
+import { AuthRepository } from '../user/database/auth.repository';
 
 @Injectable()
 export class AuthService {

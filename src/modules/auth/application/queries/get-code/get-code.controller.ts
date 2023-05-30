@@ -1,6 +1,6 @@
 import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { SwaggerGetCode } from 'src/swagger/auth/get-code.decorator';
+import { SwaggerGetCode } from 'src/modules/swagger/auth/get-code.decorator';
 
 @Controller('auth')
 @ApiTags('Auth')

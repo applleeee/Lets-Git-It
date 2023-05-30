@@ -1,18 +1,27 @@
 import { UserEntity } from '../../../domain/user.entity';
 import { UserRepository } from '../../../database/user.repository';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SignUpCommand } from './sign-up.command';
+import { USER_REPOSITORY } from 'src/modules/user/user.di-tokens';
+import { UserRepositoryPort } from 'src/modules/user/database/user.repository.port';
+import { UserMapper } from 'src/modules/user/user.mapper';
 
 @Injectable()
 @CommandHandler(SignUpCommand)
 export class SignUpCommandHandler implements ICommandHandler<SignUpCommand> {
-  constructor(private readonly _userRepository: UserRepository) {}
+  constructor(
+    private readonly _mapper: UserMapper,
+    @Inject(USER_REPOSITORY)
+    private readonly _userRepository: UserRepositoryPort,
+  ) {}
   async execute(command: SignUpCommand): Promise<any> {
     const { userName, ...signUpData } = command;
     const user = UserEntity.create({ ...signUpData });
 
-    return await this._userRepository.createUser(user);
+    await this._userRepository.insert(user);
+
+    const userDto = this._mapper.toResponse(user);
 
     // todo authService이용해서 jwt access token, refresh token 만들기
 

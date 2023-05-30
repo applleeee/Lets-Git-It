@@ -3,14 +3,17 @@ import { GithubService } from '../../../../github-api/github.service';
 import { UserRepository } from '../../../database/user.repository';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SignInCommand } from './sign-in.command';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { response } from 'express';
+import { USER_REPOSITORY } from 'src/modules/user/user.di-tokens';
+import { UserRepositoryPort } from 'src/modules/user/database/user.repository.port';
 
 @Injectable()
 @CommandHandler(SignInCommand)
 export class SignInCommandHandler implements ICommandHandler<SignInCommand> {
   constructor(
-    private readonly _userRepository: UserRepository,
+    @Inject(USER_REPOSITORY)
+    private readonly _userRepository: UserRepositoryPort,
     private readonly _githubService: GithubService, // todo private readonly port 삽입
   ) {}
   async execute(command: SignInCommand): Promise<any> {

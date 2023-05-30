@@ -25,7 +25,7 @@ export class RankerProfileRepository {
   async getUserNameByUserId(userId: string) {
     try {
       const user = await this.rankerProfileRepository.findOne({
-        where: { userId: userId },
+        where: { userId },
       });
 
       return user.name;

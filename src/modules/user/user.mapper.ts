@@ -1,9 +1,11 @@
-import { map } from 'rxjs';
-import { GetUserResponseDto } from './application/dtos/get-user.response.dto';
+import { UserResponseDto } from './application/dtos/user.response.dto';
 import { User as UserOrmEntity } from './database/user.orm-entity';
 import { UserEntity } from './domain/user.entity';
+import { Mapper } from 'src/libs/base/mapper.interface';
 
-export class UserMapper {
+export class UserMapper
+  implements Mapper<UserEntity, UserOrmEntity, UserResponseDto>
+{
   toPersistence(entity: UserEntity): UserOrmEntity {
     const copy = entity.getProps();
 
@@ -21,22 +23,32 @@ export class UserMapper {
     return record;
   }
 
-  // todo 추후 구현
-  // toDomain(record: UserOrmEntity): UserEntity {
-  //   const entity = new UserEntity({
-  //     id: record.id,
-  //     createdAt: new Date(record.createdAt),
-  //     updatedAt: new Date(record.updatedAt),
-  //     props: {},
-  //   });
-  //   return entity;
-  // }
+  toDomain(record: UserOrmEntity): UserEntity {
+    const entity = new UserEntity({
+      id: record.id,
+      createdAt: new Date(record.createdAt),
+      updatedAt: new Date(record.updatedAt),
+      props: {
+        githubId: record.githubId,
+        fieldId: record.fieldId,
+        careerId: record.careerId,
+        isAdmin: record.isAdmin,
+        isKorean: record.isKorean,
+      },
+    });
+    return entity;
+  }
 
-  // todo 추후 구현
-  // toResponse(entity: UserEntity): GetUserResponseDto {
-  //   const props = entity.getProps();
-  //   const response = new GetUserResponseDto();
+  toResponse(entity: UserEntity): UserResponseDto {
+    const props = entity.getProps();
+    const response = new UserResponseDto();
+    response.id = props.id;
+    response.githubId = props.githubId;
+    response.fieldId = props.fieldId;
+    response.careerId = props.careerId;
+    response.isAdmin = props.isAdmin;
+    response.isKorean = props.isKorean;
 
-  //   return response;
-  // }
+    return response;
+  }
 }

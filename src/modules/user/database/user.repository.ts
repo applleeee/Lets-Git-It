@@ -1,20 +1,27 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
-
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './user.orm-entity';
-import { SignUpRequestDto } from '../application/commands/sign-up/sign-up.request.dto';
+import { User as UserOrmEntity } from './user.orm-entity';
 import { UpdateUserDto } from '../application/commands/update-user/update-user.request.dto';
 import { UserEntity } from '../domain/user.entity';
 import { UserMapper } from '../user.mapper';
+import { MySqlRepositoryBase } from 'src/libs/db/mysql-repository.base';
+import { UserRepositoryPort } from './user.repository.port';
 
 @Injectable()
-export class UserRepository {
+export class UserRepository
+  extends MySqlRepositoryBase<UserEntity, UserOrmEntity>
+  implements UserRepositoryPort
+{
+  protected tableName: 'user';
+
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    private readonly _mapper: UserMapper,
-  ) {}
+    @InjectRepository(UserOrmEntity)
+    private readonly userRepository: Repository<UserOrmEntity>,
+    mapper: UserMapper,
+  ) {
+    super(mapper, userRepository);
+  }
 
   async getUserByGithubId(githubId: number) {
     return await this.userRepository.findOneBy({
@@ -29,19 +36,17 @@ export class UserRepository {
   //   return user.id;
   // }
 
-  async getByUserId(id: string): Promise<User> {
+  async getByUserId(id: string): Promise<UserOrmEntity> {
     return await this.userRepository.findOneBy({
       id,
     });
   }
 
   async createUser(entity: UserEntity) {
-    const record = this._mapper.toPersistence(entity);
-
-    const user = this.userRepository.create(record);
+    const record = this.mapper.toPersistence(entity);
 
     try {
-      return await this.userRepository.save(user);
+      return await this.userRepository.save(record);
     } catch (error) {
       console.log('createUser error: ', error);
       if (error.code === 'ER_DUP_ENTRY') {

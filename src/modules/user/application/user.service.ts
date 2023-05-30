@@ -1,32 +1,33 @@
 import { CommunityRepository } from '../../community/community.repository';
 import { RankerProfileRepository } from '../../rank/rankerProfile.repository';
 import { promisify } from 'util';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { pbkdf2 } from 'crypto';
 import { UserRepository } from '../database/user.repository';
 import { User } from '../database/user.orm-entity';
-import { SignUpRequestDto } from './commands/sign-up/sign-up.request.dto';
 import { UpdateUserDto } from './commands/update-user/update-user.request.dto';
 import { GetUserResponseDto } from './dtos/get-user.response.dto';
+import { USER_REPOSITORY } from '../user.di-tokens';
 
 @Injectable()
 export class UserService {
   constructor(
-    private readonly userRepository: UserRepository,
+    @Inject(USER_REPOSITORY) private readonly _userRepository: UserRepository,
+
     private readonly rankerProfileRepository: RankerProfileRepository,
     private readonly communityRepository: CommunityRepository,
   ) {}
 
   async getUserByGithubId(githubId: number): Promise<User> {
-    return await this.userRepository.getUserByGithubId(githubId);
+    return await this._userRepository.getUserByGithubId(githubId);
   }
 
   async getById(id: string): Promise<User> {
-    return await this.userRepository.getByUserId(id);
+    return await this._userRepository.getByUserId(id);
   }
 
   // async createUser(signUpData: SignUpRequestDto) {
-  //   await this.userRepository.createUser(signUpData);
+  //   await this._userRepository.createUser(signUpData);
   // }
 
   async getMyPage(userId: string) {
@@ -38,7 +39,7 @@ export class UserService {
 
     // 개발분야, 경력 -> User
     const { careerId, fieldId, isKorean } =
-      await this.userRepository.getByUserId(userId);
+      await this._userRepository.getByUserId(userId);
 
     // 작성한 글 목록(제목, 카테고리, 날짜, id) -> Post
     const posts = await this.communityRepository.getPostsCreatedByUser(userId);
@@ -59,7 +60,7 @@ export class UserService {
   }
 
   async updateUser(userId: string, partialEntity: UpdateUserDto) {
-    return await this.userRepository.updateUser(userId, partialEntity);
+    return await this._userRepository.updateUser(userId, partialEntity);
   }
 
   async saveRefreshToken(refreshToken: string, userId: string) {
@@ -78,7 +79,7 @@ export class UserService {
 
     const hashedRefreshToken = key.toString('base64');
 
-    return await this.userRepository.updateUserRefreshToken(
+    return await this._userRepository.updateUserRefreshToken(
       userId,
       hashedRefreshToken,
     );
@@ -126,6 +127,6 @@ export class UserService {
   }
 
   async deleteRefreshToken(id: string) {
-    return await this.userRepository.updateUserRefreshToken(id, null);
+    return await this._userRepository.updateUserRefreshToken(id, null);
   }
 }

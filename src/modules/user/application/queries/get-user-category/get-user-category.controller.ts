@@ -1,8 +1,9 @@
-import { AuthService } from '../../../../module/auth/auth.service';
 import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { SwaggerGetAuthCategory } from 'src/swagger/auth/get-user-category.decorator';
+
 import { AuthCategoryOkDto } from '../../dtos/get-user-category.response.dto';
+import { AuthService } from 'src/modules/auth/auth.service';
+import { SwaggerGetAuthCategory } from 'src/modules/swagger/auth/get-user-category.decorator';
 
 @Controller('user')
 @ApiTags('User')

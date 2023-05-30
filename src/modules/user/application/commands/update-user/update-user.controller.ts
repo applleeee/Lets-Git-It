@@ -1,4 +1,3 @@
-import { JwtAuthGuard } from '../../../../module/auth/guard/jwt-auth.guard';
 import { ApiTags } from '@nestjs/swagger';
 import {
   Body,
@@ -10,8 +9,10 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { UserService } from '../../user.service';
-import { SwaggerUpdateMyPage } from 'src/swagger/user/UpdateMyPage.decorator';
+
 import { UpdateUserDto } from './update-user.request.dto';
+import { JwtAuthGuard } from 'src/modules/auth/guard/jwt-auth.guard';
+import { SwaggerUpdateMyPage } from 'src/modules/swagger/user/UpdateMyPage.decorator';
 
 @ApiTags('User')
 @Controller('user')

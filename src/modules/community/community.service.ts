@@ -1,7 +1,5 @@
 import { Comment } from '../entities/comment.orm-entity';
 import { HttpException, Injectable, HttpStatus } from '@nestjs/common';
-import { CommunityRepository } from './community.repository';
-import { uploadToS3, getS3Data, deleteS3Data } from '../utils/aws';
 import {
   CreateCommentDto,
   CreateOrDeleteCommentLikesDto,
@@ -17,6 +15,9 @@ import {
   DeleteImageDto,
   PostLikeDto,
 } from './dto/Post.dto';
+import { CommunityRepository } from './community.repository';
+import { deleteS3Data, getS3Data, uploadToS3 } from 'src/utils/aws';
+
 @Injectable()
 export class CommunityService {
   constructor(private CommunityRepository: CommunityRepository) {}

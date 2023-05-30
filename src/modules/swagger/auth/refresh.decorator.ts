@@ -1,7 +1,3 @@
-import {
-  RefreshOkDto,
-  RefreshUnauthorizedDto,
-} from '../../module/auth/dtos/refresh.response.dto';
 import { applyDecorators } from '@nestjs/common';
 import {
   ApiCookieAuth,
@@ -9,6 +5,10 @@ import {
   ApiOperation,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import {
+  RefreshOkDto,
+  RefreshUnauthorizedDto,
+} from 'src/modules/auth/dtos/refresh.response.dto';
 
 export function SwaggerRefresh(): MethodDecorator {
   return applyDecorators(

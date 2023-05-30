@@ -2,25 +2,25 @@ import { ApiProperty } from '@nestjs/swagger';
 import { HttpStatusCode } from 'axios';
 
 export class GetUserResponseDto {
-  readonly userName: string;
+  userName: string;
 
-  readonly email: string;
+  email: string;
 
-  readonly profileText: string;
+  profileText: string;
 
-  readonly profileImageUrl: string;
+  profileImageUrl: string;
 
-  readonly fieldId: number;
+  fieldId: number;
 
-  readonly careerId: number;
+  careerId: number;
 
-  readonly isKorean: boolean;
+  isKorean: boolean;
 
-  readonly tierName: string;
+  tierName: string;
 
-  readonly tierImage: string;
+  tierImage: string;
 
-  readonly posts: PostDto[];
+  posts: PostDto[];
 }
 
 /**
@@ -71,6 +71,7 @@ export class GetMyPageUnauthorizedDto {
   readonly path: string;
 }
 
+// todo community에서 사용하는 dto로 대체하기
 class PostDto {
   title: string;
 

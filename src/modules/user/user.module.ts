@@ -1,4 +1,3 @@
-import { AuthModule } from '../module/auth/auth.module';
 import { CommunityModule } from '../community/community.module';
 import { RankModule } from '../rank/rank.module';
 import { GithubModule } from '../github-api/github.module';
@@ -21,6 +20,8 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { SignInCommandHandler } from './application/commands/sign-in/sign-in.handler';
 import { SignUpCommandHandler } from './application/commands/sign-up/sign-up.handler';
 import { UserMapper } from './user.mapper';
+import { AuthModule } from '../auth/auth.module';
+import { USER_REPOSITORY } from './user.di-tokens';
 
 const userControllers = [
   SignInController,
@@ -33,6 +34,10 @@ const userControllers = [
 
 const commandHandlers = [SignInCommandHandler, SignUpCommandHandler];
 
+const repositories = [{ provide: USER_REPOSITORY, useClass: UserRepository }];
+
+const mappers = [UserMapper];
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Field, Career]),
@@ -42,8 +47,8 @@ const commandHandlers = [SignInCommandHandler, SignUpCommandHandler];
     CqrsModule,
     forwardRef(() => AuthModule),
   ],
-  providers: [...commandHandlers, UserService, UserRepository, UserMapper],
-  exports: [UserService, UserRepository],
+  providers: [...commandHandlers, UserService, ...repositories, ...mappers],
+  exports: [UserService],
   controllers: [...userControllers],
 })
 export class UserModule {}
