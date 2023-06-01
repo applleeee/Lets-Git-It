@@ -3,13 +3,11 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigType } from '@nestjs/config';
 import authConfig from '../../config/authConfig';
 import cookieConfig from '../../config/cookieConfig';
-import { AuthRepository } from '../user/database/auth.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly authRepository: AuthRepository,
     @Inject(cookieConfig.KEY)
     private readonly _cookieConfig: ConfigType<typeof cookieConfig>,
     @Inject(authConfig.KEY)
@@ -45,10 +43,6 @@ export class AuthService {
   //   await this.userService.createUser(signUpData);
 
   //   const user = await this.userService.getUserByGithubId(signUpData.githubId);
-
-  async getAuthCategory() {
-    return await this.authRepository.getAuthCategory();
-  }
 
   async getJwtAccessToken(userId: string, userName: string) {
     const payload = { userId, userName };

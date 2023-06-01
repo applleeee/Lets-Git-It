@@ -1,11 +1,11 @@
 import { UserEntity } from '../../../domain/user.entity';
-import { UserRepository } from '../../../database/user.repository';
+import { UserRepository } from '../../../database/repository/user.repository';
 import { Inject, Injectable } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SignUpCommand } from './sign-up.command';
 import { USER_REPOSITORY } from 'src/modules/user/user.di-tokens';
 import { UserRepositoryPort } from 'src/modules/user/database/user.repository.port';
-import { UserMapper } from 'src/modules/user/user.mapper';
+import { UserMapper } from 'src/modules/user/mapper/user.mapper';
 
 @Injectable()
 @CommandHandler(SignUpCommand)

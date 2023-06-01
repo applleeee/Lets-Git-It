@@ -6,7 +6,7 @@ import { CommunityService } from './community.service';
 import { SubCategory } from '../entities/sub-category.orm-entity';
 import { MainCategory } from '../entities/main-category.orm-entity';
 import { Post } from '../entities/post.orm-entity';
-import { User } from '../user/database/user.orm-entity';
+import { User } from '../user/database/entity/user.orm-entity';
 import { PostLike } from '../entities/post-like.orm-entity';
 import { Comment } from '../entities/comment.orm-entity';
 import { RankerProfile } from '../entities/ranker-profile.orm-entity';

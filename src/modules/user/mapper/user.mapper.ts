@@ -1,6 +1,6 @@
-import { UserResponseDto } from './application/dtos/user.response.dto';
-import { User as UserOrmEntity } from './database/user.orm-entity';
-import { UserEntity } from './domain/user.entity';
+import { UserResponseDto } from '../application/dtos/user.response.dto';
+import { User as UserOrmEntity } from '../database/entity/user.orm-entity';
+import { UserEntity } from '../domain/user.entity';
 import { Mapper } from 'src/libs/base/mapper.interface';
 
 export class UserMapper
@@ -10,7 +10,7 @@ export class UserMapper
     const copy = entity.getProps();
 
     const record = new UserOrmEntity();
-    record.id = copy.id;
+    record.id = copy.id as string;
     record.githubId = copy.githubId;
     record.fieldId = copy.fieldId;
     record.careerId = copy.careerId;
@@ -42,7 +42,7 @@ export class UserMapper
   toResponse(entity: UserEntity): UserResponseDto {
     const props = entity.getProps();
     const response = new UserResponseDto();
-    response.id = props.id;
+    response.id = props.id as string;
     response.githubId = props.githubId;
     response.fieldId = props.fieldId;
     response.careerId = props.careerId;

@@ -1,18 +1,18 @@
 export interface BaseEntityProps {
-  id: string;
+  id: string | number;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface CreateEntityProps<T> {
-  id: string;
+  id: string | number;
   props: T;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 export abstract class BaseEntity<EntityProps> {
-  private readonly _id: string;
+  private readonly _id: string | number;
   private readonly _createdAt: Date;
   private _updatedAt: Date;
   protected readonly props: EntityProps;

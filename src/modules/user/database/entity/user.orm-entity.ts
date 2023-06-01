@@ -9,15 +9,15 @@ import {
   PrimaryColumn,
   Unique,
 } from 'typeorm';
-import { Comment } from '../../entities/comment.orm-entity';
-import { CommentLike } from '../../entities/comment-like.orm-entity';
-import { Post } from '../../entities/post.orm-entity';
-import { PostLike } from '../../entities/post-like.orm-entity';
-import { RankerProfile } from '../../entities/ranker-profile.orm-entity';
 import { Exclude } from 'class-transformer';
 import { Field } from './field.orm-entity';
 import { Career } from './career.orm-entity';
 import { BooleanTransformer } from 'src/utils/boolean-transformer';
+import { Comment } from 'src/modules/entities/comment.orm-entity';
+import { CommentLike } from 'src/modules/entities/comment-like.orm-entity';
+import { Post } from 'src/modules/entities/post.orm-entity';
+import { PostLike } from 'src/modules/entities/post-like.orm-entity';
+import { RankerProfile } from 'src/modules/entities/ranker-profile.orm-entity';
 
 // todo 인덱스 이게 맞아..?
 @Index('field_id', ['fieldId'], {})

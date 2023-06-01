@@ -3,10 +3,10 @@ import { RankerProfileRepository } from '../../rank/rankerProfile.repository';
 import { promisify } from 'util';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { pbkdf2 } from 'crypto';
-import { UserRepository } from '../database/user.repository';
-import { User } from '../database/user.orm-entity';
+import { UserRepository } from '../database/repository/user.repository';
 import { GetUserResponseDto } from './dtos/get-user.response.dto';
 import { USER_REPOSITORY } from '../user.di-tokens';
+import { User } from '../database/entity/user.orm-entity';
 
 @Injectable()
 export class UserService {

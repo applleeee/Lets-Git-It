@@ -9,7 +9,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../user/database/user.orm-entity';
+import { User } from '../user/database/entity/user.orm-entity';
 import { Post } from './post.orm-entity';
 import { CommentLike } from './comment-like.orm-entity';
 

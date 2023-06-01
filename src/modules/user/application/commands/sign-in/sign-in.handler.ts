@@ -1,6 +1,6 @@
 import { GithubUser } from '../../../../github-api/github-user';
 import { GithubService } from '../../../../github-api/github.service';
-import { UserRepository } from '../../../database/user.repository';
+import { UserRepository } from '../../../database/repository/user.repository';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SignInCommand } from './sign-in.command';
 import { Inject, Injectable } from '@nestjs/common';
@@ -56,6 +56,9 @@ export class SignInCommandHandler implements ICommandHandler<SignInCommand> {
     //     .cookie('Refresh', refreshToken, cookieOptions)
     //     .json(accessTokenWithUserInfo as AuthSignInOkResDto);
     // }
+
+    // todo mapper로 dto로 만들어서 반환.
+
     return;
   }
 }

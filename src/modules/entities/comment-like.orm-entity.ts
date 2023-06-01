@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Comment } from './comment.orm-entity';
-import { User } from '../user/database/user.orm-entity';
+import { User } from '../user/database/entity/user.orm-entity';
 
 @Index('comment_id', ['commentId'], {})
 @Entity('comment_like', { schema: 'git_rank' })

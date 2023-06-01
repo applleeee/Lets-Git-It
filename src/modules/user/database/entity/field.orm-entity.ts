@@ -11,4 +11,10 @@ export class Field {
 
   @OneToMany(() => User, (user) => user.field)
   users: User[];
+
+  @Column('timestamp', { name: 'created_at', default: () => "'now()'" })
+  createdAt: Date;
+
+  @Column('timestamp', { name: 'updated_at', nullable: true })
+  updatedAt: Date | null;
 }

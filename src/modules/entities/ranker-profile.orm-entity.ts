@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
   OneToOne,
 } from 'typeorm';
-import { User } from '../user/database/user.orm-entity';
+import { User } from '../user/database/entity/user.orm-entity';
 import { Ranking } from './ranking.orm-entity';
 
 @Index('user_id', ['userId'], {})

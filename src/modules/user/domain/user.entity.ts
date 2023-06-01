@@ -1,5 +1,4 @@
 import { ulid } from 'ulid';
-
 import { CreateUserProps, UserProps } from './user.types';
 import { BaseEntity } from 'src/libs/base/entity.base';
 import { UpdateUserProps } from './user.types';

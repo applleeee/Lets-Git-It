@@ -10,7 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Comment } from './comment.orm-entity';
-import { User } from '../user/database/user.orm-entity';
+import { User } from '../user/database/entity/user.orm-entity';
 import { SubCategory } from './sub-category.orm-entity';
 import { PostLike } from './post-like.orm-entity';
 

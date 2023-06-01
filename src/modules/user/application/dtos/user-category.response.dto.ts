@@ -1,12 +1,12 @@
-import { Field } from '../../database/field.orm-entity';
-import { Career } from '../../database/career.orm-entity';
+import { Field } from '../../database/entity/field.orm-entity';
+import { Career } from '../../database/entity/career.orm-entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
  * @author MyeongSeok
  * @description 회원가입 시 유저에게 받아야 하는 정보의 카테고리를 반환하는 응답객체의 DTO입니다.
  */
-export class AuthCategoryOkDto {
+export class UserCategoryDto {
   /**
    * 유저의 개발분야를 나타냅니다.
    * @example [{ id : 1, name : 프론트엔드 }, { id : 2, name : 백엔드 }, { id : 3, name : 안드로이드 }, { id : , name : IOS }, { id : 5, name : 운영체제 }, { id : 6, name : Q/A }, { id : 7, name : 임베디드 }, { id : 8, name : 보안}, { id : 9, name : 기타 }]

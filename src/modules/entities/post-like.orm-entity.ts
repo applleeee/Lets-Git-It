@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Post } from './post.orm-entity';
-import { User } from '../user/database/user.orm-entity';
+import { User } from '../user/database/entity/user.orm-entity';
 
 @Index('post_id', ['postId'], {})
 @Entity('post_like', { schema: 'git_rank' })
