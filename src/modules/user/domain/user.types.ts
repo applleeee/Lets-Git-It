@@ -13,3 +13,9 @@ export interface CreateUserProps {
   careerId: number;
   isKorean: boolean;
 }
+
+export interface UpdateUserProps {
+  fieldId: number;
+  careerId: number;
+  isKorean: boolean;
+}

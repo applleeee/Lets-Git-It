@@ -5,7 +5,6 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { pbkdf2 } from 'crypto';
 import { UserRepository } from '../database/user.repository';
 import { User } from '../database/user.orm-entity';
-import { UpdateUserDto } from './commands/update-user/update-user.request.dto';
 import { GetUserResponseDto } from './dtos/get-user.response.dto';
 import { USER_REPOSITORY } from '../user.di-tokens';
 
@@ -57,10 +56,6 @@ export class UserService {
       tierImage,
     };
     return result;
-  }
-
-  async updateUser(userId: string, partialEntity: UpdateUserDto) {
-    return await this._userRepository.updateUser(userId, partialEntity);
   }
 
   async saveRefreshToken(refreshToken: string, userId: string) {

@@ -4,33 +4,32 @@ import {
   Controller,
   HttpCode,
   Patch,
-  Req,
   UseGuards,
   HttpStatus,
 } from '@nestjs/common';
-import { UserService } from '../../user.service';
-
-import { UpdateUserDto } from './update-user.request.dto';
+import { UpdateUserRequestDto } from './update-user.request.dto';
 import { JwtAuthGuard } from 'src/modules/auth/guard/jwt-auth.guard';
 import { SwaggerUpdateMyPage } from 'src/modules/swagger/user/UpdateMyPage.decorator';
+import { User } from 'src/libs/decorator/user.decorator';
+import { AuthorizedUser } from 'src/modules/auth/domain/auth.type';
+import { UpdateUserCommand } from './update-user.command';
+import { CommandBus } from '@nestjs/cqrs';
 
 @ApiTags('User')
 @Controller('user')
 export class UpdateUserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly _commandBus: CommandBus) {}
 
   @SwaggerUpdateMyPage()
   @UseGuards(JwtAuthGuard)
   @Patch()
   @HttpCode(HttpStatus.CREATED)
-  async updateUser(@Body() body: UpdateUserDto, @Req() req) {
-    const userId = req.user.id;
-    const partialEntity = {
-      fieldId: body.fieldId,
-      careerId: body.careerId,
-      isKorean: body.isKorean,
-    };
-    await this.userService.updateUser(userId, partialEntity);
-    return { message: 'USER_INFO_UPDATED' };
+  async updateUser(
+    @User() user: Partial<AuthorizedUser>,
+    @Body() body: UpdateUserRequestDto,
+  ) {
+    const command = new UpdateUserCommand({ id: user.id, ...body });
+
+    return await this._commandBus.execute(command);
   }
 }

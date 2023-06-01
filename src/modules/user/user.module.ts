@@ -22,6 +22,8 @@ import { SignUpCommandHandler } from './application/commands/sign-up/sign-up.han
 import { UserMapper } from './user.mapper';
 import { AuthModule } from '../auth/auth.module';
 import { USER_REPOSITORY } from './user.di-tokens';
+import { SignOutCommandHandler } from './application/commands/sign-out/sign-out.handler';
+import { UpDateUserCommandHandler } from './application/commands/update-user/update-user.handler';
 
 const userControllers = [
   SignInController,
@@ -32,7 +34,12 @@ const userControllers = [
   GetUserCategoryController,
 ];
 
-const commandHandlers = [SignInCommandHandler, SignUpCommandHandler];
+const commandHandlers = [
+  SignInCommandHandler,
+  SignUpCommandHandler,
+  SignOutCommandHandler,
+  UpDateUserCommandHandler,
+];
 
 const repositories = [{ provide: USER_REPOSITORY, useClass: UserRepository }];
 

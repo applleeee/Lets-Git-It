@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User as UserOrmEntity } from './user.orm-entity';
-import { UpdateUserDto } from '../application/commands/update-user/update-user.request.dto';
 import { UserEntity } from '../domain/user.entity';
 import { UserMapper } from '../user.mapper';
 import { MySqlRepositoryBase } from 'src/libs/db/mysql-repository.base';
@@ -60,7 +59,7 @@ export class UserRepository
     }
   }
 
-  async updateUser(userId: string, partialEntity: UpdateUserDto) {
+  async updateUser(userId: string, partialEntity) {
     return await this.userRepository.update({ id: userId }, partialEntity);
   }
 
@@ -69,9 +68,11 @@ export class UserRepository
   }
 
   async deleteUserRefreshToken(id: string) {
-    return await this.userRepository.update(id, {
+    const result = await this.userRepository.update(id, {
       hashedRefreshToken: null,
       updatedAt: new Date(),
     });
+
+    return result.affected > 0;
   }
 }
