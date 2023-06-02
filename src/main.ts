@@ -9,7 +9,7 @@ import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './utils/http-exception.filter';
 import * as morgan from 'morgan';
 import { ValidationError } from 'class-validator';
-import { SwaggerSetup } from './swagger/swagger';
+import { SwaggerSetup } from './modules/swagger/swagger';
 import * as cookieParser from 'cookie-parser';
 import { readFileSync } from 'fs';
 import * as basicAuth from 'express-basic-auth';

@@ -1,17 +1,17 @@
 import { ConfigService, registerAs } from '@nestjs/config';
 import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
-import { Career } from 'src/entities/Career';
-import { Comment } from 'src/entities/Comment';
-import { CommentLike } from 'src/entities/CommentLike';
-import { Field } from 'src/entities/Field';
-import { MainCategory } from 'src/entities/MainCategory';
-import { Post } from 'src/entities/Post';
-import { PostLike } from 'src/entities/PostLike';
-import { RankerProfile } from 'src/entities/RankerProfile';
-import { Ranking } from 'src/entities/Ranking';
-import { SubCategory } from 'src/entities/SubCategory';
-import { Tier } from 'src/entities/Tier';
-import { User } from 'src/entities/User';
+import { Career } from 'src/modules/entities/Career';
+import { Comment } from 'src/modules/entities/Comment';
+import { CommentLike } from 'src/modules/entities/CommentLike';
+import { Field } from 'src/modules/entities/Field';
+import { MainCategory } from 'src/modules/entities/MainCategory';
+import { Post } from 'src/modules/entities/Post';
+import { PostLike } from 'src/modules/entities/PostLike';
+import { RankerProfile } from 'src/modules/entities/RankerProfile';
+import { Ranking } from 'src/modules/entities/Ranking';
+import { SubCategory } from 'src/modules/entities/SubCategory';
+import { Tier } from 'src/modules/entities/Tier';
+import { User } from 'src/modules/entities/User';
 import { DatabaseType } from 'typeorm';
 
 export default registerAs('orm', () => ({
