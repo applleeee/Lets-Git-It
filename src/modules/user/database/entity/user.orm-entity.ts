@@ -18,6 +18,7 @@ import { CommentLike } from 'src/modules/entities/comment-like.orm-entity';
 import { Post } from 'src/modules/entities/post.orm-entity';
 import { PostLike } from 'src/modules/entities/post-like.orm-entity';
 import { RankerProfile } from 'src/modules/entities/ranker-profile.orm-entity';
+import { RefreshToken } from '../../../auth/database/refresh-token.orm-entity';
 
 // todo 인덱스 이게 맞아..?
 @Index('field_id', ['fieldId'], {})
@@ -54,12 +55,11 @@ export class User {
   isAdmin: boolean | null;
 
   // todo refreshToken 어트리뷰트 정규화 할 것.
-  @Column('varchar', {
-    name: 'hashed_refresh_token',
+  @Column('uuid', {
+    name: 'hashed_refresh_token_id',
     nullable: true,
   })
-  @Exclude()
-  hashedRefreshToken: string | null;
+  hashedRefreshTokenId: string | null;
 
   @Column('timestamp', { name: 'created_at', default: () => "'now()'" })
   createdAt: Date;
@@ -78,6 +78,9 @@ export class User {
 
   @OneToMany(() => PostLike, (postLike) => postLike.user)
   postLikes: PostLike[];
+
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
+  refreshToken: RefreshToken[];
 
   @OneToOne(() => RankerProfile, (rankerProfile) => rankerProfile.user)
   rankerProfiles: RankerProfile[];

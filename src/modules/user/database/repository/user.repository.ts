@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User as UserOrmEntity } from '../entity/user.orm-entity';
@@ -26,53 +26,5 @@ export class UserRepository
     return await this._userRepository.findOneBy({
       githubId,
     });
-  }
-
-  // async getUserIdByGithubId(githubId: number) {
-  //   const user = await this._userRepository.findOneBy({
-  //     githubId,
-  //   });
-  //   return user.id;
-  // }
-
-  async getByUserId(id: string): Promise<UserOrmEntity> {
-    return await this._userRepository.findOneBy({
-      id,
-    });
-  }
-
-  async createUser(entity: UserEntity) {
-    const record = this.mapper.toPersistence(entity);
-
-    try {
-      return await this._userRepository.save(record);
-    } catch (error) {
-      console.log('createUser error: ', error);
-      if (error.code === 'ER_DUP_ENTRY') {
-        throw new HttpException('EXISTING_USERNAME', HttpStatus.CONFLICT);
-      } else {
-        throw new HttpException(
-          'INTERNAL_SERVER_ERROR',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
-    }
-  }
-
-  async updateUser(userId: string, partialEntity) {
-    return await this._userRepository.update({ id: userId }, partialEntity);
-  }
-
-  async updateUserRefreshToken(id: string, hashedRefreshToken: string) {
-    return await this._userRepository.update(id, { hashedRefreshToken });
-  }
-
-  async deleteUserRefreshToken(id: string) {
-    const result = await this._userRepository.update(id, {
-      hashedRefreshToken: null,
-      updatedAt: new Date(),
-    });
-
-    return result.affected > 0;
   }
 }

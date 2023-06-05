@@ -28,7 +28,8 @@ export class SignUpCommandHandler implements ICommandHandler<SignUpCommand> {
     // todo refreshtoken user에 넣어주고 db 저장
     //   const jwtToken = await this.getJwtAccessToken(user.id, userName);
 
-    // todo
+    // todo 랭킹 정보 갱신의 경우, user 엔티티에 add event 메소드 만들어서, user create event 보내고 ranker 도메인에서 eventhandler 작성해서 랭킹 정보 갱신하도록 메시지 보낼 것.
+    // todo 근데 트랜잭션 고려해야함. 참고 : https://velog.io/@backtony/Spring-Event-Driven
 
     //   await this.rankService.checkRanker(userName);
 

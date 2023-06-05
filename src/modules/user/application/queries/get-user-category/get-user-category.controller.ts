@@ -17,7 +17,7 @@ export class GetUserCategoryController {
   @Get('/category')
   @HttpCode(HttpStatus.OK)
   async getAuthCategory(): Promise<UserCategoryDto> {
-    const command = new GetUserCategoryQuery();
-    return await this._queryBus.execute(command);
+    const query = new GetUserCategoryQuery();
+    return await this._queryBus.execute(query);
   }
 }

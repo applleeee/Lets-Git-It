@@ -16,7 +16,7 @@ export class UserMapper
     record.careerId = copy.careerId;
     record.isKorean = copy.isKorean;
     record.isAdmin = copy.isAdmin;
-    record.hashedRefreshToken = copy.hashedRefreshToken;
+    record.hashedRefreshTokenId = copy.hashedRefreshTokenId;
     record.createdAt = copy.createdAt;
     record.updatedAt = copy.updatedAt;
 

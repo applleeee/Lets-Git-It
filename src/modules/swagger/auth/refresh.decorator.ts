@@ -8,7 +8,7 @@ import {
 import {
   RefreshOkDto,
   RefreshUnauthorizedDto,
-} from 'src/modules/auth/dtos/refresh.response.dto';
+} from 'src/modules/user/application/dtos/refresh.response.dto';
 
 export function SwaggerRefresh(): MethodDecorator {
   return applyDecorators(

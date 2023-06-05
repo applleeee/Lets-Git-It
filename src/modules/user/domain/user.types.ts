@@ -4,7 +4,7 @@ export interface UserProps {
   careerId: number;
   isAdmin: boolean;
   isKorean: boolean;
-  hashedRefreshToken?: string;
+  hashedRefreshTokenId?: string;
 }
 
 export interface CreateUserProps {

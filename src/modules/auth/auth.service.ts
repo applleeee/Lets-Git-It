@@ -1,8 +1,13 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigType } from '@nestjs/config';
 import authConfig from '../../config/authConfig';
 import cookieConfig from '../../config/cookieConfig';
+import { pbkdf2 } from 'crypto';
+import { promisify } from 'util';
+import { RefreshTokenRepositoryPort } from './database/refresh-token.repository.port';
+import { REFRESH_TOKEN_REPOSITORY } from './auth.di-tokens';
+import { RankerProfileRepository } from '../rank/rankerProfile.repository';
 
 @Injectable()
 export class AuthService {
@@ -12,37 +17,10 @@ export class AuthService {
     private readonly _cookieConfig: ConfigType<typeof cookieConfig>,
     @Inject(authConfig.KEY)
     private readonly _authConfig: ConfigType<typeof authConfig>,
+    @Inject(REFRESH_TOKEN_REPOSITORY)
+    private readonly _refreshTokenRepository: RefreshTokenRepositoryPort,
+    private readonly _rankerProfileRepository: RankerProfileRepository,
   ) {}
-
-  // async signIn(githubCode: SignInRequestDto) {
-  //   const { code } = githubCode;
-
-  //   const userName = githubUserInfo.login;
-  //   const user = await this.userService.getByGithubId(githubUserInfo.id);
-
-  //   if (!user) {
-  //     return {
-  //       isMember: false,
-  //       userName: userName,
-  //       githubId: githubUserInfo.id,
-  //     };
-  //   }
-
-  //   const jwtToken = await this.getJwtAccessToken(user.id, userName);
-
-  //   return {
-  //     isMember: true,
-  //     userName: userName,
-  //     accessToken: jwtToken,
-  //     userId: user.id,
-  //   };
-  // }
-
-  // async signUp(signUpDataWithUserName) {
-  //   const { userName, ...signUpData } = signUpDataWithUserName;
-  //   await this.userService.createUser(signUpData);
-
-  //   const user = await this.userService.getUserByGithubId(signUpData.githubId);
 
   async getJwtAccessToken(userId: string, userName: string) {
     const payload = { userId, userName };
@@ -88,5 +66,73 @@ export class AuthService {
       secure: true,
       signed: true,
     };
+  }
+
+  async saveRefreshToken(refreshToken: string, userId: string) {
+    const salt = process.env.REFRESH_SALT;
+    const iterations = +process.env.REFRESH_ITERATIONS;
+    const keylen = +process.env.REFRESH_KEYLEN;
+    const digest = process.env.REFRESH_DIGEST;
+    const pbkdf2Promise = promisify(pbkdf2);
+    const key = await pbkdf2Promise(
+      refreshToken,
+      salt,
+      iterations,
+      keylen,
+      digest,
+    );
+
+    const hashedRefreshToken = key.toString('base64');
+
+    return await this._refreshTokenRepository.updateUserRefreshToken(
+      userId,
+      hashedRefreshToken,
+    );
+  }
+
+  async getUserIfRefreshTokenMatches(refreshToken: string, id: string) {
+    const user = await this._refreshTokenRepository.findOneById(id);
+    const { hashedRefreshToken } = user.getProps();
+    const isRefreshTokenMatching: boolean = await this.verifyRefreshToken(
+      hashedRefreshToken,
+      refreshToken,
+    );
+
+    if (isRefreshTokenMatching) {
+      const userName = await this._rankerProfileRepository.getUserNameByUserId(
+        id,
+      );
+
+      return { id, userName };
+    }
+  }
+
+  // authService
+  async verifyRefreshToken(
+    hashedRefreshToken: string,
+    currentRefreshToken: string,
+  ) {
+    const salt = process.env.REFRESH_SALT;
+    const iterations = +process.env.REFRESH_ITERATIONS;
+    const keylen = +process.env.REFRESH_KEYLEN;
+    const digest = process.env.REFRESH_DIGEST;
+    const pbkdf2Promise = promisify(pbkdf2);
+    const key = await pbkdf2Promise(
+      currentRefreshToken,
+      salt,
+      iterations,
+      keylen,
+      digest,
+    );
+    const currentHashedRefreshToken = key.toString('base64');
+
+    if (currentHashedRefreshToken !== hashedRefreshToken)
+      throw new UnauthorizedException('UNAUTHORIZED');
+
+    return true;
+  }
+
+  async deleteRefreshToken(id: string) {
+    return await this._refreshTokenRepository.updateUserRefreshToken(id, null);
   }
 }

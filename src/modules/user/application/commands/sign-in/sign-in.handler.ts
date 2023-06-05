@@ -17,7 +17,7 @@ export class SignInCommandHandler implements ICommandHandler<SignInCommand> {
     private readonly _githubService: GithubService, // todo private readonly port 삽입
   ) {}
   async execute(command: SignInCommand): Promise<any> {
-    // todo 유저라면 엑세스 토큰,userId를 포함한 유저정보, 아니라면 githubId를 포함한 유저정보 반환
+    // todo githubService 관련 로직을 한 번 감싸서 사용. Sign In handler가 Github Service를 너무 많이 알고있다. getGithubIdOfUser 정도로 감싸자.
     const { code } = command;
 
     const githubAccessToken = await this._githubService.getGithubAccessToken(

@@ -4,7 +4,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { ConfigType } from '@nestjs/config';
 import authConfig from '../../../config/authConfig';
-import { UserService } from 'src/modules/user/application/user.service';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -12,7 +11,6 @@ export class JwtRefreshStrategy extends PassportStrategy(
   'jwt-refresh-token',
 ) {
   constructor(
-    private readonly userService: UserService,
     @Inject(authConfig.KEY)
     private readonly config: ConfigType<typeof authConfig>,
   ) {
@@ -33,11 +31,10 @@ export class JwtRefreshStrategy extends PassportStrategy(
 
     const { userId } = payload;
 
-    const user = await this.userService.getUserIfRefreshTokenMatches(
-      refreshToken,
-      userId,
-    );
-
-    return user;
+    const user = {} as any;
+    // await this.userService.getUserIfRefreshTokenMatches(
+    //   refreshToken,
+    //   userId,
+    // );
   }
 }

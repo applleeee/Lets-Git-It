@@ -3,5 +3,4 @@ import { UserEntity } from '../domain/user.entity';
 
 export interface UserRepositoryPort extends RepositoryPort<UserEntity> {
   getUserByGithubId(githubId: number): Promise<any>;
-  deleteUserRefreshToken(id: string): Promise<boolean>;
 }

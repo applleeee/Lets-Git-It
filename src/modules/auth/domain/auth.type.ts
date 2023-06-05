@@ -1,6 +1,11 @@
 import { Comment } from '../../entities/comment.orm-entity';
 import { Post } from '../../entities/post.orm-entity';
 
+export interface RefreshTokenProps {
+  hashedRefreshToken: string;
+  userId: string;
+}
+
 export class AuthorizedUser {
   readonly id: string;
   readonly userName: string;
