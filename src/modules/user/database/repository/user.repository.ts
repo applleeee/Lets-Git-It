@@ -27,4 +27,11 @@ export class UserRepository
       githubId,
     });
   }
+
+  async getUserNameByUserId(id: string): Promise<any> {
+    return await this._userRepository.findOne({
+      where: { id },
+      relations: ['rankerProfiles'],
+    });
+  }
 }

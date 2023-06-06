@@ -9,14 +9,15 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-import { AuthService } from 'src/modules/auth/auth.service';
 import { JwtRefreshGuard } from 'src/modules/auth/guard/jwt-refresh.guard';
 import { SwaggerRefresh } from 'src/modules/swagger/auth/refresh.decorator';
+import { RefreshCommand } from './refresh.command';
+import { CommandBus } from '@nestjs/cqrs';
 
 @Controller('auth')
 @ApiTags('Auth')
 export class RefreshController {
-  constructor(private readonly _authService: AuthService) {}
+  constructor(private readonly _commandBus: CommandBus) {}
 
   /**
    * @author MyeongSeok
@@ -28,23 +29,10 @@ export class RefreshController {
   @Get('/refresh')
   @HttpCode(HttpStatus.OK)
   async refresh(@Req() req, @Res({ passthrough: true }) res: Response) {
-    // const currentRefreshToken = req.signedCookies.Refresh;
-    // const { user } = req;
-    // const accessToken = await this.authService.getJwtAccessToken(
-    //   user.id,
-    //   user.userName,
-    // );
-    // const refreshTokenRegenerationRequired: boolean =
-    //   await this.authService.isRefreshTokenExpirationDateHalfPast(
-    //     currentRefreshToken,
-    //   );
-    // if (refreshTokenRegenerationRequired) {
-    //   const { refreshToken, ...cookieOptions } =
-    //     await this.authService.getCookiesWithJwtRefreshToken(user.id);
-    //   await this.userService.saveRefreshToken(refreshToken, user.id);
-    //   res.cookie('Refresh', refreshToken, cookieOptions).json({ accessToken });
-    // } else {
-    //   res.json({ accessToken });
-    // }
+    const refreshToken = req.signedCookies.Refresh;
+    const { id } = req.user;
+
+    const command = new RefreshCommand({ id, refreshToken });
+    return await this._commandBus.execute(command);
   }
 }

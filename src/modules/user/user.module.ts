@@ -24,12 +24,14 @@ import { Field } from './database/entity/field.orm-entity';
 import { UserCategoryMapper } from './mapper/user-category.mapper';
 import { GetUserCateGoryQueryHandler } from './application/queries/get-user-category/get-user-category.query-handler';
 import { GetUserQueryHandler } from './application/queries/get-user/get-user.query-handler';
+import { RefreshController } from './application/commands/refresh/refresh.controller';
 
 const userControllers = [
   SignInController,
   SignOutController,
   SignUpController,
   UpdateUserController,
+  RefreshController,
   GetUserController,
   GetUserCategoryController,
 ];

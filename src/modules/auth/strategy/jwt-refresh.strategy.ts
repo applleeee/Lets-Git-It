@@ -31,10 +31,11 @@ export class JwtRefreshStrategy extends PassportStrategy(
 
     const { userId } = payload;
 
-    const user = {} as any;
+    const user = { id: userId };
     // await this.userService.getUserIfRefreshTokenMatches(
     //   refreshToken,
     //   userId,
     // );
+    return user;
   }
 }
