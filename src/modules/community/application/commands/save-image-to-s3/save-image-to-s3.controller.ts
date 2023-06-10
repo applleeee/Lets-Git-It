@@ -10,6 +10,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { User } from 'src/libs/decorator/user.decorator';
 import { AuthorizedUser } from 'src/modules/auth/dto/auth.dto';
 import { JwtAuthGuard } from 'src/modules/auth/guard/jwt-auth.guard';
+import { SaveImageToS3Command } from './save-image-to-s3.command';
 
 @Controller('/community')
 export class SaveImageToS3Controller {
@@ -23,5 +24,12 @@ export class SaveImageToS3Controller {
     @User() user: Partial<AuthorizedUser>,
   ) {
     const { id: userId } = user;
+
+    const command = new SaveImageToS3Command({
+      userId,
+      image,
+    });
+
+    return await this._commandBus.execute(command);
   }
 }

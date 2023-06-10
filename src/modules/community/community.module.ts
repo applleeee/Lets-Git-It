@@ -30,6 +30,7 @@ import { PostRepository } from './database/post.repository';
 import { CommunityService } from './application/community.service';
 import { CommunityRepository } from './community.repository';
 import { PostMapper } from './community.mapper';
+import { SaveImageToS3CommandHandler } from './application/commands/save-image-to-s3/save-image-to-s3.handler';
 
 const controllers = [
   GetAllPostCategoriesController,
@@ -37,7 +38,7 @@ const controllers = [
   SaveImageToS3Controller,
 ];
 
-const commandHandlers = [CreatePostCommandHandler];
+const commandHandlers = [CreatePostCommandHandler, SaveImageToS3CommandHandler];
 
 const queryHandlers = [GetAllCategoriesQueryHandler];
 

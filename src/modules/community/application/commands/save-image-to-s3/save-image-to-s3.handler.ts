@@ -1,11 +1,11 @@
-import { HttpException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SaveImageToS3Command } from './save-image-to-s3.command';
 import { AwsS3Service } from 'src/modules/aws-s3/aws-s3.service';
 
 @Injectable()
 @CommandHandler(SaveImageToS3Command)
-export class SaveImageToS3Handler
+export class SaveImageToS3CommandHandler
   implements ICommandHandler<SaveImageToS3Command>
 {
   constructor(
@@ -30,6 +30,6 @@ export class SaveImageToS3Handler
       imageName,
       mimetype,
     );
-    return saveToS3;
+    return saveToS3.Location;
   }
 }

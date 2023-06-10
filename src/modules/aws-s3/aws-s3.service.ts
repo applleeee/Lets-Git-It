@@ -1,10 +1,9 @@
 import {
   DeleteObjectsCommand,
   GetObjectCommand,
-  PutObjectCommand,
-  PutObjectCommandOutput,
   S3Client,
 } from '@aws-sdk/client-s3';
+import * as AWS from 'aws-sdk';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Readable } from 'stream';
 
@@ -46,12 +45,8 @@ export class AwsS3Service {
     }
   }
 
-  async uploadToS3(
-    file: Buffer,
-    name: string,
-    mimetype: string,
-  ): Promise<PutObjectCommandOutput> {
-    const s3Client = new S3Client(this.s3Option);
+  async uploadToS3(file: Buffer, name: string, mimetype: string) {
+    const s3 = new AWS.S3(this.s3Option);
 
     try {
       const bucketParams = {
@@ -61,7 +56,7 @@ export class AwsS3Service {
         ContentType: mimetype,
       };
 
-      return await s3Client.send(new PutObjectCommand(bucketParams));
+      return await s3.upload(bucketParams).promise();
     } catch (error) {
       throw new HttpException(
         'CANNOT_UPLOAD_TO_S3',
