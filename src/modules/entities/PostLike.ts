@@ -4,9 +4,9 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  PrimaryColumn,
 } from 'typeorm';
 import { Post } from './Post';
 import { User } from './User';
@@ -14,14 +14,14 @@ import { User } from './User';
 @Index('post_id', ['postId'], {})
 @Entity('post_like', { schema: 'git_rank' })
 export class PostLike {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id', unsigned: true })
-  id: number;
+  @PrimaryColumn({ type: 'varchar', name: 'id' })
+  id: string;
 
-  @Column('int', { name: 'post_id', nullable: false, unsigned: true })
-  postId: number;
+  @Column('varchar', { name: 'post_id', nullable: false })
+  postId: string;
 
-  @Column('int', { name: 'user_id', nullable: false, unsigned: true })
-  userId: number;
+  @Column('varchar', { name: 'user_id', nullable: false })
+  userId: string;
 
   @CreateDateColumn({ name: 'created_at', nullable: false })
   createdAt: Date;

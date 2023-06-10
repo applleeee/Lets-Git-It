@@ -42,7 +42,7 @@ export class RankerProfile {
   @Column('varchar', { name: 'region', nullable: true, length: 255 })
   region: string | null;
 
-  @Column('int', { name: 'user_id', nullable: true, unsigned: true })
+  @Column('varchar', { name: 'user_id', nullable: true })
   userId: string | null;
 
   @CreateDateColumn({ name: 'created_at', nullable: false })

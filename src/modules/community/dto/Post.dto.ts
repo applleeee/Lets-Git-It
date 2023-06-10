@@ -69,7 +69,7 @@ export class PostLikeDto {
   @IsNotEmpty()
   @IsNumber()
   @Type(() => Number)
-  readonly postId: number;
+  readonly postId: string;
 }
 
 export class SearchPostDto {

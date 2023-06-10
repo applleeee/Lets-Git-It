@@ -32,6 +32,7 @@ export class UserRepository {
   }
 
   async createUser(signUpData: SignUpDto) {
+    signUpData.id = `${new Date()}`;
     const user = this.userRepository.create(signUpData);
 
     try {

@@ -158,7 +158,7 @@ export class CommunityService {
     }
   }
 
-  async createOrDeletePostLike(data: PostLikeDto, userId: number) {
+  async createOrDeletePostLike(data: PostLikeDto, userId: string) {
     const { postId } = data;
     return await this.CommunityRepository.createOrDeletePostLike(
       postId,

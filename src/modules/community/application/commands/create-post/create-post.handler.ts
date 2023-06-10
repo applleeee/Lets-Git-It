@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreatePostCommand } from './create-post.command';
-import { PostMapper } from 'src/modules/community/community.mapper';
 import { POST_REPOSITORY } from 'src/modules/community/community.di-tokens';
 import { PostRepositoryPort } from 'src/modules/community/database/post.repository.port';
 import { uploadToS3 } from 'src/utils/aws';

@@ -28,7 +28,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     const userNameInDb = await this.rankerProfileRepository.getUserNameByUserId(
       userId,
     );
-
     if (userNameInDb !== userName)
       throw new HttpException('FORBIDDEN', HttpStatus.FORBIDDEN);
 

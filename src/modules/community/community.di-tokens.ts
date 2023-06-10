@@ -1,1 +1,1 @@
-export const POST_REPOSITORY = Symbol('USER_REPOSITORY');
+export const POST_REPOSITORY = Symbol('POST_REPOSITORY');

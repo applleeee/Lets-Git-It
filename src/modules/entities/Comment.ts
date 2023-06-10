@@ -5,9 +5,9 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  PrimaryColumn,
 } from 'typeorm';
 import { User } from './User';
 import { Post } from './Post';
@@ -16,16 +16,16 @@ import { CommentLike } from './CommentLike';
 @Index('post_id', ['postId'], {})
 @Entity('comment', { schema: 'git_rank' })
 export class Comment {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id', unsigned: true })
+  @PrimaryColumn({ type: 'varchar', name: 'id' })
   id: string;
 
   @Column('varchar', { name: 'content', nullable: false, length: 2083 })
   content: string;
 
-  @Column('int', { name: 'user_id', nullable: false, unsigned: true })
+  @Column('varchar', { name: 'user_id', nullable: false })
   userId: string;
 
-  @Column('int', { name: 'post_id', nullable: false, unsigned: true })
+  @Column('varchar', { name: 'post_id', nullable: false })
   postId: string;
 
   @Column('int', { name: 'group_order', nullable: false, unsigned: true })

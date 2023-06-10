@@ -6,6 +6,7 @@ import {
   ManyToOne,
   OneToMany,
   OneToOne,
+  PrimaryColumn,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
@@ -23,7 +24,7 @@ import { Exclude } from 'class-transformer';
 @Unique(['githubId'])
 @Entity('user', { schema: 'git_rank' })
 export class User {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id', unsigned: true })
+  @PrimaryColumn({ type: 'varchar', name: 'id' })
   id: string;
 
   @Column('int', { name: 'github_id', nullable: false, unsigned: true })

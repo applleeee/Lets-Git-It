@@ -1,4 +1,3 @@
-import { JwtRefreshStrategy } from './strategy/jwt-refresh.strategy';
 import { CommunityRepository } from '../community/community.repository';
 import { MainCategory } from '../entities/MainCategory';
 import { SubCategory } from '../entities/SubCategory';
@@ -62,7 +61,6 @@ import { RankerProfileRepository } from '../rank/rankerProfile.repository';
     AuthService,
     UserService,
     JwtStrategy,
-    JwtRefreshStrategy,
     AuthRepository,
     CommunityRepository,
     CommunityService,
@@ -72,7 +70,6 @@ import { RankerProfileRepository } from '../rank/rankerProfile.repository';
     UserRepository,
     RankerProfileRepository,
     JwtStrategy,
-    JwtRefreshStrategy,
   ],
   exports: [AuthService, AuthRepository],
 })

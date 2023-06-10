@@ -1,8 +1,5 @@
-import { JwtRefreshStrategy } from '../../modules/auth/strategy/jwt-refresh.strategy';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CommunityRepository } from './community.repository';
-import { CommunityService } from './application/community.service';
 import { SubCategory } from '../entities/SubCategory';
 import { MainCategory } from '../entities/MainCategory';
 import { Post } from '../entities/Post';
@@ -24,8 +21,29 @@ import { TierRepository } from '../rank/tier.repository';
 import { GetAllPostCategoriesController } from './application/queries/get-all-post-categories/get-all-post-categories.controller';
 import { CqrsModule } from '@nestjs/cqrs';
 import { GetAllCategoriesQueryHandler } from './application/queries/get-all-post-categories/get-all-post-categories.query-handler';
+import { CreatePostController } from './application/commands/create-post/create-post.controller';
+import { SaveImageToS3Controller } from './application/commands/save-image-to-s3/save-image-to-s3.controller';
+import { AwsS3Module } from '../aws-s3/aws-s3.module';
+import { CreatePostCommandHandler } from './application/commands/create-post/create-post.handler';
+import { POST_REPOSITORY } from './community.di-tokens';
+import { PostRepository } from './database/post.repository';
+import { CommunityService } from './application/community.service';
+import { CommunityRepository } from './community.repository';
+import { PostMapper } from './community.mapper';
 
-const Communitycontrollers = [GetAllPostCategoriesController];
+const controllers = [
+  GetAllPostCategoriesController,
+  CreatePostController,
+  SaveImageToS3Controller,
+];
+
+const commandHandlers = [CreatePostCommandHandler];
+
+const queryHandlers = [GetAllCategoriesQueryHandler];
+
+const repositories = [{ provide: POST_REPOSITORY, useClass: PostRepository }];
+
+const mappers = [PostMapper];
 
 @Module({
   imports: [
@@ -41,23 +59,26 @@ const Communitycontrollers = [GetAllPostCategoriesController];
       Ranking,
       Tier,
     ]),
+    AwsS3Module,
     AuthModule,
     UserModule,
     RankModule,
     CqrsModule,
   ],
-  controllers: [...Communitycontrollers],
+  controllers: [...controllers],
   providers: [
     CommunityService,
     CommunityRepository,
     JwtStrategy,
-    JwtRefreshStrategy,
     RankService,
     RankerProfileRepository,
     RankingRepository,
     TierRepository,
-    GetAllCategoriesQueryHandler,
+    ...commandHandlers,
+    ...queryHandlers,
+    ...repositories,
+    ...mappers,
   ],
-  exports: [CommunityRepository, CommunityService],
+  exports: [CommunityService, CommunityRepository],
 })
 export class CommunityModule {}

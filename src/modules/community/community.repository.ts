@@ -204,7 +204,7 @@ export class CommunityRepository {
     return postDetail;
   }
 
-  async createOrDeletePostLike(postId: number, userId: number) {
+  async createOrDeletePostLike(postId: string, userId: string) {
     const ifLiked = await this.postLikeRepository.findOne({
       where: { postId: postId, userId: userId },
     });

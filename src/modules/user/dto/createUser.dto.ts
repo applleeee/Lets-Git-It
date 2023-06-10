@@ -1,4 +1,4 @@
-import { IsNumber, IsBoolean } from 'class-validator';
+import { IsNumber, IsBoolean, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -54,4 +54,6 @@ export class SignUpDto {
   @Type(() => Boolean)
   @IsBoolean()
   readonly isKorean: boolean;
+
+  id?: string;
 }
