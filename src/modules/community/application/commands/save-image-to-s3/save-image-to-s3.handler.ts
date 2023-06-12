@@ -13,7 +13,7 @@ export class SaveImageToS3CommandHandler
     private readonly awsS3Service: AwsS3Service,
   ) {}
 
-  async execute(command: SaveImageToS3Command): Promise<any> {
+  async execute(command: SaveImageToS3Command): Promise<string> {
     const { userId, image } = command;
 
     const now = new Date(+new Date() + 3240 * 10000)

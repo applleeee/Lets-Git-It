@@ -28,8 +28,6 @@ export const validationSchema = Joi.object({
   S3_ACCESS_KEY_ID: Joi.string().required(),
   S3_SECRET_ACCESS_KEY: Joi.string().required(),
   S3_BUCKET_NAME: Joi.string().required(),
-  AWS_ACCESS_KEY_ID: Joi.string().required(),
-  AWS_SECRET_ACCESS_KEY: Joi.string().required(),
   SSL_KEY_PATH: Joi.string().optional(),
   SSL_CERT_PATH: Joi.string().optional(),
   SSL_CA_PATH: Joi.string().optional(),

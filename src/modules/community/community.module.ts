@@ -31,14 +31,21 @@ import { CommunityService } from './application/community.service';
 import { CommunityRepository } from './community.repository';
 import { PostMapper } from './community.mapper';
 import { SaveImageToS3CommandHandler } from './application/commands/save-image-to-s3/save-image-to-s3.handler';
+import { DeleteImageInS3Controller } from './application/commands/delete-image-in-s3/delete-image-in-s3.controller';
+import { DeleteImageInS3CommandHandler } from './application/commands/delete-image-in-s3/delete-image-in-s3.handler';
 
 const controllers = [
   GetAllPostCategoriesController,
   CreatePostController,
   SaveImageToS3Controller,
+  DeleteImageInS3Controller,
 ];
 
-const commandHandlers = [CreatePostCommandHandler, SaveImageToS3CommandHandler];
+const commandHandlers = [
+  CreatePostCommandHandler,
+  SaveImageToS3CommandHandler,
+  DeleteImageInS3CommandHandler,
+];
 
 const queryHandlers = [GetAllCategoriesQueryHandler];
 
