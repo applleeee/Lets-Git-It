@@ -6,9 +6,12 @@ export interface PostProps {
   fixedCategoryId?: number;
 }
 
-export interface CreatePostProps {
+export interface CreatePostProps extends UpdatePostProps {
+  userId: string;
+}
+
+export interface UpdatePostProps {
   title: string;
   contentUrl: string;
-  userId: string;
   subCategoryId: number;
 }

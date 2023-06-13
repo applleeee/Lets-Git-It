@@ -179,7 +179,7 @@ export class CommunityService {
 
   async getIdsOfPostsCreatedByUser(userId: string) {
     const data = await this.CommunityRepository.getPostsCreatedByUser(userId);
-    return data?.map<Post>((item) => Object.values(item)[0]);
+    return data?.map<Post['id']>((item) => Object.values(item)[0]);
   }
 
   async getIdsOfPostLikedByUser(userId: string) {
@@ -319,7 +319,7 @@ export class CommunityService {
     const data = await this.CommunityRepository.getCommentsCreatedByUser(
       userId,
     );
-    return data?.map<Comment>((item) => Object.values(item)[0]);
+    return data?.map<Comment['id']>((item) => Object.values(item)[0]);
   }
 
   async getIdsOfCommentLikedByUser(userId: string) {

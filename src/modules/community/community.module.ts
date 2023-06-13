@@ -33,18 +33,22 @@ import { PostMapper } from './community.mapper';
 import { SaveImageToS3CommandHandler } from './application/commands/save-image-to-s3/save-image-to-s3.handler';
 import { DeleteImageInS3Controller } from './application/commands/delete-image-in-s3/delete-image-in-s3.controller';
 import { DeleteImageInS3CommandHandler } from './application/commands/delete-image-in-s3/delete-image-in-s3.handler';
+import { UpdatePostController } from './application/commands/update-post/update-post.controller';
+import { UpdatePostCommandHandler } from './application/commands/update-post/update-post.handler';
 
 const controllers = [
   GetAllPostCategoriesController,
   CreatePostController,
   SaveImageToS3Controller,
   DeleteImageInS3Controller,
+  UpdatePostController,
 ];
 
 const commandHandlers = [
   CreatePostCommandHandler,
   SaveImageToS3CommandHandler,
   DeleteImageInS3CommandHandler,
+  UpdatePostCommandHandler,
 ];
 
 const queryHandlers = [GetAllCategoriesQueryHandler];

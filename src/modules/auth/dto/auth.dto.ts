@@ -101,8 +101,8 @@ export class SignUpWithUserNameDto {
 export class AuthorizedUser {
   readonly id: string;
   readonly userName: string;
-  readonly idsOfPostsCreatedByUser?: Post[];
+  readonly idsOfPostsCreatedByUser?: string[];
   readonly idsOfPostLikedByUser?: string[];
-  readonly idsOfCommentsCreatedByUser?: Comment[];
+  readonly idsOfCommentsCreatedByUser?: string[];
   readonly idsOfCommentLikedByUser?: string[];
 }

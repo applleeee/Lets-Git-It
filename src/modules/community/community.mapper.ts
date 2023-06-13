@@ -11,7 +11,7 @@ export class PostMapper
 
     const record = new PostOrmEntity();
 
-    record.id = copy.id;
+    record.id = copy.id as string;
     record.title = copy.title;
     record.contentUrl = copy.contentUrl;
     record.userId = copy.userId;
@@ -41,7 +41,7 @@ export class PostMapper
     const props = entity.getProps();
 
     const response = new PostResponseDto();
-    response.id = props.id;
+    response.id = props.id as string;
     response.title = props.title;
     response.contentUrl = props.contentUrl;
     response.userId = props.userId;

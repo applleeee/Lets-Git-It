@@ -1,15 +1,15 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CreatePostCommand } from './create-post.command';
+import { UpdatePostCommand } from './update-post.command';
 import { POST_REPOSITORY } from 'src/modules/community/community.di-tokens';
 import { PostRepositoryPort } from 'src/modules/community/database/post.repository.port';
-import { PostEntity } from 'src/modules/community/domain/community.entity';
 import { AwsS3Service } from 'src/modules/aws-s3/aws-s3.service';
+import { PostEntity } from 'src/modules/community/domain/community.entity';
 
 @Injectable()
-@CommandHandler(CreatePostCommand)
-export class CreatePostCommandHandler
-  implements ICommandHandler<CreatePostCommand>
+@CommandHandler(UpdatePostCommand)
+export class UpdatePostCommandHandler
+  implements ICommandHandler<UpdatePostCommand>
 {
   constructor(
     @Inject(POST_REPOSITORY)
@@ -18,8 +18,19 @@ export class CreatePostCommandHandler
     private readonly awsS3Service: AwsS3Service,
   ) {}
 
-  async execute(command: CreatePostCommand): Promise<void> {
-    const { userId, title, content, subCategoryId } = command;
+  async execute(command: UpdatePostCommand): Promise<void> {
+    const { postId, userId, title, subCategoryId, content } = command;
+
+    const originPost = await this._postRepository.findOneById(postId);
+
+    try {
+      await this.awsS3Service.deleteS3Data([originPost.getProps().contentUrl]);
+    } catch (error) {
+      throw new HttpException(
+        'CANNOT_DELETE_POST_IN_S3',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
 
     const now = new Date(+new Date() + 3240 * 10000)
       .toISOString()
@@ -38,25 +49,13 @@ export class CreatePostCommandHandler
       );
     } catch (error) {
       throw new HttpException(
-        'CANNOT_UPLOAD_TO_S3',
+        'CANNOT_UPLOAD_POST_TO_S3',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
 
-    const post = PostEntity.create({
-      title,
-      userId,
-      subCategoryId,
-      contentUrl,
-    });
+    originPost.update({ title, contentUrl, subCategoryId });
 
-    try {
-      await this._postRepository.insert(post);
-    } catch (error) {
-      throw new HttpException(
-        'CANNOT_SAVE_POST_IN_DB',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    await this._postRepository.update(originPost);
   }
 }

@@ -1,4 +1,9 @@
-import { FindOptionsWhere, ObjectLiteral, Repository } from 'typeorm';
+import {
+  FindOptionsWhere,
+  ObjectLiteral,
+  Repository,
+  UpdateResult,
+} from 'typeorm';
 import { BaseEntity } from '../base/entity.base';
 import { Mapper } from '../base/mapper.interface';
 import {
@@ -27,7 +32,7 @@ export abstract class MySqlRepositoryBase<
     const record = this.mapper.toPersistence(entity);
 
     try {
-      await this._repository.save(record);
+      await this.repository.save(record);
     } catch (error) {
       console.log(`${this.tableName} insert error : ${error}`);
       if (error.code === 'ER_DUP_ENTRY') {
@@ -38,8 +43,8 @@ export abstract class MySqlRepositoryBase<
     }
   }
 
-  async findOneById(id: string): Promise<Partial<Entity>> {
-    const record = await this._repository.findOne({
+  async findOneById(id: string): Promise<Entity> {
+    const record = await this.repository.findOne({
       where: { id } as unknown as FindOptionsWhere<OrmEntity>,
     });
 
@@ -47,7 +52,7 @@ export abstract class MySqlRepositoryBase<
   }
 
   async findAll(): Promise<Entity[]> {
-    const records = await this._repository.find();
+    const records = await this.repository.find();
 
     return records.map(this.mapper.toDomain);
   }
@@ -59,7 +64,14 @@ export abstract class MySqlRepositoryBase<
   }
 
   async update(entity: Entity): Promise<boolean> {
-    throw new Error('Method not implemented.');
+    const ormEntity = this.mapper.toPersistence(entity);
+
+    const result: UpdateResult = await this.repository.update(
+      ormEntity.id,
+      ormEntity,
+    );
+
+    return result.affected > 0;
   }
 
   async delete(entity: Entity): Promise<boolean> {
