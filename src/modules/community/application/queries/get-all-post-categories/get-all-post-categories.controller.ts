@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
-import { GetAllPostCategoriesQuery } from './get-all-post-categories.query-handler';
 import { SubCategory } from 'src/modules/entities/SubCategory';
+import { GetAllPostCategoriesQuery } from './get-all-post-categories.query';
 
 @Controller('/community')
 export class GetAllPostCategoriesController {

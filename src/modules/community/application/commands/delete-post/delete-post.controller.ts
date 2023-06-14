@@ -34,7 +34,7 @@ export class DeletePostController {
           HttpStatus.NOT_FOUND,
         );
       }
-      return { message: 'post deleted', data: result };
+      return { message: 'post deleted' };
     } else {
       throw new HttpException(
         'THIS_USER_HAS_NEVER_WRITTEN_THAT_POST',

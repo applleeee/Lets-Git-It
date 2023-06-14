@@ -37,6 +37,8 @@ import { UpdatePostController } from './application/commands/update-post/update-
 import { UpdatePostCommandHandler } from './application/commands/update-post/update-post.handler';
 import { DeletePostController } from './application/commands/delete-post/delete-post.controller';
 import { DeletePostCommandHandler } from './application/commands/delete-post/delete-post.handler';
+import { GetPostDetailController } from './application/queries/get-post-detail/get-post-detail.controller';
+import { GetPostDetailQueryHandler } from './application/queries/get-post-detail/get-post-detail.query-handler';
 
 const controllers = [
   GetAllPostCategoriesController,
@@ -45,6 +47,7 @@ const controllers = [
   DeleteImageInS3Controller,
   UpdatePostController,
   DeletePostController,
+  GetPostDetailController,
 ];
 
 const commandHandlers = [
@@ -55,7 +58,7 @@ const commandHandlers = [
   DeletePostCommandHandler,
 ];
 
-const queryHandlers = [GetAllCategoriesQueryHandler];
+const queryHandlers = [GetAllCategoriesQueryHandler, GetPostDetailQueryHandler];
 
 const repositories = [{ provide: POST_REPOSITORY, useClass: PostRepository }];
 

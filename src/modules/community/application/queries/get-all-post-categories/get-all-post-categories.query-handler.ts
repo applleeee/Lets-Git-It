@@ -2,10 +2,7 @@ import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SubCategory } from 'src/modules/entities/SubCategory';
 import { Repository } from 'typeorm';
-
-export class GetAllPostCategoriesQuery {
-  constructor() {}
-}
+import { GetAllPostCategoriesQuery } from './get-all-post-categories.query';
 
 @QueryHandler(GetAllPostCategoriesQuery)
 export class GetAllCategoriesQueryHandler implements IQueryHandler {
