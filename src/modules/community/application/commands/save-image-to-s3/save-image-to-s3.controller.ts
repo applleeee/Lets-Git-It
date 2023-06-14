@@ -22,7 +22,7 @@ export class SaveImageToS3Controller {
   async saveImageToS3(
     @UploadedFile() image: Express.Multer.File,
     @User() user: Partial<AuthorizedUser>,
-  ) {
+  ): Promise<string> {
     const { id: userId } = user;
 
     const command = new SaveImageToS3Command({

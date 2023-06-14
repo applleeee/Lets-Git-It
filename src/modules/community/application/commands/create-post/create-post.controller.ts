@@ -15,7 +15,7 @@ export class CreatePostController {
   async createPost(
     @Body() postData: CreatePostRequestDto,
     @User() user: Partial<AuthorizedUser>,
-  ) {
+  ): Promise<{ message: string }> {
     const { id: userId } = user;
     const { title, subCategoryId, content } = postData;
 

@@ -1,5 +1,6 @@
 import {
   DeleteObjectsCommand,
+  DeleteObjectsCommandOutput,
   GetObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -15,7 +16,7 @@ export class AwsS3Service {
     region: 'ap-northeast-2',
   };
 
-  async getS3Data(filePath: string) {
+  async getS3Data(filePath: string): Promise<string> {
     const s3Client = new S3Client(this.s3Option);
 
     try {
@@ -45,7 +46,11 @@ export class AwsS3Service {
     }
   }
 
-  async uploadToS3(file: Buffer, name: string, mimetype: string) {
+  async uploadToS3(
+    file: Buffer,
+    name: string,
+    mimetype: string,
+  ): Promise<AWS.S3.ManagedUpload.SendData> {
     const s3 = new AWS.S3(this.s3Option);
 
     try {
@@ -65,7 +70,7 @@ export class AwsS3Service {
     }
   }
 
-  async deleteS3Data(filePaths: string[]) {
+  async deleteS3Data(filePaths: string[]): Promise<DeleteObjectsCommandOutput> {
     const s3Client = new S3Client(this.s3Option);
 
     try {

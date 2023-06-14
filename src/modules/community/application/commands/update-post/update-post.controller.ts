@@ -24,7 +24,7 @@ export class UpdatePostController {
     @Param('postId') postId: string,
     @Body() updatedData: UpdatePostDto,
     @User() user: Partial<AuthorizedUser>,
-  ) {
+  ): Promise<{ message: string }> {
     const { title, subCategoryId, content } = updatedData;
     const { idsOfPostsCreatedByUser, id: userId } = user;
 

@@ -21,7 +21,7 @@ export class DeletePostController {
   async DeletePostController(
     @Param('postId') postId: string,
     @User() user: Partial<AuthorizedUser>,
-  ) {
+  ): Promise<{ message: string }> {
     const { idsOfPostsCreatedByUser } = user;
 
     if (idsOfPostsCreatedByUser.includes(postId)) {
