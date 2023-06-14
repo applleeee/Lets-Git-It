@@ -23,6 +23,6 @@ export interface RepositoryPort<Entity> {
   findOneById(id: string): Promise<Entity>;
   findAll(): Promise<Entity[]>;
   findAllPaginated(params: PaginatedQueryParams): Promise<Paginated<Entity>>;
-  delete(entity: Entity): Promise<boolean>;
+  delete(entity: Entity): Promise<Entity>;
   update(entity: Entity): Promise<boolean>;
 }

@@ -35,6 +35,8 @@ import { DeleteImageInS3Controller } from './application/commands/delete-image-i
 import { DeleteImageInS3CommandHandler } from './application/commands/delete-image-in-s3/delete-image-in-s3.handler';
 import { UpdatePostController } from './application/commands/update-post/update-post.controller';
 import { UpdatePostCommandHandler } from './application/commands/update-post/update-post.handler';
+import { DeletePostController } from './application/commands/delete-post/delete-post.controller';
+import { DeletePostCommandHandler } from './application/commands/delete-post/delete-post.handler';
 
 const controllers = [
   GetAllPostCategoriesController,
@@ -42,6 +44,7 @@ const controllers = [
   SaveImageToS3Controller,
   DeleteImageInS3Controller,
   UpdatePostController,
+  DeletePostController,
 ];
 
 const commandHandlers = [
@@ -49,6 +52,7 @@ const commandHandlers = [
   SaveImageToS3CommandHandler,
   DeleteImageInS3CommandHandler,
   UpdatePostCommandHandler,
+  DeletePostCommandHandler,
 ];
 
 const queryHandlers = [GetAllCategoriesQueryHandler];

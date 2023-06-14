@@ -1,4 +1,5 @@
 import {
+  DeleteResult,
   FindOptionsWhere,
   ObjectLiteral,
   Repository,
@@ -74,8 +75,12 @@ export abstract class MySqlRepositoryBase<
     return result.affected > 0;
   }
 
-  async delete(entity: Entity): Promise<boolean> {
-    throw new Error('Method not implemented.');
+  async delete(entity: Entity) {
+    const ormEntity = this.mapper.toPersistence(entity);
+
+    const result = await this.repository.remove(ormEntity);
+
+    return this.mapper.toDomain(result);
   }
 
   protected get repository() {
