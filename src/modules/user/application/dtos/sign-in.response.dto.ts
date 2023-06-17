@@ -1,5 +1,13 @@
-import { ApiProperty, PickType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { HttpStatusCode } from 'axios';
+import { Exclude, Expose } from 'class-transformer';
+
+export enum SignInResCase {
+  OK = 'OK',
+  UNAUTHORIZED = 'UNAUTHORIZED',
+  WRONG_GITHUB_CODE = 'WRONG_GITHUB_CODE',
+  WRONG_GITHUB_ACCESS_TOKEN = 'WRONG_GITHUB_ACCESS_TOKEN',
+}
 
 /**
  * @author MyeongSeok
@@ -8,7 +16,18 @@ import { HttpStatusCode } from 'axios';
  * @param userName github user name
  * @param accessToken jwt
  */
-export class AuthSignInOkResDto {
+export class SignInOkResDto {
+  @Exclude() private readonly _isMember: boolean;
+  @Exclude() private readonly _userName: string;
+  @Exclude() private readonly _accessToken: string;
+  @Exclude() private readonly _case = SignInResCase.OK;
+
+  constructor({ isMember, userName, accessToken }) {
+    this._isMember = isMember;
+    this._userName = userName;
+    this._accessToken = accessToken;
+  }
+
   /**
    * 로그인 요청한 유저가 회원인지 아닌지를 나타냅니다.
    * @example true : 회원인 경우
@@ -18,7 +37,10 @@ export class AuthSignInOkResDto {
     description: '로그인 요청한 유저가 회원인지 아닌지를 나타냅니다.',
     required: true,
   })
-  readonly isMember: boolean;
+  @Expose()
+  get isMember(): boolean {
+    return this._isMember;
+  }
 
   /**
    * 유저의 github 이름입니다.
@@ -29,7 +51,10 @@ export class AuthSignInOkResDto {
     description: '유저의 github 이름입니다.',
     required: true,
   })
-  readonly userName: string;
+  @Expose()
+  get userName(): string {
+    return this._userName;
+  }
 
   /**
    * 인가(Authorization)에 필요한 jwtToken 입니다. 인가가 필요한 요청 시 헤더(Authorization)에 담아주세요.
@@ -42,7 +67,15 @@ export class AuthSignInOkResDto {
       '인가(Authorization)에 필요한 jwtToken 입니다. 인가가 필요한 요청 시 헤더(Authorization)에 담아주세요.',
     required: true,
   })
-  readonly accessToken: string;
+  @Expose()
+  get accessToken(): string {
+    return this._accessToken;
+  }
+
+  @Exclude()
+  get case(): string {
+    return this._case;
+  }
 }
 
 /**
@@ -52,9 +85,18 @@ export class AuthSignInOkResDto {
  * @param userName github user name
  * @param githubId github user id
  */
-export class AuthSignInUnauthorizedResDto extends PickType(AuthSignInOkResDto, [
-  'userName',
-] as const) {
+export class SignInUnauthorizedResDto {
+  @Exclude() private readonly _isMember: boolean;
+  @Exclude() private readonly _userName: string;
+  @Exclude() private readonly _githubId: number;
+  @Exclude() private readonly _case = SignInResCase.UNAUTHORIZED;
+
+  constructor({ isMember, userName, githubId }) {
+    this._isMember = isMember;
+    this._userName = userName;
+    this._githubId = githubId;
+  }
+
   /**
    * 로그인 요청한 유저가 회원인지 아닌지를 나타냅니다.
    * @example false : 회원이 아닌 경우
@@ -64,7 +106,24 @@ export class AuthSignInUnauthorizedResDto extends PickType(AuthSignInOkResDto, [
     description: '로그인 요청한 유저가 회원인지 아닌지를 나타냅니다.',
     required: true,
   })
-  readonly isMember: boolean;
+  @Expose()
+  get isMember(): boolean {
+    return this._isMember;
+  }
+
+  /**
+   * 유저의 github 이름입니다.
+   * @example userName
+   */
+  @ApiProperty({
+    example: 'userName',
+    description: '유저의 github 이름입니다.',
+    required: true,
+  })
+  @Expose()
+  get userName(): string {
+    return this._userName;
+  }
 
   /**
    * github의 userId 입니다.
@@ -75,14 +134,35 @@ export class AuthSignInUnauthorizedResDto extends PickType(AuthSignInOkResDto, [
     description: 'github의 userId 입니다.',
     required: true,
   })
-  readonly githubId: number;
+  @Expose()
+  get githubId(): number {
+    return this._githubId;
+  }
+
+  @Exclude()
+  get case(): string {
+    return this._case;
+  }
 }
 
 /**
  * @author MyeongSeok
  * @description 잘못된 깃허브 코드 사용으로 인한 로그인 실패 시 응답 객체의 DTO입니다.
  */
-export class AuthSignInWrongCodeDto {
+export class SignInWrongCodeDto {
+  @Exclude() private readonly _statusCode: number;
+  @Exclude() private readonly _message: string;
+  @Exclude() private readonly _timestamp: Date;
+  @Exclude() private readonly _path: string;
+  @Exclude() private readonly _case = SignInResCase.WRONG_GITHUB_CODE;
+
+  constructor({ statusCode, message, timestamp, path }) {
+    this._statusCode = statusCode;
+    this._message = message;
+    this._timestamp = timestamp;
+    this._path = path;
+  }
+
   /**
    * @example 400
    */
@@ -90,7 +170,10 @@ export class AuthSignInWrongCodeDto {
     example: HttpStatusCode.BadRequest,
     required: true,
   })
-  readonly statusCode: number;
+  @Expose()
+  get statusCode(): number {
+    return this._statusCode;
+  }
 
   /**
    * 잘못된 github code입니다.
@@ -101,7 +184,10 @@ export class AuthSignInWrongCodeDto {
     example: 'WRONG_GITHUB_CODE',
     required: true,
   })
-  readonly message: string;
+  @Expose()
+  get message(): string {
+    return this._message;
+  }
 
   /**
    * 요청 시간을 나타냅니다.
@@ -112,7 +198,10 @@ export class AuthSignInWrongCodeDto {
     example: '2023-03-09T17:32:56.871Z',
     required: true,
   })
-  readonly timestamp: Date;
+  @Expose()
+  get timestamp(): Date {
+    return this._timestamp;
+  }
 
   /**
    * 요청 엔드포인트를 나타냅니다.
@@ -123,14 +212,35 @@ export class AuthSignInWrongCodeDto {
     example: '/auth/sign-in',
     required: true,
   })
-  readonly path: string;
+  @Expose()
+  get path(): string {
+    return this._path;
+  }
+
+  @Exclude()
+  get case(): string {
+    return this._case;
+  }
 }
 
 /**
  * @author MyeongSeok
  * @description github access token으로 github user 정보 조회에 실패한 경우입니다.
  */
-export class AuthSignInWrongGithubAccessTokenDto {
+export class SignInWrongGithubAccessTokenDto {
+  @Exclude() private readonly _statusCode: number;
+  @Exclude() private readonly _message: string;
+  @Exclude() private readonly _timestamp: Date;
+  @Exclude() private readonly _path: string;
+  @Exclude() private readonly _case = SignInResCase.WRONG_GITHUB_ACCESS_TOKEN;
+
+  constructor({ statusCode, message, timestamp, path }) {
+    this._statusCode = statusCode;
+    this._message = message;
+    this._timestamp = timestamp;
+    this._path = path;
+  }
+
   /**
    * @example 404
    */
@@ -138,7 +248,10 @@ export class AuthSignInWrongGithubAccessTokenDto {
     example: HttpStatusCode.NotFound,
     required: true,
   })
-  readonly statusCode: number;
+  @Expose()
+  get statusCode(): number {
+    return this._statusCode;
+  }
 
   /**
    * github access token으로 github user 정보 조회에 실패한 경우입니다.
@@ -150,7 +263,10 @@ export class AuthSignInWrongGithubAccessTokenDto {
     example: 'NOT_FOUND_GITHUB_USER',
     required: true,
   })
-  readonly message: string;
+  @Expose()
+  get message(): string {
+    return this._message;
+  }
 
   /**
    * 요청 시간을 나타냅니다.
@@ -161,7 +277,10 @@ export class AuthSignInWrongGithubAccessTokenDto {
     example: '2023-03-09T17:32:56.871Z',
     required: true,
   })
-  readonly timestamp: Date;
+  @Expose()
+  get timestamp(): Date {
+    return this._timestamp;
+  }
 
   /**
    * 요청 엔드포인트를 나타냅니다.
@@ -172,5 +291,13 @@ export class AuthSignInWrongGithubAccessTokenDto {
     example: '/auth/sign-in',
     required: true,
   })
-  readonly path: string;
+  @Expose()
+  get path(): string {
+    return this._path;
+  }
+
+  @Exclude()
+  get case(): string {
+    return this._case;
+  }
 }

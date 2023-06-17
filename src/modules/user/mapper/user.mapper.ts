@@ -1,5 +1,7 @@
 import { UserResponseDto } from '../application/dtos/user.response.dto';
 import { User as UserOrmEntity } from '../database/entity/user.orm-entity';
+import { CareerId } from '../domain/user-category.types';
+import { FieldId } from '../domain/user-category.types';
 import { UserEntity } from '../domain/user.entity';
 import { Mapper } from 'src/libs/base/mapper.interface';
 
@@ -12,13 +14,13 @@ export class UserMapper
     const record = new UserOrmEntity();
     record.id = copy.id as string;
     record.githubId = copy.githubId;
-    record.fieldId = copy.fieldId;
-    record.careerId = copy.careerId;
+    record.fieldId = copy.fieldId as unknown as number;
+    record.careerId = copy.careerId as unknown as number;
     record.isKorean = copy.isKorean;
     record.isAdmin = copy.isAdmin;
-    record.hashedRefreshTokenId = copy.hashedRefreshTokenId;
     record.createdAt = copy.createdAt;
     record.updatedAt = copy.updatedAt;
+    record.refreshTokenId = copy?.refreshTokenId;
 
     return record;
   }
@@ -30,8 +32,8 @@ export class UserMapper
       updatedAt: new Date(record.updatedAt),
       props: {
         githubId: record.githubId,
-        fieldId: record.fieldId,
-        careerId: record.careerId,
+        fieldId: record.fieldId as unknown as FieldId,
+        careerId: record.careerId as unknown as CareerId,
         isAdmin: record.isAdmin,
         isKorean: record.isKorean,
       },
@@ -41,13 +43,14 @@ export class UserMapper
 
   toResponse(entity: UserEntity): UserResponseDto {
     const props = entity.getProps();
-    const response = new UserResponseDto();
-    response.id = props.id as string;
-    response.githubId = props.githubId;
-    response.fieldId = props.fieldId;
-    response.careerId = props.careerId;
-    response.isAdmin = props.isAdmin;
-    response.isKorean = props.isKorean;
+    const response = new UserResponseDto({
+      id: props.id as string,
+      githubId: props.githubId,
+      fieldId: props.fieldId,
+      careerId: props.careerId,
+      isAdmin: props.isAdmin,
+      isKorean: props.isKorean,
+    });
 
     return response;
   }

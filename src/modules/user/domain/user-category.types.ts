@@ -13,6 +13,12 @@ export enum FieldName {
   '기타',
 }
 
+const fieldEnumValues = Object.values(FieldName).filter(
+  (value) => !isNaN(Number(value)),
+);
+
+export type FieldId = typeof fieldEnumValues;
+
 export enum CareerPeriod {
   '학생' = 1,
   '1년차',
@@ -26,6 +32,12 @@ export enum CareerPeriod {
   '9년차',
   '10년차 이상',
 }
+
+const careerEnumValues = Object.values(CareerPeriod).filter(
+  (value) => !isNaN(Number(value)),
+);
+
+export type CareerId = typeof careerEnumValues;
 
 export interface FieldProps {
   name: FieldName;

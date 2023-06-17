@@ -15,6 +15,7 @@ import {
   ConflictException,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { UpsertOptions } from 'typeorm/repository/UpsertOptions';
 
 export abstract class MySqlRepositoryBase<
   Entity extends BaseEntity<any>,
@@ -28,11 +29,12 @@ export abstract class MySqlRepositoryBase<
     private readonly _repository: Repository<OrmEntity>,
   ) {}
 
-  async insert(entity: Entity): Promise<void> {
+  async insert(entity: Entity): Promise<boolean> {
     const record = this.mapper.toPersistence(entity);
 
     try {
       await this.repository.save(record);
+      return true;
     } catch (error) {
       console.log(`${this.tableName} insert error : ${error}`);
       if (error.code === 'ER_DUP_ENTRY') {
@@ -41,6 +43,27 @@ export abstract class MySqlRepositoryBase<
         throw new InternalServerErrorException('INTERNAL_SERVER_ERROR');
       }
     }
+  }
+
+  /**
+   * 추후 삭제될 수 있음 사용시 유의해주세요
+   * @param entity
+   * @returns
+   */
+
+  async upsertByUserId(entity: Entity): Promise<boolean> {
+    const record = this.mapper.toPersistence(entity);
+    const conflictPathsOrOptions: string[] | UpsertOptions<OrmEntity> = [
+      'userId',
+    ];
+
+    const result = await this._repository.upsert(
+      record,
+      conflictPathsOrOptions,
+    );
+
+    console.log('result: ', result);
+    return result.raw.affectedRows > 0;
   }
 
   async findOneById(id: string): Promise<Entity> {
@@ -75,7 +98,22 @@ export abstract class MySqlRepositoryBase<
   }
 
   async delete(entity: Entity): Promise<boolean> {
-    throw new Error('Method not implemented.');
+    const ormEntity = this.mapper.toPersistence(entity);
+    const result = await this.repository.delete(ormEntity);
+
+    return result.affected > 0;
+  }
+
+  /**
+   * 추후 삭제될 수 있음 사용시 유의해주세요
+   * @param entity
+   * @returns
+   */
+  async softDelete(entity: Entity): Promise<boolean> {
+    const ormEntity = this.mapper.toPersistence(entity);
+    const result = await this.repository.softDelete(ormEntity);
+
+    return result.affected > 0;
   }
 
   protected get repository() {

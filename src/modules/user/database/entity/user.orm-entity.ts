@@ -9,7 +9,6 @@ import {
   PrimaryColumn,
   Unique,
 } from 'typeorm';
-import { Exclude } from 'class-transformer';
 import { Field } from './field.orm-entity';
 import { Career } from './career.orm-entity';
 import { BooleanTransformer } from 'src/utils/boolean-transformer';
@@ -54,12 +53,11 @@ export class User {
   })
   isAdmin: boolean | null;
 
-  // todo refreshToken 어트리뷰트 정규화 할 것.
   @Column('uuid', {
-    name: 'hashed_refresh_token_id',
+    name: 'refresh_token_id',
     nullable: true,
   })
-  hashedRefreshTokenId: string | null;
+  refreshTokenId: string;
 
   @Column('timestamp', { name: 'created_at', default: () => "'now()'" })
   createdAt: Date;

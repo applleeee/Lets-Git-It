@@ -1,6 +1,6 @@
 import { PickType } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsString, IsEnum } from 'class-validator';
-import { AuthorizedUser } from 'src/modules/auth/domain/auth.type';
+import { AuthorizedUser } from 'src/modules/auth/domain/auth.types';
 
 export enum Depth {
   COMMENT = 1,

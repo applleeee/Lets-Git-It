@@ -13,7 +13,7 @@ export class SignOutCommandHandler implements ICommandHandler<SignOutCommand> {
   ) {}
 
   async execute(command: SignOutCommand): Promise<any> {
-    await this._refreshTokenRepository.deleteUserRefreshToken(command.userId);
+    await this._refreshTokenRepository.deleteRefreshToken(command.userId);
 
     return { message: 'LOG_OUT_COMPLETED' };
   }

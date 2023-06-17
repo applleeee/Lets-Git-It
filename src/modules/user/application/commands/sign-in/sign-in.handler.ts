@@ -1,12 +1,26 @@
-import { GithubUser } from '../../../../github-api/github-user';
-import { GithubService } from '../../../../github-api/github.service';
-import { UserRepository } from '../../../database/repository/user.repository';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SignInCommand } from './sign-in.command';
 import { Inject, Injectable } from '@nestjs/common';
-import { response } from 'express';
-import { USER_REPOSITORY } from 'src/modules/user/user.di-tokens';
+import {
+  AUTH_SERVICE_ADAPTOR,
+  GITHUB_OAUTH_ADAPTOR,
+  USER_REPOSITORY,
+} from 'src/modules/user/user.di-tokens';
 import { UserRepositoryPort } from 'src/modules/user/database/user.repository.port';
+import { GithubOauthPort } from 'src/modules/user/github-api/github-oauth.port';
+import {
+  SignInOkResDto,
+  SignInResCase,
+  SignInUnauthorizedResDto,
+  SignInWrongCodeDto,
+  SignInWrongGithubAccessTokenDto,
+} from '../../dtos/sign-in.response.dto';
+import { AuthServicePort } from 'src/modules/user/auth/auth.service.port';
+import {
+  AccessTokenPayload,
+  RefreshTokenPayload,
+} from 'src/modules/auth/domain/auth.types';
+import { SignInResOk } from './sign-in.controller';
 
 @Injectable()
 @CommandHandler(SignInCommand)
@@ -14,51 +28,66 @@ export class SignInCommandHandler implements ICommandHandler<SignInCommand> {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly _userRepository: UserRepositoryPort,
-    private readonly _githubService: GithubService, // todo private readonly port 삽입
+    @Inject(GITHUB_OAUTH_ADAPTOR)
+    private readonly _githubOauthPort: GithubOauthPort,
+    @Inject(AUTH_SERVICE_ADAPTOR)
+    private readonly _authService: AuthServicePort,
   ) {}
-  async execute(command: SignInCommand): Promise<any> {
-    // todo githubService 관련 로직을 한 번 감싸서 사용. Sign In handler가 Github Service를 너무 많이 알고있다. getGithubIdOfUser 정도로 감싸자.
+  async execute(
+    command: SignInCommand,
+  ): Promise<
+    | SignInResOk
+    | SignInUnauthorizedResDto
+    | SignInWrongCodeDto
+    | SignInWrongGithubAccessTokenDto
+  > {
     const { code } = command;
+    const { id, login } = await this._githubOauthPort.getGithubUser(code);
+    const user = await this._userRepository.getUserByGithubId(id);
 
-    const githubAccessToken = await this._githubService.getGithubAccessToken(
-      code,
+    if (!user) {
+      return new SignInUnauthorizedResDto({
+        isMember: false,
+        userName: login,
+        githubId: id,
+      });
+    }
+
+    const userId = user.id as string;
+
+    const accessTokenPayload: AccessTokenPayload = {
+      userId,
+      userName: login,
+    };
+
+    const { accessToken } = await this._authService.getJwtAccessToken(
+      accessTokenPayload,
     );
 
-    const githubUser: GithubUser =
-      await this._githubService.getGithubUserByGithubAccessToken(
-        githubAccessToken,
+    const signInOkResDto = new SignInOkResDto({
+      isMember: true,
+      userName: login,
+      accessToken,
+    });
+
+    const refreshTokenPayload: RefreshTokenPayload = {
+      userId,
+    };
+
+    const { refreshToken, cookieOptions } =
+      await this._authService.getCookiesWithJwtRefreshToken(
+        refreshTokenPayload,
       );
 
-    console.log('githubUser: ', githubUser);
-    const user = await this._userRepository.getUserByGithubId(githubUser.id);
+    await this._authService.updateRefreshToken(refreshToken, userId);
 
-    // todo 회원이 아니라면 회원 정보 리턴 -> 이걸 바로 그냥 회원가입으로 넘기는것은 어떤가.
-    return response.redirect('/sign-up');
-    // if (!userInfo.isMember) {
-    //   res
-    //     .status(HttpStatus.UNAUTHORIZED)
-    //     .json(userInfo as AuthSignInUnauthorizedResDto);
-    // }
-    // todo 유저라면
-    // todo jwt 토큰 제작 - auth service
-    // todo 리프레시 토큰 제작 - auth service
-    // todo 리프레시 토큰 db 저장
-    // else {
-    //   const { userId, ...accessTokenWithUserInfo } = userInfo;
+    const result = {
+      case: SignInResCase.OK,
+      refreshToken,
+      signInOkResDto,
+      cookieOptions,
+    } as SignInResOk;
 
-    //   const { refreshToken, ...cookieOptions } =
-    //     await this.authService.getCookiesWithJwtRefreshToken(userId);
-
-    //   await this.userService.saveRefreshToken(refreshToken, userId);
-
-    // todo 리프레시 토큰 쿠키와 엑세스토큰 리턴
-    //   res
-    //     .cookie('Refresh', refreshToken, cookieOptions)
-    //     .json(accessTokenWithUserInfo as AuthSignInOkResDto);
-    // }
-
-    // todo mapper로 dto로 만들어서 반환.
-
-    return;
+    return result;
   }
 }

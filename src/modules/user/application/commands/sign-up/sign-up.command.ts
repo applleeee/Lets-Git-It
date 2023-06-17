@@ -1,9 +1,10 @@
+import { CareerId, FieldId } from './../../../domain/user-category.types';
 import { ICommand } from '@nestjs/cqrs';
 
 export class SignUpCommand implements ICommand {
   readonly githubId: number;
-  readonly fieldId: number;
-  readonly careerId: number;
+  readonly fieldId: FieldId;
+  readonly careerId: CareerId;
   readonly isKorean: boolean;
   readonly userName: string;
 

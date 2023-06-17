@@ -5,7 +5,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import authConfig from '../../../config/authConfig';
-import { AuthorizedUser } from '../domain/auth.type';
+import { AccessTokenPayload, AuthorizedUser } from '../domain/auth.types';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -13,16 +13,16 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     private readonly communityService: CommunityService,
     private readonly rankerProfileRepository: RankerProfileRepository,
     @Inject(authConfig.KEY)
-    private readonly config: ConfigType<typeof authConfig>,
+    private readonly _config: ConfigType<typeof authConfig>,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: config.jwtSecret,
+      secretOrKey: _config.jwtSecret,
       ignoreExpiration: false,
     });
   }
 
-  async validate(payload: any): Promise<AuthorizedUser> {
+  async validate(payload: AccessTokenPayload): Promise<AuthorizedUser> {
     const { userId, userName } = payload;
 
     const userNameInDb = await this.rankerProfileRepository.getUserNameByUserId(
@@ -32,6 +32,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     if (userNameInDb !== userName)
       throw new HttpException('FORBIDDEN', HttpStatus.FORBIDDEN);
 
+    // todo 아래 메소드는 여기에서 밖에 안씀 그니까 하나로 묶어주자.
     const idsOfPostsCreatedByUser =
       await this.communityService.getIdsOfPostsCreatedByUser(userId);
 
@@ -52,6 +53,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       idsOfCommentsCreatedByUser,
       idsOfCommentLikedByUser,
     };
+
     return user;
   }
 }

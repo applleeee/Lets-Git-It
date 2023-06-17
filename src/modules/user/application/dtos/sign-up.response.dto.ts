@@ -1,12 +1,12 @@
 import { HttpStatusCode } from 'axios';
-import { AuthSignInOkResDto } from './sign-in.response.dto';
+import { SignInOkResDto } from './sign-in.response.dto';
 import { ApiProperty, PickType } from '@nestjs/swagger';
 
 /**
  * @author MyeongSeok
  * @description 회원가입 성공 시 응답 객체의 DTO입니다.
  */
-export class AuthSignUpCreatedDto extends PickType(AuthSignInOkResDto, [
+export class AuthSignUpCreatedDto extends PickType(SignInOkResDto, [
   'accessToken',
 ] as const) {}
 

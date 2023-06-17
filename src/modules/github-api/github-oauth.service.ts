@@ -6,12 +6,22 @@ import {
 } from '@nestjs/common';
 import { AxiosRequestConfig } from 'axios';
 import { lastValueFrom, map } from 'rxjs';
+import { GithubUser } from './github-user';
 
 @Injectable()
-export class GithubService {
+export class GithubOauthService {
   constructor(private readonly _http: HttpService) {}
 
-  async getGithubAccessToken(code: string) {
+  async getGithubUser(code: string): Promise<GithubUser> {
+    const githubAccessToken = await this.getGithubAccessToken(code);
+    const githubUser: GithubUser = await this.getGithubUserByGithubAccessToken(
+      githubAccessToken,
+    );
+
+    return githubUser;
+  }
+
+  private async getGithubAccessToken(code: string) {
     const requestBody = {
       code,
       client_id: process.env.AUTH_CLIENT_ID,
@@ -39,7 +49,7 @@ export class GithubService {
     return result;
   }
 
-  async getGithubUserByGithubAccessToken(githubAccessToken: string) {
+  private async getGithubUserByGithubAccessToken(githubAccessToken: string) {
     const config: AxiosRequestConfig = {
       headers: {
         accept: 'application/json',

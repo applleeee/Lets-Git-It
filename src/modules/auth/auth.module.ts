@@ -3,7 +3,7 @@ import { CommunityModule } from '../community/community.module';
 import { GetCodeController } from './application/queries/get-code/get-code.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module, forwardRef } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { AuthService } from './application/auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { UserModule } from '../user/user.module';
@@ -29,11 +29,10 @@ const mappers = [RefreshTokenMapper];
       secret: process.env.JWT_SECRET_KEY,
       signOptions: { expiresIn: `${process.env.JWT_EXPIRES_IN}s` },
     }),
-    // CommunityModule,
     RankModule,
   ],
   controllers: [...authControllers],
   providers: [AuthService, ...repositories, ...mappers],
-  exports: [AuthService],
+  exports: [AuthService, ...repositories],
 })
 export class AuthModule {}

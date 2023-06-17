@@ -18,7 +18,6 @@ import ormConfig from './config/ormConfig';
 import { CommunityModule } from './modules/community/community.module';
 import { UserModule } from './modules/user/user.module';
 import { SchedulerModule } from './modules/schedule/schedule.module';
-import { GithubModule } from './modules/github-api/github.module';
 
 @Module({
   imports: [
@@ -35,10 +34,8 @@ import { GithubModule } from './modules/github-api/github.module';
     }),
     CommunityModule,
     RankModule,
-    AuthModule,
     UserModule,
     SchedulerModule,
-    GithubModule,
   ],
   controllers: [],
   providers: [

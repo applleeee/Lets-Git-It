@@ -6,7 +6,7 @@ import { UserRepositoryPort } from 'src/modules/user/database/user.repository.po
 
 @CommandHandler(UpdateUserCommand)
 @Injectable()
-export class UpDateUserCommandHandler
+export class UpdateUserCommandHandler
   implements ICommandHandler<UpdateUserCommand>
 {
   constructor(

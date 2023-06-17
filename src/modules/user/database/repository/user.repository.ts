@@ -22,10 +22,12 @@ export class UserRepository
     super(mapper, _userRepository);
   }
 
-  async getUserByGithubId(githubId: number) {
-    return await this._userRepository.findOneBy({
+  async getUserByGithubId(githubId: number): Promise<UserEntity> {
+    const UserOrmEntity = await this._userRepository.findOneBy({
       githubId,
     });
+
+    return this.mapper.toDomain(UserOrmEntity);
   }
 
   async getUserNameByUserId(id: string): Promise<any> {

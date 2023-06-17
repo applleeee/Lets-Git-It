@@ -1,7 +1,16 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+  Unique,
+} from 'typeorm';
 import { User } from '../../user/database/entity/user.orm-entity';
+import { Exclude } from 'class-transformer';
 
 @Entity('refresh_token', { schema: 'git_rank' })
+@Unique(['userId'])
 export class RefreshToken {
   @PrimaryColumn({ type: 'uuid', name: 'id' })
   id: string;
@@ -20,6 +29,10 @@ export class RefreshToken {
 
   @Column('timestamp', { name: 'updated_at', nullable: true })
   updatedAt: Date | null;
+
+  @Exclude()
+  @Column('timestamp', { name: 'deleted_at', nullable: true })
+  deletedAt: Date | null;
 
   @ManyToOne(() => User, (user) => user.refreshToken, {
     onDelete: 'CASCADE',

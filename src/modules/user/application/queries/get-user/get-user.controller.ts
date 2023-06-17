@@ -14,7 +14,7 @@ import { JwtAuthGuard } from 'src/modules/auth/guard/jwt-auth.guard';
 import { User } from 'src/libs/decorator/user.decorator';
 import { QueryBus } from '@nestjs/cqrs';
 import { GetUserQuery } from './get-user.query';
-import { AuthorizedUser } from 'src/modules/auth/domain/auth.type';
+import { AuthorizedUser } from 'src/modules/auth/domain/auth.types';
 
 // todo MyPage 도메인을 둬야하는가? 혹시 redirect로
 

@@ -316,14 +316,14 @@ export class CommunityService {
     return await this.CommunityRepository.createOrDeleteCommentLikes(criteria);
   }
 
-  async getIdsOfCommentCreatedByUser(userId: number) {
+  async getIdsOfCommentCreatedByUser(userId: string) {
     const data = await this.CommunityRepository.getCommentsCreatedByUser(
       userId,
     );
     return data?.map<Comment>((item) => Object.values(item)[0]);
   }
 
-  async getIdsOfCommentLikedByUser(userId: number) {
+  async getIdsOfCommentLikedByUser(userId: string) {
     const data = await this.CommunityRepository.getIdsOfCommentLikedByUser(
       userId,
     );

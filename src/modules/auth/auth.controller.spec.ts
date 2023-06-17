@@ -3,7 +3,7 @@ import { UserService } from '../user/user.service';
 import { Test } from '@nestjs/testing';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
+import { AuthService } from './application/auth.service';
 import { Response } from 'express';
 
 const moduleMocker = new ModuleMocker(global);

@@ -11,7 +11,7 @@ import { UpdateUserRequestDto } from './update-user.request.dto';
 import { JwtAuthGuard } from 'src/modules/auth/guard/jwt-auth.guard';
 import { SwaggerUpdateMyPage } from 'src/modules/swagger/user/UpdateMyPage.decorator';
 import { User } from 'src/libs/decorator/user.decorator';
-import { AuthorizedUser } from 'src/modules/auth/domain/auth.type';
+import { AuthorizedUser } from 'src/modules/auth/domain/auth.types';
 import { UpdateUserCommand } from './update-user.command';
 import { CommandBus } from '@nestjs/cqrs';
 

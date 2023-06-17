@@ -17,22 +17,23 @@ export class RefreshTokenRepository
   constructor(
     @InjectRepository(RefreshTokenOrmEntity)
     private readonly _refreshTokenRepository: Repository<RefreshTokenOrmEntity>,
-    mapper: RefreshTokenMapper, // todo mapper 구현 후 타입 추가
+    mapper: RefreshTokenMapper,
   ) {
     super(mapper, _refreshTokenRepository);
   }
 
-  async updateUserRefreshToken(id: string, hashedRefreshToken: string) {
-    return await this._refreshTokenRepository.update(id, {
-      hashedRefreshToken,
-    });
-  }
-
-  async deleteUserRefreshToken(id: string) {
+  async deleteRefreshToken(id: string) {
+    //soft delete 쓰는거 어때
     const result = await this._refreshTokenRepository.update(id, {
       hashedRefreshToken: null,
       updatedAt: new Date(),
     });
+
+    return result.affected > 0;
+  }
+
+  async deleteRefreshTokenByUserId(userId: string) {
+    const result = await this._refreshTokenRepository.delete(userId);
 
     return result.affected > 0;
   }

@@ -37,7 +37,7 @@ import {
   DeleteImageDto,
   PostLikeDto,
 } from './dto/Post.dto';
-import { AuthorizedUser } from '../auth/domain/auth.type';
+import { AuthorizedUser } from '../auth/domain/auth.types';
 
 @ApiTags('Community')
 @Controller('/community')

@@ -12,7 +12,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { SignOutCommand } from './sign-out.command';
 import { SwaggerSignOut } from 'src/modules/swagger/auth/sing-out.decorator';
 import { JwtRefreshGuard } from 'src/modules/auth/guard/jwt-refresh.guard';
-import { AuthorizedUser } from 'src/modules/auth/domain/auth.type';
+import { AuthorizedUser } from 'src/modules/auth/domain/auth.types';
 import { Response } from 'express';
 
 @Controller('user')

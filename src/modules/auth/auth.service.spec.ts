@@ -11,7 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { Test } from '@nestjs/testing';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
-import { AuthService } from './auth.service';
+import { AuthService } from './application/auth.service';
 import { AuthRepository } from '../../user/database/auth.repository';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
@@ -382,7 +382,7 @@ describe('AuthService', () => {
       const { maxAge, ...refreshOptions } = cookieOptions;
 
       // When
-      const result = await authService.getCookiesForLogOut();
+      const result = authService.getCookiesForLogOut();
 
       // Then
       expect(result).toEqual(refreshOptions);

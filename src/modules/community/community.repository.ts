@@ -414,7 +414,7 @@ export class CommunityRepository {
     return await this.commentLikeRepository.delete(criteria);
   }
 
-  async getCommentsCreatedByUser(userId: number): Promise<Comment[]> {
+  async getCommentsCreatedByUser(userId: string): Promise<Comment[]> {
     return this.commentRepository
       .createQueryBuilder('comment')
       .select(['id', 'content', 'post_id as postId', 'created_at as createdAt'])
@@ -422,7 +422,7 @@ export class CommunityRepository {
       .getRawMany();
   }
 
-  async getIdsOfCommentLikedByUser(userId: number): Promise<CommentLike[]> {
+  async getIdsOfCommentLikedByUser(userId: string): Promise<CommentLike[]> {
     return this.commentLikeRepository
       .createQueryBuilder('comment')
       .select(['comment_id'])

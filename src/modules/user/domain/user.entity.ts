@@ -1,5 +1,9 @@
 import { ulid } from 'ulid';
-import { CreateUserProps, UserProps } from './user.types';
+import {
+  CreateUserProps,
+  UpdateUserRefreshTokenIdProps,
+  UserProps,
+} from './user.types';
 import { BaseEntity } from 'src/libs/base/entity.base';
 import { UpdateUserProps } from './user.types';
 
@@ -14,5 +18,9 @@ export class UserEntity extends BaseEntity<UserProps> {
     this.props.fieldId = props.fieldId;
     this.props.careerId = props.careerId;
     this.props.isKorean = props.isKorean;
+  }
+
+  updateUserRefreshTokenId(props: UpdateUserRefreshTokenIdProps) {
+    this.props.refreshTokenId = props.refreshTokenId;
   }
 }

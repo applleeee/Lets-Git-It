@@ -1,8 +1,8 @@
 import {
-  AuthSignInOkResDto,
-  AuthSignInUnauthorizedResDto,
-  AuthSignInWrongCodeDto,
-  AuthSignInWrongGithubAccessTokenDto,
+  SignInOkResDto,
+  SignInUnauthorizedResDto,
+  SignInWrongCodeDto,
+  SignInWrongGithubAccessTokenDto,
 } from '../../user/application/dtos/sign-in.response.dto';
 import { applyDecorators } from '@nestjs/common';
 import {
@@ -23,20 +23,20 @@ export function SwaggerSignIn(): MethodDecorator {
     ApiOkResponse({
       description:
         '로그인에 성공하여 accessToken을 Res body로 리턴합니다. 그리고 응답 쿠키에 refreshToken을 반환합니다.',
-      type: AuthSignInOkResDto,
+      type: SignInOkResDto,
     }),
     ApiUnauthorizedResponse({
       description: '가입되지 않은 유저입니다.',
-      type: AuthSignInUnauthorizedResDto,
+      type: SignInUnauthorizedResDto,
     }),
     ApiBadRequestResponse({
       description: '잘못된 github code입니다. ',
-      type: AuthSignInWrongCodeDto,
+      type: SignInWrongCodeDto,
     }),
     ApiNotFoundResponse({
       description:
         'github access token으로 github user 정보 조회에 실패한 경우입니다.',
-      type: AuthSignInWrongGithubAccessTokenDto,
+      type: SignInWrongGithubAccessTokenDto,
     }),
   );
 }
