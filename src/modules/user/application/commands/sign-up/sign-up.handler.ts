@@ -8,15 +8,12 @@ import { UserEntity } from '../../../domain/user.entity';
 import { Inject, Injectable } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SignUpCommand } from './sign-up.command';
-import { USER_REPOSITORY } from 'src/modules/user/user.di-tokens';
-import { UserRepositoryPort } from 'src/modules/user/database/user.repository.port';
 import { UserMapper } from 'src/modules/user/mapper/user.mapper';
 import { AuthServicePort } from 'src/modules/user/auth/auth.service.port';
-import { REFRESH_TOKEN_REPOSITORY } from 'src/modules/auth/auth.di-tokens';
-import { RefreshTokenRepositoryPort } from 'src/modules/auth/database/refresh-token.repository.port';
 import { RefreshTokenEntity } from 'src/modules/auth/domain/refresh-token.entity';
 import { DataSource } from 'typeorm';
 import { UpdateUserRefreshTokenIdProps } from 'src/modules/user/domain/user.types';
+import { RefreshTokenMapper } from 'src/modules/auth/mapper/refresh-token.mapper';
 
 @Injectable()
 @CommandHandler(SignUpCommand)
@@ -24,18 +21,15 @@ export class SignUpCommandHandler implements ICommandHandler<SignUpCommand> {
   constructor(
     private readonly dataSource: DataSource,
     private readonly _userMapper: UserMapper,
-    @Inject(USER_REPOSITORY)
-    private readonly _userRepository: UserRepositoryPort,
+    private readonly _refreshTokenMapper: RefreshTokenMapper,
     @Inject(AUTH_SERVICE_ADAPTOR)
     private readonly _authService: AuthServicePort,
-    @Inject(REFRESH_TOKEN_REPOSITORY)
-    private readonly _refreshTokenRepository: RefreshTokenRepositoryPort,
   ) {}
 
   async execute(command: SignUpCommand): Promise<any> {
     const { userName, ...signUpData } = command;
-    const user = UserEntity.create({ ...signUpData });
-    const userId = user.getProps().id as string;
+    const userEntity = UserEntity.create({ ...signUpData });
+    const userId = userEntity.getProps().id as string;
 
     const accessTokenPayload: AccessTokenPayload = {
       userId,
@@ -68,9 +62,13 @@ export class SignUpCommandHandler implements ICommandHandler<SignUpCommand> {
       refreshTokenId,
     };
 
-    user.updateUserRefreshTokenId(updateUserRefreshTokenIdProps);
+    userEntity.updateUserRefreshTokenId(updateUserRefreshTokenIdProps);
 
-    console.log('user: ', user);
+    const userOrmEntity = this._userMapper.toPersistence(userEntity);
+    console.log('userOrmEntity: ', userOrmEntity);
+
+    const refreshTokenOrmEntity =
+      this._refreshTokenMapper.toPersistence(refreshTokenEntity);
 
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -79,8 +77,8 @@ export class SignUpCommandHandler implements ICommandHandler<SignUpCommand> {
     await queryRunner.startTransaction();
 
     try {
-      await this._userRepository.insert(user);
-      await this._refreshTokenRepository.insert(refreshTokenEntity);
+      await queryRunner.manager.insert('user', userOrmEntity);
+      await queryRunner.manager.insert('refresh_token', refreshTokenOrmEntity);
 
       // await this._authService.insertRefreshToken(createRefreshTokenProps);
       //   const jwtToken = await this.getJwtAccessToken(user.id, userName);

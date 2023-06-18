@@ -133,7 +133,7 @@ export class AuthService {
       userId: id,
       hashedRefreshToken: null,
     });
-    return await this._refreshTokenRepository.softDelete(refreshTokenEntity);
+    return await this._refreshTokenRepository.softRemove(refreshTokenEntity);
   }
 
   async getUserIfRefreshTokenMatches(refreshToken: string, id: string) {

@@ -34,6 +34,7 @@ export abstract class MySqlRepositoryBase<
 
     try {
       await this.repository.save(record);
+
       return true;
     } catch (error) {
       console.log(`${this.tableName} insert error : ${error}`);
@@ -97,11 +98,11 @@ export abstract class MySqlRepositoryBase<
     return result.affected > 0;
   }
 
-  async delete(entity: Entity): Promise<boolean> {
+  async remove(entity: Entity): Promise<boolean> {
     const ormEntity = this.mapper.toPersistence(entity);
-    const result = await this.repository.delete(ormEntity);
+    const removedEntity = await this.repository.remove(ormEntity);
 
-    return result.affected > 0;
+    return removedEntity !== null;
   }
 
   /**
@@ -109,11 +110,11 @@ export abstract class MySqlRepositoryBase<
    * @param entity
    * @returns
    */
-  async softDelete(entity: Entity): Promise<boolean> {
+  async softRemove(entity: Entity): Promise<boolean> {
     const ormEntity = this.mapper.toPersistence(entity);
-    const result = await this.repository.softDelete(ormEntity);
+    const removedEntity = await this.repository.softRemove(ormEntity);
 
-    return result.affected > 0;
+    return removedEntity !== null;
   }
 
   protected get repository() {

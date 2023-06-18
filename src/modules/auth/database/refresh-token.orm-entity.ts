@@ -19,7 +19,7 @@ export class RefreshToken {
     name: 'hashed_refresh_token',
     nullable: true,
   })
-  hashedRefreshToken: string | null;
+  hashedRefreshToken?: string | null;
 
   @Column({ name: 'user_id', nullable: false, type: 'uuid' })
   userId: string;
@@ -28,15 +28,15 @@ export class RefreshToken {
   createdAt: Date;
 
   @Column('timestamp', { name: 'updated_at', nullable: true })
-  updatedAt: Date | null;
+  updatedAt?: Date;
 
   @Exclude()
   @Column('timestamp', { name: 'deleted_at', nullable: true })
-  deletedAt: Date | null;
+  deletedAt?: Date;
 
   @ManyToOne(() => User, (user) => user.refreshToken, {
     onDelete: 'CASCADE',
-    onUpdate: 'NO ACTION',
+    onUpdate: 'CASCADE',
   })
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
   user: User;

@@ -57,7 +57,7 @@ export class User {
     name: 'refresh_token_id',
     nullable: true,
   })
-  refreshTokenId: string;
+  refreshTokenId?: string;
 
   @Column('timestamp', { name: 'created_at', default: () => "'now()'" })
   createdAt: Date;
@@ -66,22 +66,27 @@ export class User {
   updatedAt: Date | null;
 
   @OneToMany(() => Comment, (comment) => comment.user)
-  comments: Comment[];
+  comments?: Comment[];
 
   @OneToMany(() => CommentLike, (commentLike) => commentLike.user)
-  commentLikes: CommentLike[];
+  commentLikes?: CommentLike[];
 
   @OneToMany(() => Post, (post) => post.user)
-  posts: Post[];
+  posts?: Post[];
 
   @OneToMany(() => PostLike, (postLike) => postLike.user)
-  postLikes: PostLike[];
+  postLikes?: PostLike[];
 
-  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
-  refreshToken: RefreshToken[];
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user, {
+    cascade: ['insert', 'update'],
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'refresh_token_id', referencedColumnName: 'id' })
+  refreshToken?: RefreshToken[];
 
   @OneToOne(() => RankerProfile, (rankerProfile) => rankerProfile.user)
-  rankerProfiles: RankerProfile[];
+  @JoinColumn({ name: 'rankerProfile_id', referencedColumnName: 'id' })
+  rankerProfiles?: RankerProfile[];
 
   @ManyToOne(() => Field, (field) => field.users, {
     onDelete: 'NO ACTION',
