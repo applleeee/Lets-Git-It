@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { RefreshCommand } from './refresh.command';
 import {
@@ -19,13 +19,15 @@ export class RefreshCommandHandler implements ICommandHandler<RefreshCommand> {
     private readonly _authService: AuthServicePort,
   ) {}
 
-  // todo auth 모듈 정비 끝나면, refreshToken 발급 받는 로직 하나로 감싸고, res 분기 처리해서 내보내는 것 처리
   async execute(command: RefreshCommand): Promise<any> {
     const { id } = command;
 
-    // todo 현재 랭커 정보가 db에 없어서 username을 가져오지 못하기 때문에 name이 null임
-    const { name } = await this._userRepository.getUserNameByUserId(id);
+    const name = await this._userRepository.getUserNameByUserId(id);
+
+    if (!name) throw new NotFoundException('NO_EXIST_RANKER');
+
     const payload: AccessTokenPayload = { userId: id, userName: name };
+
     return this._authService.getJwtAccessToken(payload);
   }
 }

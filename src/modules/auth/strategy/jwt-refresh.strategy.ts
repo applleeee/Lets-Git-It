@@ -1,6 +1,6 @@
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import authConfig from '../../../config/authConfig';
 import { RefreshTokenPayload } from '../domain/auth.types';
@@ -38,10 +38,10 @@ export class JwtRefreshStrategy extends PassportStrategy(
       userId,
     );
 
-    if (isRefreshTokenMatches) {
-      const user = { id: userId };
+    if (!isRefreshTokenMatches) throw new UnauthorizedException('UNAUTHORIZED');
 
-      return user;
-    }
+    const user = { id: userId };
+
+    return user;
   }
 }

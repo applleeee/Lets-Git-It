@@ -30,10 +30,16 @@ export class UserRepository
     return userOrmEntity ? this.mapper.toDomain(userOrmEntity) : null;
   }
 
-  async getUserNameByUserId(id: string): Promise<any> {
-    return await this._userRepository.findOne({
+  async getUserNameByUserId(id: string): Promise<string> {
+    const userOrmEntity = await this._userRepository.findOne({
       where: { id },
+      select: { rankerProfiles: { name: true } },
       relations: ['rankerProfiles'],
     });
+
+    // todo userEntity에 rankerProfile 속성 추가하고 mapper에 적용하면 아래 로직 바꾸기.
+    const name = userOrmEntity.rankerProfiles?.map((ranker) => ranker.name);
+
+    return name ? name[0] : null;
   }
 }
