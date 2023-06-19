@@ -25,11 +25,11 @@ import { CreatePostController } from './application/commands/create-post/create-
 import { SaveImageToS3Controller } from './application/commands/save-image-to-s3/save-image-to-s3.controller';
 import { AwsS3Module } from '../aws-s3/aws-s3.module';
 import { CreatePostCommandHandler } from './application/commands/create-post/create-post.handler';
-import { POST_REPOSITORY } from './community.di-tokens';
+import { POST_LIKE_REPOSITORY, POST_REPOSITORY } from './community.di-tokens';
 import { PostRepository } from './database/post.repository';
 import { CommunityService } from './application/community.service';
 import { CommunityRepository } from './community.repository';
-import { PostMapper } from './community.mapper';
+import { PostMapper } from './mapper/post.mapper';
 import { SaveImageToS3CommandHandler } from './application/commands/save-image-to-s3/save-image-to-s3.handler';
 import { DeleteImageInS3Controller } from './application/commands/delete-image-in-s3/delete-image-in-s3.controller';
 import { DeleteImageInS3CommandHandler } from './application/commands/delete-image-in-s3/delete-image-in-s3.handler';
@@ -41,6 +41,10 @@ import { GetPostDetailController } from './application/queries/get-post-detail/g
 import { GetPostDetailQueryHandler } from './application/queries/get-post-detail/get-post-detail.query-handler';
 import { GetPostListController } from './application/queries/get-post-list/get-post-list.controller';
 import { GetPostListQueryHandler } from './application/queries/get-post-list/get-post-list.query-handler';
+import { CreateOrDeletePostLikeController } from './application/commands/create-or-delete-post-like/create-or-delete-post-like.controller';
+import { CreateOrDeletePostLikeCommandHandler } from './application/commands/create-or-delete-post-like/create-or-delete-post-like.handler';
+import { PostLikeRepository } from './database/post-like.respository';
+import { PostLikeMapper } from './mapper/postLike.mapper';
 
 const controllers = [
   GetAllPostCategoriesController,
@@ -51,6 +55,7 @@ const controllers = [
   DeletePostController,
   GetPostDetailController,
   GetPostListController,
+  CreateOrDeletePostLikeController,
 ];
 
 const commandHandlers = [
@@ -59,6 +64,7 @@ const commandHandlers = [
   DeleteImageInS3CommandHandler,
   UpdatePostCommandHandler,
   DeletePostCommandHandler,
+  CreateOrDeletePostLikeCommandHandler,
 ];
 
 const queryHandlers = [
@@ -67,9 +73,12 @@ const queryHandlers = [
   GetPostListQueryHandler,
 ];
 
-const repositories = [{ provide: POST_REPOSITORY, useClass: PostRepository }];
+const repositories = [
+  { provide: POST_REPOSITORY, useClass: PostRepository },
+  { provide: POST_LIKE_REPOSITORY, useClass: PostLikeRepository },
+];
 
-const mappers = [PostMapper];
+const mappers = [PostMapper, PostLikeMapper];
 
 @Module({
   imports: [

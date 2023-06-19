@@ -4,7 +4,7 @@ import { DeletePostCommand } from './delete-post.command';
 import { POST_REPOSITORY } from 'src/modules/community/community.di-tokens';
 import { PostRepositoryPort } from 'src/modules/community/database/post.repository.port';
 import { AwsS3Service } from 'src/modules/aws-s3/aws-s3.service';
-import { PostEntity } from 'src/modules/community/domain/community.entity';
+import { PostEntity } from 'src/modules/community/domain/post.entity';
 
 @Injectable()
 @CommandHandler(DeletePostCommand)

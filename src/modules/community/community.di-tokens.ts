@@ -1,1 +1,3 @@
 export const POST_REPOSITORY = Symbol('POST_REPOSITORY');
+
+export const POST_LIKE_REPOSITORY = Symbol('POST_LIKE_REPOSITORY');

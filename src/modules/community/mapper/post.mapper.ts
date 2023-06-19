@@ -1,7 +1,7 @@
 import { Mapper } from 'src/libs/base/mapper.interface';
-import { PostEntity } from './domain/community.entity';
-import { Post as PostOrmEntity } from '../entities/Post';
-import { PostResponseDto } from './application/res-dto/post.response.dto';
+import { PostEntity } from '../domain/post.entity';
+import { Post as PostOrmEntity } from '../../entities/Post';
+import { PostResponseDto } from '../application/res-dto/post.response.dto';
 
 export class PostMapper
   implements Mapper<PostEntity, PostOrmEntity, PostResponseDto>

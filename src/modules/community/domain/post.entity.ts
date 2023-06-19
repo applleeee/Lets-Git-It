@@ -1,5 +1,5 @@
 import { BaseEntity } from 'src/libs/base/entity.base';
-import { CreatePostProps, PostProps, UpdatePostProps } from './community.types';
+import { CreatePostProps, PostProps, UpdatePostProps } from './post.types';
 import { ulid } from 'ulid';
 
 export class PostEntity extends BaseEntity<PostProps> {
