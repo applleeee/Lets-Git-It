@@ -34,7 +34,6 @@ import { GithubOauthAdaptor } from './github-api/github-oauth.adaptor';
 import { AuthServiceAdaptor } from './auth/auth.service.adaptor';
 import { AuthModule } from '../auth/auth.module';
 import { RefreshCommandHandler } from './application/commands/refresh/refresh.handler';
-import { RefreshTokenMapper } from '../auth/mapper/refresh-token.mapper';
 
 const userControllers = [
   SignInController,
@@ -63,7 +62,7 @@ const repositories = [
   { provide: AUTH_SERVICE_ADAPTOR, useClass: AuthServiceAdaptor },
 ];
 
-const mappers = [UserMapper, UserCategoryMapper, RefreshTokenMapper];
+const mappers = [UserMapper, UserCategoryMapper];
 
 @Module({
   imports: [

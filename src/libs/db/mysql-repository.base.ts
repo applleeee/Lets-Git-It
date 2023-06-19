@@ -33,7 +33,7 @@ export abstract class MySqlRepositoryBase<
     const record = this.mapper.toPersistence(entity);
 
     try {
-      await this.repository.save(record);
+      await this.repository.save(record, { reload: false });
 
       return true;
     } catch (error) {

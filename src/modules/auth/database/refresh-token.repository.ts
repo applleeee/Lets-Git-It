@@ -32,9 +32,12 @@ export class RefreshTokenRepository
     return result.affected > 0;
   }
 
-  async deleteRefreshTokenByUserId(userId: string) {
-    const result = await this._refreshTokenRepository.delete(userId);
+  async findOneByUserId(userId: string) {
+    const record = await this._refreshTokenRepository.findOne({
+      where: { userId },
+      relations: ['user'],
+    });
 
-    return result.affected > 0;
+    return this.mapper.toDomain(record);
   }
 }

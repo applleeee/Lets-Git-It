@@ -131,7 +131,7 @@ describe('UserRepository', () => {
         try {
           if (error.name === 'QueryFailedError') {
             expect(error).toBeInstanceOf(QueryFailedError);
-            throw new HttpException('EXISTING_USERNAME', HttpStatus.CONFLICT);
+            throw new HttpException('USER_ALREADY_EXIST', HttpStatus.CONFLICT);
           } else {
             throw new HttpException(
               'INTERNAL_SEVER_ERROR',
@@ -140,7 +140,7 @@ describe('UserRepository', () => {
           }
         } catch (error) {
           expect(error).toBeInstanceOf(HttpException);
-          expect(error.message).toBe('EXISTING_USERNAME');
+          expect(error.message).toBe('USER_ALREADY_EXIST');
           expect(error.status).toBe(HttpStatus.CONFLICT);
         }
       }

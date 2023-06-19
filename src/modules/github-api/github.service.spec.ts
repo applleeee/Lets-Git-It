@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { GithubService } from './github-oauth.service';
+import { GithubService } from './github.service';
 
 describe('GithubService', () => {
   let service: GithubService;

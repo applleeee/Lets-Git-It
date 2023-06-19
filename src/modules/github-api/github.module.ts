@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { GithubOauthService } from './github-oauth.service';
+import { GithubService } from './github.service';
 import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [HttpModule],
-  providers: [GithubOauthService],
-  exports: [GithubOauthService],
+  providers: [GithubService],
+  exports: [GithubService],
 })
 export class GithubModule {}

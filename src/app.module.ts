@@ -2,15 +2,9 @@ import { validationSchema } from './config/validationSchema';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
-
 import { RankModule } from './modules/rank/rank.module';
-import { AuthModule } from './modules/auth/auth.module';
-
 import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from './utils/http-exception.filter';
-
-import { JwtRefreshStrategy } from './modules/auth/strategy/jwt-refresh.strategy';
-import { JwtStrategy } from './modules/auth/strategy/jwt.strategy';
 import authConfig from './config/authConfig';
 import cookieConfig from './config/cookieConfig';
 import appConfig from './config/appConfig';
@@ -39,8 +33,6 @@ import { SchedulerModule } from './modules/schedule/schedule.module';
   ],
   controllers: [],
   providers: [
-    JwtStrategy,
-    JwtRefreshStrategy,
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,

@@ -23,16 +23,29 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: AccessTokenPayload): Promise<AuthorizedUser> {
-    const { userId, userName } = payload;
+    const { userId, userName: userNameInPayload } = payload;
 
     const userNameInDb = await this.rankerProfileRepository.getUserNameByUserId(
       userId,
     );
 
-    if (userNameInDb !== userName)
-      throw new HttpException('FORBIDDEN', HttpStatus.FORBIDDEN);
+    const user: AuthorizedUser = await this.getAuthorizedUser(
+      userId,
+      userNameInPayload,
+      userNameInDb,
+    );
 
-    // todo 아래 메소드는 여기에서 밖에 안씀 그니까 하나로 묶어주자.
+    return user;
+  }
+
+  private async getAuthorizedUser(
+    userId: string,
+    userNameInPayload: string,
+    userNameInDb: string,
+  ) {
+    // todo 아래 메소드는 여기에서 밖에 안씀 그니까 communityService에서 하나로 묶어주자.
+    this.compareUserName(userNameInPayload, userNameInDb);
+
     const idsOfPostsCreatedByUser =
       await this.communityService.getIdsOfPostsCreatedByUser(userId);
 
@@ -47,7 +60,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
     const user: AuthorizedUser = {
       id: userId,
-      userName,
+      userName: userNameInDb,
       idsOfPostsCreatedByUser,
       idsOfPostLikedByUser,
       idsOfCommentsCreatedByUser,
@@ -55,5 +68,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     };
 
     return user;
+  }
+
+  private compareUserName(userNameInPayload: string, userNameInDb: string) {
+    if (userNameInDb !== userNameInPayload)
+      throw new HttpException('FORBIDDEN', HttpStatus.FORBIDDEN);
   }
 }

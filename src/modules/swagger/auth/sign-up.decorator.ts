@@ -1,6 +1,6 @@
 import {
-  AuthSignUpConflictDto,
-  AuthSignUpCreatedDto,
+  SignUpConflictDto,
+  SignUpCreatedDto,
 } from '../../user/application/dtos/sign-up.response.dto';
 import { applyDecorators } from '@nestjs/common';
 import {
@@ -19,11 +19,11 @@ export function SwaggerSignUp(): MethodDecorator {
     ApiCreatedResponse({
       description:
         '회원가입이 되어 accessToken을 리턴합니다. 그리고 응답 쿠키에 refreshToken을 반환합니다.',
-      type: AuthSignUpCreatedDto,
+      type: SignUpCreatedDto,
     }),
     ApiConflictResponse({
       description: '이미 가입한 회원이 회원 가입을 시도할 때의 응답입니다.',
-      type: AuthSignUpConflictDto,
+      type: SignUpConflictDto,
     }),
   );
 }

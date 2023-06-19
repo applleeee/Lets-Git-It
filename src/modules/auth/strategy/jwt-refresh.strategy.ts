@@ -15,6 +15,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
   constructor(
     @Inject(authConfig.KEY)
     private readonly _config: ConfigType<typeof authConfig>,
+    private readonly _authService: AuthService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -28,11 +29,19 @@ export class JwtRefreshStrategy extends PassportStrategy(
     });
   }
 
-  async validate(req: Request, payload: RefreshTokenPayload) {
+  async validate(request: Request, payload: RefreshTokenPayload) {
+    const refreshToken = request.signedCookies?.Refresh;
     const { userId } = payload;
 
-    const user = { id: userId };
+    const isRefreshTokenMatches = await this._authService.isRefreshTokenMatches(
+      refreshToken,
+      userId,
+    );
 
-    return user;
+    if (isRefreshTokenMatches) {
+      const user = { id: userId };
+
+      return user;
+    }
   }
 }

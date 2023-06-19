@@ -1,9 +1,8 @@
 import { ICommand } from '@nestjs/cqrs';
 export class RefreshCommand implements ICommand {
   readonly id: string;
-  readonly refreshToken: string;
-  constructor({ id, refreshToken }) {
+
+  constructor({ id }) {
     this.id = id;
-    this.refreshToken = refreshToken;
   }
 }

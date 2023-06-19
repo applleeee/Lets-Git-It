@@ -1,3 +1,3 @@
-interface UserCategoryRepositoryPort {
+export interface UserCategoryRepositoryPort {
   getUserCategory(): Promise<any>;
 }

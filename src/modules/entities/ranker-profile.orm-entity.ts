@@ -11,7 +11,7 @@ import {
 import { User } from '../user/database/entity/user.orm-entity';
 import { Ranking } from './ranking.orm-entity';
 
-@Index('user_id', ['userId'], {})
+@Index(['name'], {})
 @Entity('ranker_profile', { schema: 'git_rank' })
 export class RankerProfile {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id', unsigned: true })
@@ -55,7 +55,13 @@ export class RankerProfile {
     onDelete: 'CASCADE',
     onUpdate: 'NO ACTION',
   })
-  @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
+  @JoinColumn([
+    {
+      name: 'user_id',
+      referencedColumnName: 'id',
+      foreignKeyConstraintName: 'fk_ranker_profile_user_id',
+    },
+  ])
   user: User;
 
   @OneToOne(() => Ranking, (ranking) => ranking.rankerProfile)

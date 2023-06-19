@@ -1,12 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { HttpStatusCode } from 'axios';
-import { AuthSignUpCreatedDto } from 'src/modules/user/application/dtos/sign-up.response.dto';
-
+import { SignUpCreatedDto } from './sign-up.response.dto';
 /**
  * @author MyeongSeok
  * @description 엑세스 토큰 재발급 성공 시 응답 객체의 DTO입니다.
  */
-export class RefreshOkDto extends AuthSignUpCreatedDto {}
+export class RefreshOkDto extends SignUpCreatedDto {}
 
 /**
  * @author MyeongSeok

@@ -21,7 +21,6 @@ export class RefreshInterceptor implements NestInterceptor<any, Response> {
     const request = this.getRequest<
       IncomingMessage & { user: Record<string, unknown> } // IncomingMessage가 뭔지 알게 되면 저거 타입을 refreshRequest로 만들어서 쓰자. 컨트롤러에도 타입 넣기
     >(context);
-    console.log('request: ', request);
     const refreshToken = this.getRefreshToken(request);
     const res: Response = this.getResponse(context);
 
@@ -33,10 +32,8 @@ export class RefreshInterceptor implements NestInterceptor<any, Response> {
     if (isRefreshTokenExpirationDateHalfPast) {
       const refreshTokenPayload: RefreshTokenPayload = { userId };
       const { refreshToken, ...cookieOptions } =
-        await this._authService.getCookiesWithJwtRefreshToken(
-          refreshTokenPayload,
-        );
-      await this._authService.updateRefreshToken(refreshToken, userId);
+        this._authService.getCookiesWithJwtRefreshToken(refreshTokenPayload);
+      await this._authService.updateRefreshToken({ refreshToken, userId });
 
       request.user.refreshToken = refreshToken;
 

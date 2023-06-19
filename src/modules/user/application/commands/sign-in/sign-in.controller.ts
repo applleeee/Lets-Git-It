@@ -49,21 +49,19 @@ export class SignInController {
 
     const result = await this._commandBus.execute<
       SignInCommand,
-      | SignInResOk
-      | SignInUnauthorizedResDto
-      | SignInWrongCodeDto
-      | SignInWrongGithubAccessTokenDto
+      SignInResOk | SignInUnauthorizedResDto
     >(command);
 
     switch (result.case) {
       case SignInResCase.UNAUTHORIZED:
-        res.status(HttpStatus.UNAUTHORIZED).json(result);
-        break;
+        res.status(HttpStatus.UNAUTHORIZED);
+        return result;
 
       case SignInResCase.OK:
         const { refreshToken, signInOkResDto, cookieOptions } =
           result as SignInResOk;
-        res.cookie('Refresh', refreshToken, cookieOptions).json(signInOkResDto);
+        res.cookie('Refresh', refreshToken, cookieOptions);
+        return signInOkResDto;
     }
   }
 }

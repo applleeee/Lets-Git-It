@@ -1,20 +1,40 @@
 import { HttpStatusCode } from 'axios';
-import { SignInOkResDto } from './sign-in.response.dto';
-import { ApiProperty, PickType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
+import { Exclude, Expose } from 'class-transformer';
 
 /**
  * @author MyeongSeok
  * @description 회원가입 성공 시 응답 객체의 DTO입니다.
  */
-export class AuthSignUpCreatedDto extends PickType(SignInOkResDto, [
-  'accessToken',
-] as const) {}
+export class SignUpCreatedDto {
+  @Exclude() private readonly _accessToken: string;
+
+  constructor(accessToken: string) {
+    this._accessToken = accessToken;
+  }
+
+  /**
+   * 인가(Authorization)에 필요한 jwtToken 입니다. 인가가 필요한 요청 시 헤더(Authorization)에 담아주세요.
+   * @example jwtToken
+   */
+  @ApiProperty({
+    example:
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMwLCJzZWNyZXRPclByaXZhdGVLZXkiOiJnaXRfcmFuayIsImlhdCI6MTY3NjU1MjU2MywiZXhwIjoxNjc2NTU0MzYzfQ.VE8cC20AziLwXYcruiwedYda8LaX4k43nRZQLBmG0tA',
+    description:
+      '인가(Authorization)에 필요한 jwtToken 입니다. 인가가 필요한 요청 시 헤더(Authorization)에 담아주세요.',
+    required: true,
+  })
+  @Expose()
+  get accessToken(): string {
+    return this._accessToken;
+  }
+}
 
 /**
  * @author MyeongSeok
  * @description 이미 가입한 회원이 회원 가입을 시도할 때 응답 객체의 DTO입니다.
  */
-export class AuthSignUpConflictDto {
+export class SignUpConflictDto {
   /**
    * @example 409
    */
@@ -26,11 +46,11 @@ export class AuthSignUpConflictDto {
 
   /**
    * 이미 가입된 유저입니다.
-   * @example EXISTING_USERNAME
+   * @example USER_ALREADY_EXIST
    */
   @ApiProperty({
     description: '이미 가입된 유저입니다.',
-    example: 'EXISTING_USERNAME',
+    example: 'USER_ALREADY_EXIST',
     required: true,
   })
   readonly message: string;

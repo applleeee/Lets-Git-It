@@ -12,6 +12,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { SignUpRequestDto } from './sign-up.request.dto';
 import { SignUpCommand } from './sign-up.command';
 import { Response } from 'express';
+import { SignUpCreatedDto } from '../../dtos/sign-up.response.dto';
 
 @Controller('user')
 @ApiTags('User')
@@ -26,18 +27,16 @@ export class SignUpController {
   @SwaggerSignUp()
   @Post('/sign-up')
   @HttpCode(HttpStatus.CREATED)
-  async signUp(@Body() userData: SignUpRequestDto, @Res() response: Response) {
+  async signUp(
+    @Body() userData: SignUpRequestDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     const command = new SignUpCommand(userData);
-    const { accessToken, refreshToken, cookieOptions } =
+    const { signUpCreatedDto, refreshToken, cookieOptions } =
       await this._commandBus.execute(command);
 
-    response
-      .cookie('Refresh', refreshToken, cookieOptions)
-      .json({ accessToken });
-    // const { accessToken, userId } = await this.authService.signUp(userData);
-    //   const { refreshToken, ...cookieOptions } =
-    //     await this.authService.getCookiesWithJwtRefreshToken(userId);
-    //   await this.userService.saveRefreshToken(refreshToken, userId);
-    //   res.cookie('Refresh', refreshToken, cookieOptions).json({ accessToken });
+    response.cookie('Refresh', refreshToken, cookieOptions);
+
+    return signUpCreatedDto;
   }
 }

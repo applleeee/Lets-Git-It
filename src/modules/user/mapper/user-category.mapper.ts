@@ -6,6 +6,7 @@ import {
   FieldName,
   UserCategoryEntity,
 } from '../domain/user-category.types';
+import { UserCategoryDto } from '../application/dtos/user-category.response.dto';
 
 export class UserCategoryMapper {
   toDomain(record: UserCategoryOrmEntity): UserCategoryEntity {
@@ -39,6 +40,16 @@ export class UserCategoryMapper {
   }
 
   toResponse(entity: UserCategoryEntity) {
-    return;
+    const fields = entity.field.map((field) => ({
+      id: field.id,
+      name: field.getProps().name,
+    }));
+
+    const careers = entity.career.map((career) => ({
+      id: career.id,
+      period: career.getProps().period,
+    }));
+
+    return new UserCategoryDto({ fields, careers });
   }
 }

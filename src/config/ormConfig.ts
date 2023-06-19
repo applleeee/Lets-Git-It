@@ -11,7 +11,6 @@ export default registerAs('orm', () => ({
   synchronize: process.env.NODE_ENV === 'prod' ? false : true,
   autoLoadEntities: process.env.NODE_ENV === 'prod' ? false : true,
   logging: process.env.NODE_ENV === 'prod' ? false : true,
-  // todo 엔티티가 각 모듈로 들어가게 되면 이렇게 수정 :
   entities: [__dirname + '/**/*.orm-entity{.ts,.js}'],
   charset: 'utf8mb4',
   extra: {

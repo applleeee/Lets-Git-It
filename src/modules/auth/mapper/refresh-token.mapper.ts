@@ -1,6 +1,7 @@
 import { RefreshTokenEntity } from '../domain/refresh-token.entity';
 import { RefreshToken as RefreshTokenOrmEntity } from '../database/refresh-token.orm-entity';
 import { Mapper } from 'src/libs/base/mapper.interface';
+import { User } from 'src/modules/user/database/entity/user.orm-entity';
 
 export class RefreshTokenMapper
   implements Mapper<RefreshTokenEntity, RefreshTokenOrmEntity>
@@ -14,6 +15,10 @@ export class RefreshTokenMapper
     record.userId = copy.userId;
     record.createdAt = copy.createdAt;
     record.updatedAt = copy.updatedAt;
+    record.user = {
+      id: copy.userId,
+      refreshTokenId: copy.id as string,
+    } as User;
 
     return record;
   }

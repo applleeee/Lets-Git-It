@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Career } from '../entity/career.orm-entity.js';
 import { Field } from '../entity/field.orm-entity.js';
 import { UserCategoryMapper } from '../../mapper/user-category.mapper.js';
+import { UserCategoryRepositoryPort } from '../user-category.repository.port.js';
 
 export interface UserCategoryOrmEntity {
   field: Field[];

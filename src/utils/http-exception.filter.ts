@@ -6,6 +6,9 @@ import {
   HttpStatus,
   UnauthorizedException,
   ForbiddenException,
+  ConflictException,
+  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { QueryFailedError } from 'typeorm';
@@ -32,12 +35,25 @@ export class AllExceptionsFilter implements ExceptionFilter {
         code = (exception as any).code;
         break;
 
+      case BadRequestException:
+        status = (exception as BadRequestException).getStatus();
+        break;
+
       case UnauthorizedException: // for Auth guard error
         status = (exception as UnauthorizedException).getStatus();
         break;
 
       case ForbiddenException:
         status = (exception as ForbiddenException).getStatus();
+        break;
+
+      case NotFoundException:
+        status = (exception as NotFoundException).getStatus();
+        break;
+
+      case ConflictException:
+        status = (exception as ConflictException).getStatus();
+        break;
 
       default: // default
         status = HttpStatus.INTERNAL_SERVER_ERROR;

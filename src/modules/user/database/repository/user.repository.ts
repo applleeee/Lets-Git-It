@@ -23,11 +23,11 @@ export class UserRepository
   }
 
   async getUserByGithubId(githubId: number): Promise<UserEntity> {
-    const UserOrmEntity = await this._userRepository.findOneBy({
+    const userOrmEntity = await this._userRepository.findOneBy({
       githubId,
     });
 
-    return this.mapper.toDomain(UserOrmEntity);
+    return userOrmEntity ? this.mapper.toDomain(userOrmEntity) : null;
   }
 
   async getUserNameByUserId(id: string): Promise<any> {

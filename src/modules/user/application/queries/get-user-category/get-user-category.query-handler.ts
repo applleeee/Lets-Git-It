@@ -2,8 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetUserCategoryQuery } from './get-user-category.query';
 import { USER_CATEGORY_REPOSITORY } from 'src/modules/user/user.di-tokens';
-import { Mapper } from 'src/libs/base/mapper.interface';
 import { UserCategoryMapper } from 'src/modules/user/mapper/user-category.mapper';
+import { UserCategoryRepositoryPort } from 'src/modules/user/database/user-category.repository.port';
+import { UserCategoryDto } from '../../dtos/user-category.response.dto';
 
 @Injectable()
 @QueryHandler(GetUserCategoryQuery)
@@ -16,8 +17,9 @@ export class GetUserCateGoryQueryHandler
     private readonly _mapper: UserCategoryMapper,
   ) {}
 
-  async execute(query: GetUserCategoryQuery): Promise<any> {
-    return await this._userCategoryRepository.getUserCategory();
-    // todo mapper로 dto로 만들어서 반환.
+  async execute(query: GetUserCategoryQuery): Promise<UserCategoryDto> {
+    const userCategoryEntity =
+      await this._userCategoryRepository.getUserCategory();
+    return this._mapper.toResponse(userCategoryEntity);
   }
 }

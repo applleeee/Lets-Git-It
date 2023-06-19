@@ -1,4 +1,9 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigType } from '@nestjs/config';
 import authConfig from '../../../config/authConfig';
@@ -7,7 +12,6 @@ import { pbkdf2 } from 'crypto';
 import { promisify } from 'util';
 import { RefreshTokenRepositoryPort } from '../database/refresh-token.repository.port';
 import { REFRESH_TOKEN_REPOSITORY } from '../auth.di-tokens';
-import { RankerProfileRepository } from '../../rank/rankerProfile.repository';
 import {
   AccessTokenPayload,
   CookieOptions,
@@ -16,6 +20,10 @@ import {
   RefreshTokenPayload,
 } from '../domain/auth.types';
 import { RefreshTokenEntity } from '../domain/refresh-token.entity';
+import { DataSource } from 'typeorm';
+import { RefreshTokenMapper } from '../mapper/refresh-token.mapper';
+import { RefreshToken } from '../database/refresh-token.orm-entity';
+import { User } from 'src/modules/user/database/entity/user.orm-entity';
 
 @Injectable()
 export class AuthService {
@@ -27,7 +35,8 @@ export class AuthService {
     private readonly _authConfig: ConfigType<typeof authConfig>,
     @Inject(REFRESH_TOKEN_REPOSITORY)
     private readonly _refreshTokenRepository: RefreshTokenRepositoryPort,
-    private readonly _rankerProfileRepository: RankerProfileRepository,
+    private readonly _dataSource: DataSource,
+    private readonly _refreshTokenMapper: RefreshTokenMapper,
   ) {}
 
   getJwtAccessToken(payload: AccessTokenPayload): JwtAccessToken {
@@ -86,27 +95,55 @@ export class AuthService {
     };
   }
 
-  // async insertRefreshToken(
-  //   insertRefreshTokenProps: InsertRefreshTokenProps,
-  // ): Promise<boolean> {
-  //   const { refreshToken, userId } = insertRefreshTokenProps;
-  //   const hashedRefreshToken = await this.hashRefreshToken(refreshToken);
-  //   const refreshTokenEntity = RefreshTokenEntity.create({
-  //     hashedRefreshToken,
-  //     userId,
-  //   });
-  //   return await this._refreshTokenRepository.insert(refreshTokenEntity);
-  // }
-
-  async updateRefreshToken(refreshToken: string, userId: string) {
+  async updateRefreshToken({ userId, refreshToken }) {
     const hashedRefreshToken = await this.hashRefreshToken(refreshToken);
     const refreshTokenEntity = RefreshTokenEntity.create({
       userId,
       hashedRefreshToken,
     });
-    // todo user 테이블에 refreshTokenRepository id 넣어주기
-    await this._refreshTokenRepository.deleteRefreshTokenByUserId(userId);
-    await this._refreshTokenRepository.insert(refreshTokenEntity);
+
+    const refreshTokenOrmEntity =
+      this._refreshTokenMapper.toPersistence(refreshTokenEntity);
+
+    const queryRunner = this._dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const { id: refreshTokenIdInDb } = await queryRunner.manager.findOne<{
+        id: string;
+        userId: string;
+      } | null>(RefreshToken, {
+        where: { userId },
+        select: { id: true, userId: true },
+      });
+
+      const updatedResult = await queryRunner.manager.softDelete(RefreshToken, {
+        id: refreshTokenIdInDb,
+        userId,
+      });
+
+      if (updatedResult.affected === 0) {
+        throw new Error('NO_EXIST_USER_ID');
+      }
+
+      await queryRunner.manager.insert(RefreshToken, refreshTokenOrmEntity);
+      await queryRunner.manager.update(User, userId, {
+        refreshTokenId: refreshTokenOrmEntity.id,
+      });
+
+      await queryRunner.commitTransaction();
+
+      return refreshTokenEntity;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+
+      console.log('transaction error: ', error);
+
+      throw new BadRequestException('REFRESH_TOKEN_RE_GENERATION_FAILED');
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async hashRefreshToken(refreshToken: string) {
@@ -128,29 +165,13 @@ export class AuthService {
     return hashedRefreshToken;
   }
 
-  async deleteRefreshToken(id: string) {
-    const refreshTokenEntity = RefreshTokenEntity.create({
-      userId: id,
-      hashedRefreshToken: null,
-    });
-    return await this._refreshTokenRepository.softRemove(refreshTokenEntity);
-  }
+  async isRefreshTokenMatches(refreshToken: string, userId: string) {
+    const refreshTokenEntity: RefreshTokenEntity =
+      await this._refreshTokenRepository.findOneByUserId(userId);
 
-  async getUserIfRefreshTokenMatches(refreshToken: string, id: string) {
-    const user = await this._refreshTokenRepository.findOneById(id);
-    const { hashedRefreshToken } = user.getProps();
-    const isRefreshTokenMatching: boolean = await this.verifyRefreshToken(
-      hashedRefreshToken,
-      refreshToken,
-    );
+    const { hashedRefreshToken } = refreshTokenEntity.getProps();
 
-    if (isRefreshTokenMatching) {
-      const userName = await this._rankerProfileRepository.getUserNameByUserId(
-        id,
-      );
-
-      return { id, userName };
-    }
+    return await this.verifyRefreshToken(hashedRefreshToken, refreshToken);
   }
 
   private async verifyRefreshToken(

@@ -1,16 +1,14 @@
 import {
   Controller,
-  Get,
   HttpCode,
   HttpStatus,
   Post,
   Req,
-  Res,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { JwtRefreshGuard } from 'src/modules/auth/guard/jwt-refresh.guard';
 import { SwaggerRefresh } from 'src/modules/swagger/auth/refresh.decorator';
 import { RefreshCommand } from './refresh.command';
@@ -34,7 +32,7 @@ export class RefreshController {
   async refresh(@Req() request: Request & { user?: Record<string, unknown> }) {
     const { id, refreshToken } = request.user;
 
-    const command = new RefreshCommand({ id, refreshToken });
+    const command = new RefreshCommand({ id });
 
     return await this._commandBus.execute(command);
   }

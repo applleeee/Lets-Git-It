@@ -1,3 +1,4 @@
+import { UpdateRefreshTokenProps } from './../../auth/domain/auth.types';
 import { AuthService } from 'src/modules/auth/application/auth.service';
 import { Injectable } from '@nestjs/common';
 import { AuthServicePort } from './auth.service.port';
@@ -26,14 +27,8 @@ export class AuthServiceAdaptor implements AuthServicePort {
     return { refreshToken, cookieOptions };
   }
 
-  // async insertRefreshToken(
-  //   insertRefreshTokenProps: InsertRefreshTokenProps,
-  // ): Promise<boolean> {
-  //   return await this._authService.insertRefreshToken(insertRefreshTokenProps);
-  // }
-
-  async updateRefreshToken(refreshToken: string, userId: string) {
-    await this._authService.updateRefreshToken(refreshToken, userId);
+  async updateRefreshToken(updateRefreshTokenProps: UpdateRefreshTokenProps) {
+    return await this._authService.updateRefreshToken(updateRefreshTokenProps);
   }
 
   async isRefreshTokenExpirationDateHalfPast(

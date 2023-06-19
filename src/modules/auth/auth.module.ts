@@ -11,6 +11,8 @@ import { RefreshToken } from './database/refresh-token.orm-entity';
 import { RefreshTokenRepository } from './database/refresh-token.repository';
 import { REFRESH_TOKEN_REPOSITORY } from './auth.di-tokens';
 import { RefreshTokenMapper } from './mapper/refresh-token.mapper';
+import { JwtRefreshStrategy } from './strategy/jwt-refresh.strategy';
+import { JwtStrategy } from './strategy/jwt.strategy';
 
 const authControllers = [GetCodeController];
 
@@ -20,19 +22,22 @@ const repositories = [
 
 const mappers = [RefreshTokenMapper];
 
+const strategies = [JwtStrategy, JwtRefreshStrategy];
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([RefreshToken]),
     forwardRef(() => UserModule),
-    PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET_KEY,
       signOptions: { expiresIn: `${process.env.JWT_EXPIRES_IN}s` },
     }),
+    PassportModule.register([...strategies]),
     RankModule,
+    CommunityModule,
   ],
   controllers: [...authControllers],
-  providers: [AuthService, ...repositories, ...mappers],
-  exports: [AuthService, ...repositories],
+  providers: [AuthService, ...repositories, ...mappers, ...strategies],
+  exports: [AuthService, ...repositories, ...mappers, ...strategies],
 })
 export class AuthModule {}

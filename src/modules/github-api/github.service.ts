@@ -9,7 +9,7 @@ import { lastValueFrom, map } from 'rxjs';
 import { GithubUser } from './github-user';
 
 @Injectable()
-export class GithubOauthService {
+export class GithubService {
   constructor(private readonly _http: HttpService) {}
 
   async getGithubUser(code: string): Promise<GithubUser> {
