@@ -29,10 +29,14 @@ export class RefreshInterceptor implements NestInterceptor<any, Response> {
         refreshToken,
       );
 
-    if (isRefreshTokenExpirationDateHalfPast) {
+    if (!isRefreshTokenExpirationDateHalfPast) {
+      return next.handle().pipe(map((data) => data));
+    } else {
       const refreshTokenPayload: RefreshTokenPayload = { userId };
+
       const { refreshToken, ...cookieOptions } =
         this._authService.getCookiesWithJwtRefreshToken(refreshTokenPayload);
+
       await this._authService.updateRefreshToken({ refreshToken, userId });
 
       request.user.refreshToken = refreshToken;
@@ -43,8 +47,6 @@ export class RefreshInterceptor implements NestInterceptor<any, Response> {
           return data;
         }),
       );
-    } else {
-      return next.handle().pipe(map((data) => data));
     }
   }
 

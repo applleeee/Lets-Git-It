@@ -98,23 +98,11 @@ export abstract class MySqlRepositoryBase<
     return result.affected > 0;
   }
 
-  async remove(entity: Entity): Promise<boolean> {
+  async softDelete(entity: Entity): Promise<boolean> {
     const ormEntity = this.mapper.toPersistence(entity);
-    const removedEntity = await this.repository.remove(ormEntity);
+    const result = await this.repository.softDelete(ormEntity);
 
-    return removedEntity !== null;
-  }
-
-  /**
-   * 추후 삭제될 수 있음 사용시 유의해주세요
-   * @param entity
-   * @returns
-   */
-  async softRemove(entity: Entity): Promise<boolean> {
-    const ormEntity = this.mapper.toPersistence(entity);
-    const removedEntity = await this.repository.softRemove(ormEntity);
-
-    return removedEntity !== null;
+    return result.affected > 0;
   }
 
   protected get repository() {

@@ -25,7 +25,6 @@ export class RefreshCommandHandler implements ICommandHandler<RefreshCommand> {
 
     // todo 현재 랭커 정보가 db에 없어서 username을 가져오지 못하기 때문에 name이 null임
     const { name } = await this._userRepository.getUserNameByUserId(id);
-    console.log('name: ', name);
     const payload: AccessTokenPayload = { userId: id, userName: name };
     return this._authService.getJwtAccessToken(payload);
   }

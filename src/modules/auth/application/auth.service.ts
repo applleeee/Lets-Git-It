@@ -120,7 +120,6 @@ export class AuthService {
 
       const updatedResult = await queryRunner.manager.softDelete(RefreshToken, {
         id: refreshTokenIdInDb,
-        userId,
       });
 
       if (updatedResult.affected === 0) {

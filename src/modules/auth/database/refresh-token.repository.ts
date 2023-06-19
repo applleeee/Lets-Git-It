@@ -22,16 +22,6 @@ export class RefreshTokenRepository
     super(mapper, _refreshTokenRepository);
   }
 
-  async deleteRefreshToken(id: string) {
-    //soft delete 쓰는거 어때
-    const result = await this._refreshTokenRepository.update(id, {
-      hashedRefreshToken: null,
-      updatedAt: new Date(),
-    });
-
-    return result.affected > 0;
-  }
-
   async findOneByUserId(userId: string) {
     const record = await this._refreshTokenRepository.findOne({
       where: { userId },

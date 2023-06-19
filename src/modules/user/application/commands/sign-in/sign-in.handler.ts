@@ -89,21 +89,15 @@ export class SignInCommandHandler implements ICommandHandler<SignInCommand> {
     await queryRunner.startTransaction();
 
     try {
-      const { id: refreshTokenIdInDb } = await queryRunner.manager.findOne<{
-        id: string;
-        userId: string;
-      } | null>(RefreshToken, {
+      const refreshTokenInDb = await queryRunner.manager.findOne(RefreshToken, {
         where: { userId },
         select: { id: true, userId: true },
       });
 
-      const updatedResult = await queryRunner.manager.softDelete(RefreshToken, {
-        id: refreshTokenIdInDb,
-        userId,
-      });
-
-      if (updatedResult.affected === 0) {
-        throw new Error('NO_EXIST_USER_ID');
+      if (!!refreshTokenInDb) {
+        await queryRunner.manager.softDelete(RefreshToken, {
+          id: refreshTokenInDb.id,
+        });
       }
 
       await queryRunner.manager.insert(RefreshToken, refreshTokenOrmEntity);
