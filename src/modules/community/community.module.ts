@@ -45,6 +45,8 @@ import { CreateOrDeletePostLikeController } from './application/commands/create-
 import { CreateOrDeletePostLikeCommandHandler } from './application/commands/create-or-delete-post-like/create-or-delete-post-like.handler';
 import { PostLikeRepository } from './database/post-like.respository';
 import { PostLikeMapper } from './mapper/postLike.mapper';
+import { GetSearchedPostController } from './application/queries/get-searched-post/get-searched-post.controller';
+import { GetSearchedPostQueryHandler } from './application/queries/get-searched-post/get-searched-post.query-handler';
 
 const controllers = [
   GetAllPostCategoriesController,
@@ -56,6 +58,7 @@ const controllers = [
   GetPostDetailController,
   GetPostListController,
   CreateOrDeletePostLikeController,
+  GetSearchedPostController,
 ];
 
 const commandHandlers = [
@@ -71,6 +74,7 @@ const queryHandlers = [
   GetAllCategoriesQueryHandler,
   GetPostDetailQueryHandler,
   GetPostListQueryHandler,
+  GetSearchedPostQueryHandler,
 ];
 
 const repositories = [
