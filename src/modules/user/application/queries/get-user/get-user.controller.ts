@@ -28,8 +28,6 @@ export class GetUserController {
   @Get()
   @HttpCode(HttpStatus.OK)
   async getMyPage(@User() user: AuthorizedUser): Promise<GetUserResponseDto> {
-    const { id: userId } = user;
-    const query = new GetUserQuery(userId);
-    return await this._queryBus.execute(query);
+    return await this._queryBus.execute(new GetUserQuery(user.id));
   }
 }

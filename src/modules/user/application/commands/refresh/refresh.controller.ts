@@ -30,10 +30,8 @@ export class RefreshController {
   @Post('/refresh')
   @HttpCode(HttpStatus.OK)
   async refresh(@Req() request: Request & { user?: Record<string, unknown> }) {
-    const { id } = request.user;
-
-    const command = new RefreshCommand({ id });
-
-    return await this._commandBus.execute(command);
+    return await this._commandBus.execute(
+      new RefreshCommand({ id: request.user.id }),
+    );
   }
 }

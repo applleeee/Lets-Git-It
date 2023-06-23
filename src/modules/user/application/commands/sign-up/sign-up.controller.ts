@@ -31,9 +31,8 @@ export class SignUpController {
     @Body() userData: SignUpRequestDto,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const command = new SignUpCommand(userData);
     const { signUpCreatedDto, refreshToken, cookieOptions } =
-      await this._commandBus.execute(command);
+      await this._commandBus.execute(new SignUpCommand(userData));
 
     response.cookie('Refresh', refreshToken, cookieOptions);
 

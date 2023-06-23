@@ -32,10 +32,7 @@ export class SignOutController {
     @User() user: Partial<AuthorizedUser>,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { id: userId } = user;
-    const command = new SignOutCommand({ userId });
-
-    const message = await this._commandBus.execute(command);
+    const message = await this._commandBus.execute(new SignOutCommand(user.id));
 
     res.cookie('Refresh', null, { expires: new Date(0) }).json(message);
   }

@@ -28,8 +28,8 @@ export class UpdateUserController {
     @User() user: Partial<AuthorizedUser>,
     @Body() body: UpdateUserRequestDto,
   ) {
-    const command = new UpdateUserCommand({ id: user.id, ...body });
-
-    return await this._commandBus.execute(command);
+    return await this._commandBus.execute(
+      new UpdateUserCommand({ id: user.id, ...body }),
+    );
   }
 }

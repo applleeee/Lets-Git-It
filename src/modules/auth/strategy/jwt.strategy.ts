@@ -43,7 +43,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     userNameInPayload: string,
     userNameInDb: string,
   ) {
-    // todo 아래 메소드는 여기에서 밖에 안씀 그니까 communityService에서 하나로 묶어주자.
     this.compareUserName(userNameInPayload, userNameInDb);
 
     const idsOfPostsCreatedByUser =

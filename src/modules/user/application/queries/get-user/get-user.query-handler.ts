@@ -19,7 +19,7 @@ export class GetUserQueryHandler implements IQueryHandler {
     const user = await this._userRepository.findOneById(id);
 
     const { fieldId, careerId, isKorean } = user.getProps();
-
+    // todo rankerprofile user 엔티티에 추가해서 가져오기
     // 유저네임, 프로필 텍스트, 이메일, 프로필 이미지, 티어 이름 -> RankerProfile
     // const [ranker] = await this.rankerProfileRepository.getMyPage(userId);
     // const { name, profileText, profileImageUrl, email } = ranker;

@@ -45,12 +45,10 @@ export class SignInController {
     @Body() dto: SignInRequestDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const command = new SignInCommand(dto);
-
     const result = await this._commandBus.execute<
       SignInCommand,
       SignInResOk | SignInUnauthorizedResDto
-    >(command);
+    >(new SignInCommand(dto));
 
     switch (result.case) {
       case SignInResCase.UNAUTHORIZED:

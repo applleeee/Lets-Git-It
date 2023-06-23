@@ -38,8 +38,9 @@ export class UserRepository
     });
 
     // todo userEntity에 rankerProfile 속성 추가하고 mapper에 적용하면 아래 로직 바꾸기.
-    const name = userOrmEntity.rankerProfiles?.map((ranker) => ranker.name);
+    // ?? 근데 꼭 orm entity를 domain entity로 바꿔줘야 할까? name만 가져오는데?
+    const [name] = userOrmEntity.rankerProfiles?.map((ranker) => ranker.name);
 
-    return name ? name[0] : null;
+    return name ? name : null;
   }
 }
