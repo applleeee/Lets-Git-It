@@ -1,0 +1,29 @@
+export class Paginated<T> {
+  readonly limit: number;
+  readonly page: number;
+  readonly data: readonly T[];
+
+  constructor(props: Paginated<T>) {
+    this.limit = props.limit;
+    this.page = props.page;
+    this.data = props.data;
+  }
+}
+
+export type OrderBy = { field: string; param: 'asc' | 'desc' };
+
+export type PaginatedQueryParams = {
+  limit: number;
+  offset: number;
+  orderBy?: OrderBy;
+};
+
+export interface RepositoryPort<Entity> {
+  insert(entity: Entity): Promise<boolean>;
+  upsertByUserId(entity: Entity): Promise<boolean>;
+  findOneById(id: string): Promise<Partial<Entity>>;
+  findAll(): Promise<Entity[]>;
+  findAllPaginated(params: PaginatedQueryParams): Promise<Paginated<Entity>>;
+  update(entity: Partial<Entity>): Promise<boolean>;
+  softDelete(entity: Partial<Entity>): Promise<boolean>;
+}

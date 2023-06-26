@@ -9,13 +9,14 @@ import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './utils/http-exception.filter';
 import * as morgan from 'morgan';
 import { ValidationError } from 'class-validator';
-import { SwaggerSetup } from './swagger/swagger';
+
 import * as cookieParser from 'cookie-parser';
 import { readFileSync } from 'fs';
 import * as basicAuth from 'express-basic-auth';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigType } from '@nestjs/config';
 import appConfig from './config/appConfig';
+import { SwaggerSetup } from './modules/swagger/swagger';
 
 async function bootstrap() {
   let httpsOptions = null;

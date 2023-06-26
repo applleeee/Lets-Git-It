@@ -2,17 +2,16 @@ import { validationSchema } from './config/validationSchema';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
-import { CommunityModule } from './community/community.module';
-import { RankModule } from './rank/rank.module';
-import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
+import { RankModule } from './modules/rank/rank.module';
 import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from './utils/http-exception.filter';
-import { SchedulerModule } from './schedule/schedule.module';
 import authConfig from './config/authConfig';
 import cookieConfig from './config/cookieConfig';
-import ormConfig from './config/ormConfig';
 import appConfig from './config/appConfig';
+import ormConfig from './config/ormConfig';
+import { CommunityModule } from './modules/community/community.module';
+import { UserModule } from './modules/user/user.module';
+import { SchedulerModule } from './modules/schedule/schedule.module';
 
 @Module({
   imports: [
@@ -29,7 +28,6 @@ import appConfig from './config/appConfig';
     }),
     CommunityModule,
     RankModule,
-    AuthModule,
     UserModule,
     SchedulerModule,
   ],

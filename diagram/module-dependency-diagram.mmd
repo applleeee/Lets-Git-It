@@ -1,0 +1,54 @@
+---
+title: Module Dependency
+---
+classDiagram
+  note "[23.06.24 작성 초안]"
+
+  Auth <.. User : Dependency
+  Community <.. Auth : Dependency
+  Rank <.. Auth : Dependency
+
+  class User {
+    [Domain]
+    --UserEntity
+    --UserCategoryCareerEntity
+    --UserCategoryFieldEntity
+    [Handler]
+    --SignInCommandHandler
+    --SignUpCommandHandler
+    --SignOutCommandHandler
+    --UpdateUserCommandHandler
+    --RefreshCommandHandler
+    --GetUserCateGoryQueryHandler
+    --GetUserQueryHandler
+    [Repository]
+    --UserRepository
+    --UserCategoryRepository
+    [Adaptor]
+    --GithubOauthAdaptor
+    --AuthServiceAdaptor
+    }
+
+  note for User "[23.06.24 작성 초안] \n - 추후 수정될 수 있음"
+
+  class Auth {
+    [Domain]
+    --RefreshTokenEntity
+    [Service]
+    --AuthService
+    [Repository]
+    --RefreshTokenRepository
+    [Strategy]
+    --JwtStrategy
+    --JwtRefreshStrategy
+    }
+
+
+
+  class Community {
+
+  }
+
+  class Rank {
+
+  }
