@@ -25,7 +25,11 @@ import { CreatePostController } from './application/commands/create-post/create-
 import { SaveImageToS3Controller } from './application/commands/save-image-to-s3/save-image-to-s3.controller';
 import { AwsS3Module } from '../aws-s3/aws-s3.module';
 import { CreatePostCommandHandler } from './application/commands/create-post/create-post.handler';
-import { POST_LIKE_REPOSITORY, POST_REPOSITORY } from './community.di-tokens';
+import {
+  COMMENT_REPOSITORY,
+  POST_LIKE_REPOSITORY,
+  POST_REPOSITORY,
+} from './community.di-tokens';
 import { PostRepository } from './database/post.repository';
 import { CommunityService } from './application/community.service';
 import { CommunityRepository } from './community.repository';
@@ -43,10 +47,14 @@ import { GetPostListController } from './application/queries/get-post-list/get-p
 import { GetPostListQueryHandler } from './application/queries/get-post-list/get-post-list.query-handler';
 import { CreateOrDeletePostLikeController } from './application/commands/create-or-delete-post-like/create-or-delete-post-like.controller';
 import { CreateOrDeletePostLikeCommandHandler } from './application/commands/create-or-delete-post-like/create-or-delete-post-like.handler';
-import { PostLikeRepository } from './database/post-like.respository';
+import { PostLikeRepository } from './database/post-like.repository';
 import { PostLikeMapper } from './mapper/postLike.mapper';
 import { GetSearchedPostController } from './application/queries/get-searched-post/get-searched-post.controller';
 import { GetSearchedPostQueryHandler } from './application/queries/get-searched-post/get-searched-post.query-handler';
+import { CreateCommentController } from './application/commands/create-comment/creaet-comment.controller';
+import { CreateCommentCommandHandler } from './application/commands/create-comment/create-comment.handler';
+import { CommentRepository } from './database/comment.repository';
+import { CommentMapper } from './mapper/comment.mapper';
 
 const controllers = [
   GetAllPostCategoriesController,
@@ -59,6 +67,7 @@ const controllers = [
   GetPostListController,
   CreateOrDeletePostLikeController,
   GetSearchedPostController,
+  CreateCommentController,
 ];
 
 const commandHandlers = [
@@ -68,6 +77,7 @@ const commandHandlers = [
   UpdatePostCommandHandler,
   DeletePostCommandHandler,
   CreateOrDeletePostLikeCommandHandler,
+  CreateCommentCommandHandler,
 ];
 
 const queryHandlers = [
@@ -80,9 +90,10 @@ const queryHandlers = [
 const repositories = [
   { provide: POST_REPOSITORY, useClass: PostRepository },
   { provide: POST_LIKE_REPOSITORY, useClass: PostLikeRepository },
+  { provide: COMMENT_REPOSITORY, useClass: CommentRepository },
 ];
 
-const mappers = [PostMapper, PostLikeMapper];
+const mappers = [PostMapper, PostLikeMapper, CommentMapper];
 
 @Module({
   imports: [

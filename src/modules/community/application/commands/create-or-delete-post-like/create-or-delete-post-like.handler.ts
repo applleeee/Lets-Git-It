@@ -2,9 +2,9 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateOrDeletePostLikeCommand } from './create-or-delete-post-like.command';
 import { POST_LIKE_REPOSITORY } from 'src/modules/community/community.di-tokens';
-import { PostLikeRepositoryPort } from 'src/modules/community/database/post-like.respository.port';
 import { PostLikeEntity } from 'src/modules/community/domain/postLike.entity';
 import { PostLikeMapper } from 'src/modules/community/mapper/postLike.mapper';
+import { PostLikeRepositoryPort } from 'src/modules/community/database/post-like.repository.port';
 
 @Injectable()
 @CommandHandler(CreateOrDeletePostLikeCommand)
