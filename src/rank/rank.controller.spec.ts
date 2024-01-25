@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { MockFunctionMetadata, ModuleMocker } from 'jest-mock';
 import { RankController } from './rank.controller';
 import { RankService } from './rank.service';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -72,53 +73,16 @@ describe('RankController', () => {
     tierImage: '',
   };
 
-  const testMaxValues = {
-    maxCuriosityScore: '',
-    maxPassionScore: '',
-    maxFameScore: '',
-    maxAbilityScore: '',
-    maxTotalScore: '',
-    maxIssueNumber: 0,
-    maxForkingNumber: 0,
-    maxStarringNumber: 0,
-    maxFollowingNumber: 0,
-    maxCommitNumber: 0,
-    maxPRNumber: 0,
-    maxReviewNumber: 0,
-    maxPersonalRepoNumber: 0,
-    maxFollowerNumber: 0,
-    maxForkedNumber: 0,
-    maxWatchedNumber: 0,
-    maxSponsorNumber: 0,
-    maxContributingRepoStarNumber: 0,
-    maxMyStartNumber: 0,
-  };
-  const testAvgValues = {
-    avgCuriosityScore: '',
-    avgPassionScore: '',
-    avgFameScore: '',
-    avgAbilityScore: '',
-    avgTotalScore: '',
-    avgIssueNumber: '',
-    avgForkingNumber: '',
-    avgStarringNumber: '',
-    avgFollowingNumber: '',
-    avgCommitNumber: '',
-    avgPRNumber: '',
-    avgReviewNumber: '',
-    avgPersonalRepoNumber: '',
-    avgFollowerNumber: '',
-    avgForkedNumber: '',
-    avgWatchedNumber: '',
-    avgSponsorNumber: '',
-    avgContributingRepoStarNumber: '',
-    avgMyStartNumber: '',
-  };
-
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
+      imports: [
+        ThrottlerModule.forRoot({
+          ttl: 60,
+          limit: 20,
+        }),
+      ],
       controllers: [RankController],
-      providers: [RankService],
+      providers: [RankService, ThrottlerGuard],
     })
       .useMocker((token) => {
         if (token === RankService) {
@@ -170,26 +134,18 @@ describe('RankController', () => {
       const testComapreRankerOutput = {
         firstUser: {
           testRankerDetail1,
-          testMaxValues,
-          testAvgValues,
         },
         secondUser: {
           testRankerDetail2,
-          testMaxValues,
-          testAvgValues,
         },
       };
       rankService.checkRanker = jest
         .fn()
         .mockResolvedValueOnce({
           testRankerDetail1,
-          testMaxValues,
-          testAvgValues,
         })
         .mockResolvedValueOnce({
           testRankerDetail2,
-          testMaxValues,
-          testAvgValues,
         });
       const result = await rankController.compareRanker(userName);
 
@@ -201,14 +157,10 @@ describe('RankController', () => {
       const userName = 'Oh';
       const testRankerDetail = {
         testRankerDetail1,
-        testMaxValues,
-        testAvgValues,
       };
 
       rankService.checkRanker = jest.fn().mockResolvedValueOnce({
         testRankerDetail1,
-        testMaxValues,
-        testAvgValues,
       });
       const result = await rankController.getRankerDetail(userName);
 

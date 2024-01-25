@@ -1,13 +1,15 @@
 import { ApiTags } from '@nestjs/swagger';
-import { Controller, Get, Param, Patch, Query } from '@nestjs/common';
 import {
-  RankerProfileOutput,
-  SearchOutput,
-  Top100,
-  Top5,
-} from './dto/rankerProfile.dto';
-import { AvgValuesOutput, MaxValuesOutput } from './dto/ranking.dto';
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { SearchOutput, Top100, Top5 } from './dto/rankerProfile.dto';
 import { RankService } from './rank.service';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 @ApiTags('Ranks')
 @Controller('/ranks')
@@ -29,11 +31,8 @@ export class RankController {
   }
 
   @Get('/:userName')
-  async getRankerDetail(@Param('userName') userName: string): Promise<{
-    rankerDetail: RankerProfileOutput;
-    maxValues: MaxValuesOutput;
-    avgValues: AvgValuesOutput;
-  }> {
+  @UseGuards(ThrottlerGuard)
+  async getRankerDetail(@Param('userName') userName: string) {
     return await this.rankService.checkRanker(userName);
   }
 

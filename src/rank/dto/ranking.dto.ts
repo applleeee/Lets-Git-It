@@ -1,5 +1,23 @@
 import { IsNumber, IsString } from 'class-validator';
 
+export class LangOutput {
+  @IsString()
+  main_language: string;
+}
+
+export class TotalScoresOutput {
+  @IsString()
+  total_score: string;
+}
+
+export class UserRankOutput {
+  @IsString()
+  rank: string;
+
+  @IsNumber()
+  ranker_profile_id: number;
+}
+
 export class MaxValuesOutput {
   @IsString()
   maxCuriosityScore: string;
@@ -57,73 +75,4 @@ export class MaxValuesOutput {
 
   @IsNumber()
   maxMyStartNumber: number;
-}
-
-export class AvgValuesOutput {
-  @IsString()
-  avgCuriosityScore: string;
-
-  @IsString()
-  avgPassionScore: string;
-
-  @IsString()
-  avgFameScore: string;
-
-  @IsString()
-  avgAbilityScore: string;
-
-  @IsString()
-  avgTotalScore: string;
-
-  @IsString()
-  avgIssueNumber: string;
-
-  @IsString()
-  avgForkingNumber: string;
-
-  @IsString()
-  avgStarringNumber: string;
-
-  @IsString()
-  avgFollowingNumber: string;
-
-  @IsString()
-  avgCommitNumber: string;
-
-  @IsString()
-  avgPRNumber: string;
-
-  @IsString()
-  avgReviewNumber: string;
-
-  @IsString()
-  avgPersonalRepoNumber: string;
-
-  @IsString()
-  avgFollowerNumber: string;
-
-  @IsString()
-  avgForkedNumber: string;
-
-  @IsString()
-  avgWatchedNumber: string;
-
-  @IsString()
-  avgSponsorNumber: string;
-
-  @IsString()
-  avgContributingRepoStarNumber: string;
-
-  @IsString()
-  avgMyStartNumber: string;
-}
-
-export class LangOutput {
-  @IsString()
-  main_language: string;
-}
-
-export class TotalScoresOutput {
-  @IsString()
-  total_score: string;
 }

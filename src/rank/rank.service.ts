@@ -4,8 +4,14 @@ import { RankerProfileRepository } from './rankerProfile.repository';
 import * as dotenv from 'dotenv';
 import { TierRepository } from './tier.repository';
 import { RankingRepository } from './ranking.repository';
-import { SearchOutput, Top100, Top5 } from './dto/rankerProfile.dto';
+import {
+  RankerProfileOutput,
+  SearchOutput,
+  Top100,
+  Top5,
+} from './dto/rankerProfile.dto';
 import cheerio from 'cheerio';
+import { MaxValuesOutput } from './dto/ranking.dto';
 
 dotenv.config();
 
@@ -27,10 +33,20 @@ export class RankService {
       const rankerDetail = await this.rankerProfileRepository.getRankerProfile(
         userName,
       );
-      rankerDetail['blank'] = null;
-      const maxValues = await this.rankingRepository.getMaxValues();
-      const avgValues = await this.rankingRepository.getAvgValues();
-      return { rankerDetail, maxValues, avgValues };
+      const userRank = await this.rankingRepository.getAUserRanking(userName);
+
+      rankerDetail['userRank'] = userRank[0].rank;
+
+      const tierMaxValues = await this.rankingRepository.getTierMaxValues(
+        rankerDetail.tierId,
+      );
+
+      const rankerPosition = this.calculateMyStandard(
+        rankerDetail,
+        tierMaxValues,
+      );
+
+      return { rankerDetail, rankerPosition };
     }
 
     return this.getRankerDetail(userName);
@@ -347,9 +363,20 @@ export class RankService {
       const rankerDetail = await this.rankerProfileRepository.getRankerProfile(
         userName,
       );
-      const maxValues = await this.rankingRepository.getMaxValues();
-      const avgValues = await this.rankingRepository.getAvgValues();
-      return { rankerDetail, maxValues, avgValues };
+      const userRank = await this.rankingRepository.getAUserRanking(userName);
+
+      rankerDetail['userRank'] = userRank[0].rank;
+
+      const tierMaxValues = await this.rankingRepository.getTierMaxValues(
+        rankerDetail.tierId,
+      );
+
+      const rankerPosition = this.calculateMyStandard(
+        rankerDetail,
+        tierMaxValues,
+      );
+
+      return { rankerDetail, rankerPosition };
     } catch (e) {
       if (e.response.status === 404) {
         throw new HttpException('INVALID GITHUB USER', HttpStatus.NOT_FOUND);
@@ -366,14 +393,6 @@ export class RankService {
         throw new HttpException('PROBLEM WITH TOKEN', HttpStatus.BAD_REQUEST);
       }
     }
-  }
-
-  private getNextToken() {
-    const token = this.TOKENS[this.currentTOKEN];
-    this.currentTOKEN = (this.currentTOKEN + 1) % this.TOKENS.length;
-    console.log(this.TOKENS.length);
-    console.log(this.currentTOKEN);
-    return token;
   }
 
   async getTop5(): Promise<Top5[]> {
@@ -408,5 +427,27 @@ export class RankService {
 
   async findRanker(userName: string): Promise<SearchOutput[]> {
     return await this.rankerProfileRepository.findRanker(userName);
+  }
+
+  private getNextToken() {
+    const token = this.TOKENS[this.currentTOKEN];
+    this.currentTOKEN = (this.currentTOKEN + 1) % this.TOKENS.length;
+    return token;
+  }
+
+  private calculateMyStandard(
+    rankerDetail: RankerProfileOutput,
+    maxValues: MaxValuesOutput,
+  ) {
+    const position = {};
+    for (let [key, value] of Object.entries(rankerDetail)) {
+      key = 'max' + key.charAt(0).toUpperCase() + key.slice(1);
+      const max = maxValues[key];
+      if (max !== undefined) {
+        key = 'rankerPos' + key.slice(3);
+        position[key] = Math.trunc((value / max) * 100);
+      }
+    }
+    return position;
   }
 }
