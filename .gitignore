@@ -1,4 +1,5 @@
 # local
+.env
 .lh
 
 # compiled output
@@ -42,9 +43,3 @@ lerna-debug.log*
 
 .lh
 .vscode
-
-# nodeenv
-env**
-env-18.16.1/**/*
-.env
-.local.env
