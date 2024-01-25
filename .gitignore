@@ -1,6 +1,4 @@
 # local
-.env
-.local.env
 .lh
 
 # compiled output
@@ -47,3 +45,6 @@ lerna-debug.log*
 
 # nodeenv
 env**
+env-18.16.1/**/*
+.env
+.local.env
